@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Combobox Utenti</title>
+
+    <!-- Includiamo la libreria Tom-Select via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        .control-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; }
+        /* Aumentiamo la dimensione del controllo per una migliore usabilità */
+        .ts-control { padding: 10px 12px !important; }
+        .container { max-width: 500px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Assegna Task a un Utente</h1>
+        <div class="control-group">
+            <label for="select-user">Cerca e seleziona un utente:</label>
+            <!-- Questo è l'elemento che trasformeremo in una combobox ricercabile -->
+            <select id="select-user" placeholder="Digita per cercare..."></select>
+        </div>
+
+        <button onclick="mostraUtenteSelezionato()">Mostra ID Utente</button>
+        <p>ID dell'utente selezionato: <strong id="selected-user-id">Nessuno</strong></p>
+    </div>
+
+    <script>
+        // Inizializziamo TomSelect sul nostro elemento <select>
+        const userSelect = new TomSelect('#select-user', {
+            valueField: 'id',         // Il campo del JSON che useremo come valore (l'ID)
+            labelField: 'nome_completo',// Il campo del JSON che mostreremo all'utente
+            searchField: 'nome_completo',// Il campo su cui la libreria deve cercare
+
+            // Funzione di caricamento dati da remoto
+            load: function(query, callback) {
+                const url = 'api/utente/leggi.php?search=' + encodeURIComponent(query);
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json); // Passa i dati alla libreria
+                    }).catch(()=>{
+                        callback(); // In caso di errore, non fare nulla
+                    });
+            },
+            
+            // Messaggio da mostrare mentre si caricano i dati
+            render: {
+                loading: function() {
+                    return '<div class="loading">Caricamento...</div>';
+                }
+            }
+        });
+
+        // Funzione di esempio per mostrare come ottenere l'ID dell'utente scelto
+        function mostraUtenteSelezionato() {
+            const selectedId = userSelect.getValue();
+            const outputElement = document.getElementById('selected-user-id');
+            if (selectedId) {
+                outputElement.textContent = selectedId;
+                alert('Hai selezionato l\'utente con ID: ' + selectedId);
+            } else {
+                outputElement.textContent = 'Nessuno';
+                alert('Nessun utente selezionato.');
+            }
+        }
+    </script>
+
+</body>
+</html>

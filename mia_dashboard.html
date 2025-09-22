@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Mia Dashboard Workflow</title>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f8fa; color: #333; margin: 0; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { background-color: #fff; padding: 15px 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        h1, h2, h3 { margin: 0; color: #0056b3; }
+        h2 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;}
+        h3 { color: #495057; font-size: 1.2em; }
+
+        .kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .kanban-column { background-color: #e9ecef; border-radius: 8px; padding: 15px; }
+        .kanban-column h3 { padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid #ced4da; }
+
+        .task-card { background: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.08); transition: transform 0.2s; margin-bottom: 15px; }
+        .task-card-header { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
+        .task-card-header h3 { font-size: 1em; }
+        .task-card-body { padding: 15px; font-size: 0.9em; }
+        .task-card-footer { padding: 10px 15px; background-color: #fcfcfc; border-top: 1px solid #eee; text-align: right; }
+
+        .report-section { margin-top: 40px; }
+        .report-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
+        .list-item { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid transparent; }
+        .list-item.active { border-left-color: #007bff; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; font-weight: 600; }
+        .item-details { display: none; padding: 15px; background-color: #f8f9fa; border-top: 1px solid #e9ecef; }
+        .list-item.active .item-details { display: block; }
+        .item-details table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .item-details th, .item-details td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        .item-actions button { background: none; border:none; cursor: pointer; padding: 2px 5px; font-size: 1.1em; }
+        .item-actions .btn-start-instance { color: #28a745; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { position: relative; background: #fff; padding: 30px; border-radius: 8px; width: 90%; max-width: 600px; }
+        .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8em; color: #aaa; background: none; border: none; cursor: pointer; }
+        .modal-content form .form-row { display: grid; grid-template-columns: 150px 1fr; align-items: center; margin-bottom: 15px; }
+        .modal-content form label { text-align: right; padding-right: 15px; }
+        .modal-actions { text-align: right; margin-top: 20px; }
+        .column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        button, input, select, textarea { font-family: inherit; font-size: inherit; }
+        button { border-radius: 5px; cursor: pointer; font-weight: 600; border: none; padding: 8px 15px; }
+        .btn-create { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Mia Dashboard</h1>
+        <div id="user-selector-container" style="width: 300px;">
+            <select id="user-selector" placeholder="Seleziona utente..."></select>
+        </div>
+    </header>
+    <main id="dashboard-main">
+        <div class="board-controls">
+            <label for="task-search">Cerca Task:</label>
+            <input id="task-search" type="text" placeholder="Digita per filtrare..." style="width: 300px;">
+        </div>
+        <div class="kanban-board">
+            <div class="kanban-column"><h3>Da Fare</h3><div id="tasks-todo"></div></div>
+            <div class="kanban-column"><h3>In Gestione</h3><div id="tasks-doing"></div></div>
+            <div class="kanban-column"><h3>Completati</h3><div id="tasks-done"></div></div>
+        </div>
+        <section class="report-section">
+            <h2>Esplora Risorse</h2>
+            <div class="report-container">
+                <div class="report-column">
+                    <div class="column-header"><h3>Modelli di Workflow</h3><button class="btn-create" data-resource="workflows">+ Nuovo</button></div>
+                    <div id="workflows-list"></div>
+                </div>
+                <div class="report-column">
+                    <div class="column-header"><h3>Istanze Avviate</h3></div>
+                    <div id="instances-list"></div>
+                </div>
+            </div>
+            <div class="report-container" style="margin-top: 20px;">
+                <div class="report-column" style="grid-column: 1 / -1;">
+                    <div class="column-header"><h3>Gruppi di Utenti</h3><button class="btn-create" data-resource="gruppi">+ Nuovo</button></div>
+                    <div id="gruppi-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal di Creazione -->
+    <div id="create-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="create-modal-title"></h3>
+            <form id="create-form"></form>
+            <div class="modal-actions">
+                <button class="close-modal-btn">Annulla</button>
+                <button id="create-modal-save" style="background-color: #28a745; color: white;">Crea</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal di Modifica -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="edit-modal-title"></h3>
+            <form id="edit-form"></form>
+            <div class="modal-actions">
+                <button class="close-modal-btn">Annulla</button>
+                <button id="modal-save" style="background-color: #28a745; color: white;">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per Avviare Istanza -->
+    <div id="start-instance-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="start-instance-modal-title"></h3>
+            <form id="start-instance-form">
+                <div class="form-row"><label>Nome Entità:</label><input name="nome_entita_associata"></div>
+                <div class="form-row"><label>ID Entità:</label><input name="id_entita_associata" type="number"></div>
+            </form>
+            <div class="modal-actions">
+                <button class="close-modal-btn">Annulla</button>
+                <button id="start-instance-save" style="background-color: #17a2b8; color: white;">Avvia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aggiungi Utente a Gruppo -->
+    <div id="add-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3>Aggiungi Utente al Gruppo</h3>
+            <form id="add-user-form">
+                <div class="form-row">
+                    <label for="select-user-to-add">Utente:</label>
+                    <select id="select-user-to-add" required placeholder="Cerca un utente..."></select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" style="background-color:#007bff; color:white;">Aggiungi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Avvia Sottoprocesso -->
+    <div id="subflow-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="subflow-modal-title">Avvia Sottoprocesso</h3>
+            <form id="start-subflow-form">
+                <div class="form-row">
+                    <label for="select-subflow-workflow">Workflow:</label>
+                    <select id="select-subflow-workflow" required placeholder="Cerca un workflow..."></select>
+                </div>
+                <div class="form-row">
+                    <label for="select-subflow-user">Assegna a (opzionale):</label>
+                    <select id="select-subflow-user" placeholder="Cerca un utente..."></select>
+                </div>
+                <div class="modal-actions">
+                    <button class="close-modal-btn">Annulla</button>
+                    <button type="submit" style="background-color:#fd7e14; color:white;">Avvia Sottoprocesso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Visualizza Sottoprocessi -->
+    <div id="view-subflows-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="view-subflows-modal-title">Sottoprocessi Correlati</h3>
+            <div id="subflows-list"></div>
+            <div class="modal-actions">
+                <button class="close-modal-btn">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Note -->
+    <div id="notes-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="notes-modal-title">Note per il Task</h3>
+            <div id="notes-list"></div>
+            <form id="add-note-form" style="margin-top: 20px;">
+                <label for="new-note-text">Aggiungi una nuova nota:</label>
+                <textarea id="new-note-text" required style="width: 100%; min-height: 80px;"></textarea>
+                <div class="modal-actions">
+                    <button type="submit" style="background-color:#007bff; color:white;">Salva Nota</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="dashboard.js" defer></script>
+</body>
+</html>

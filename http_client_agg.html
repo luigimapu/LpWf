@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Update Workflow</title>
+</head>
+<body>
+<button onclick="updateWorkflow()">Update Workflow</button>
+<button onclick="updateWorkflowStep()">Update Workflow Step</button>
+<button onclick="updateUtente()">Update Utente</button>
+
+<script>
+    function updateWorkflowStep() {
+        const data = {
+            "id": 1,
+            "nome_passo": "Approvazione Ufficio Acquisti2",
+            "descrizione_passo": "2L'ufficio acquisti verifica la conformità del fornitore e approva l'ordine.",
+            "ordine": 3,
+            "ruolo_responsabile_id": 3
+        };
+
+            fetch('api/workflow_step/aggiorna.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Update successful');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Update failed');
+            });
+    }
+
+    function updateWorkflow() {
+        const data = {
+            "id": 5,
+            "nome_workflow": "Gestione Ferie e Permessi",
+            "descrizione": "Processo aziendale unificato per la richiesta e approvazione delle ferie e dei permessi dei dipendenti. new "
+        };
+
+        fetch('api/workflow/aggiorna.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Update successful');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Update failed');
+            });
+    }
+
+    function updateUtente() {
+        const data = {
+            "id": 6,
+            "nome": "PUCA",
+            //"cognome": "Puca"
+        };
+
+        fetch('api/utente/aggiorna.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Update successful');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Update failed');
+            });
+    }
+</script>
+</body>
+</html>
