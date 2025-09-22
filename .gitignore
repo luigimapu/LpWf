@@ -1,0 +1,18 @@
+# PHP / Composer
+/vendor/
+/composer.lock
+
+# IDE
+/.idea/
+/.vscode/
+/.junie/
+
+# Runtime
+/uploads/
+/.env
+.env
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
