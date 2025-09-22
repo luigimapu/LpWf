@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/env_loader.php';
+loadEnv(__DIR__ . '/../.env');
+
 // Headers globali per CORS e JSON
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");

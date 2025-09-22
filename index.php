@@ -4,8 +4,8 @@
 // Se hai un 'dashboard.php' che genera HTML, il principio è lo stesso.
 $dashboard_file = 'mia_dashboard.html';
 $http_client_file = 'http_client.html'; // Assumo che questo file esista.
-require_once __DIR__ . '/../config/env_loader.php';
-loadEnv(__DIR__ . '/../.env');
+require_once __DIR__ . '/config/env_loader.php';
+loadEnv(__DIR__ . '/.env');
 
 // Leggiamo il contenuto dei file come stringhe.
 // Aggiungiamo un controllo per mostrare un errore se un file non viene trovato.
