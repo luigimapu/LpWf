@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// Evita che i DEPRECATED vadano in output rompendo il JSON delle API
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../models/CrudBaseAbstract.php';
@@ -118,6 +119,44 @@ if ($resource_name === 'auth') {
     exit();
 }
 
+// Health: endpoint pubblico per diagnostica (no auth obbligatoria)
+if ($resource_name === 'health') {
+    $headers = getRequestHeaders();
+    $authorizationHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+    $auth_ok = false;
+    $auth_user = null;
+    if ($authorizationHeader) {
+        try {
+            $auth_user = $authService->authenticateRequest($authorizationHeader);
+            $auth_ok = true;
+        } catch (Throwable $e) {
+            $auth_ok = false;
+        }
+    }
+    $db_ok = true;
+    $tables = ['auth_audit' => false, 'user_role_audit' => false];
+    $counts = ['auth_audit' => null, 'user_role_audit' => null];
+    try {
+        $rows = $database->select("SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN ('auth_audit','user_role_audit')");
+        $present = array_map(fn($r) => $r['table_name'] ?? '', $rows ?: []);
+        foreach ($tables as $name => $_) { $tables[$name] = in_array($name, $present, true); }
+        foreach ($tables as $name => $exists) {
+            if ($exists) {
+                $c = $database->selectOne("SELECT COUNT(*) AS c FROM `$name`");
+                $counts[$name] = $c !== false ? (int)($c['c'] ?? 0) : null;
+            }
+        }
+    } catch (Throwable $e) { $db_ok = false; }
+    sendJson(200, [
+        'db_ok' => $db_ok,
+        'tables' => $tables,
+        'counts' => $counts,
+        'auth_ok' => $auth_ok,
+        'auth_user' => $auth_user,
+    ]);
+    exit();
+}
+
 $headers = getRequestHeaders();
 $authorizationHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
 
@@ -129,6 +168,16 @@ try {
     exit();
 } catch (Throwable $ex) {
     sendJson(500, ['message' => 'Errore nella verifica dell\'autenticazione.']);
+    exit();
+}
+
+// Config runtime: restituisce configurazione pubblica (autenticata)
+if ($resource_name === 'config') {
+    $cfg = [
+        'audit_role_limit' => (int)(getenv('AUDIT_ROLE_LIMIT') ?: 200),
+        'audit_auth_default_limit' => (int)(getenv('AUDIT_AUTH_DEFAULT_LIMIT') ?: 200),
+    ];
+    sendJson(200, $cfg);
     exit();
 }
 

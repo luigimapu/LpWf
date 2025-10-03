@@ -9,27 +9,26 @@ class WorkflowIstanza extends CrudBaseAbstract
 
     // 2. Definisci i campi che possono essere creati/aggiornati
     protected $fillable_fields = [
-        'workflow_id',
-        'id_entita_associata',
-        'nome_entita_associata',
-        'stato_istanza','attivo', 'id_istanza_padre','id_utente_avvio'
-
-        // Le date sono gestite automaticamente dal database
+        'workflow_modello_id',
+        'entita_collegata_tipo',
+        'entita_collegata_id',
+        'stato',
+        'avviato_da',
+        'id_istanza_padre',
+        'completato_il'
     ];
 
     // 3. Dichiara le proprietà pubbliche per l'accesso ai dati
     public $id;
-    public $workflow_id;
-    public $id_entita_associata;
-    public $nome_entita_associata;
-    public $stato_istanza;
-    public $data_avvio;
-    public $data_completamento;
-    // Aggiungiamo una proprietà per contenere i task
+    public $workflow_modello_id;
+    public $entita_collegata_tipo;
+    public $entita_collegata_id;
+    public $stato;
+    public $avviato_da;
+    public $avviato_il;
+    public $completato_il;
     public $tasks = [];
-    public $attivo;
     public $id_istanza_padre;
-    public $id_utente_avvio;
 
 
 
@@ -71,25 +70,36 @@ class WorkflowIstanza extends CrudBaseAbstract
         $query = "SELECT 
                     wi.*, 
                     CONCAT(u.nome, ' ', u.cognome) as nome_utente_avvio,
+                    wm.nome as nome_workflow,
                     (SELECT COUNT(sub.id) FROM workflow_istanze sub WHERE sub.id_istanza_padre = wi.id) as subflow_count
                   FROM 
                     {$this->table_name} wi
                   LEFT JOIN 
-                    utenti u ON wi.id_utente_avvio = u.id";
+                    utenti u ON wi.avviato_da = u.id
+                  LEFT JOIN
+                    workflow_modelli wm ON wi.workflow_modello_id = wm.id";
 
 
         $params = [];
         $where_clauses = [];
 
         // Filtro per istanza padre (usato per trovare i figli di un genitore)
+        if (!empty($conditions['visible_for_user_id'])) {
+            $userId = (int)$conditions['visible_for_user_id'];
+            $where_clauses[] = '(wi.avviato_da = ? OR EXISTS (
+                SELECT 1 FROM workflow_task t
+                WHERE t.workflow_istanza_id = wi.id
+                  AND t.assegnato_a_utente_id = ?
+            ))';
+            $params[] = $userId;
+            $params[] = $userId;
+            unset($conditions['visible_for_user_id']);
+        }
+
         if (!empty($conditions['id_istanza_padre'])) {
             $where_clauses[] = "wi.id_istanza_padre = ?";
             $params[] = $conditions['id_istanza_padre'];
-        }
-
-        // Aggiungiamo un filtro per mostrare solo le istanze principali
-        // (quelle che non sono sottoprocessi) nella vista di default.
-        if (empty($conditions)) {
+        } else {
             $where_clauses[] = "wi.id_istanza_padre IS NULL";
         }
 
@@ -99,8 +109,23 @@ class WorkflowIstanza extends CrudBaseAbstract
 
         $query .= " ORDER BY wi.id DESC";
 
-        return $this->db->select($query, $params) ?: [];
+        $rows = $this->db->select($query, $params) ?: [];
+        foreach ($rows as &$row) {
+            if (!isset($row['workflow_id']) && isset($row['workflow_modello_id'])) {
+                $row['workflow_id'] = $row['workflow_modello_id'];
+            }
+            if (!isset($row['stato_istanza']) && isset($row['stato'])) {
+                $row['stato_istanza'] = $row['stato'];
+            }
+        }
+
+        return $rows;
     }
 
-
+    public function utenteCoinvolto(int $userId): bool
+    {
+        $sql = "SELECT 1 FROM workflow_task WHERE workflow_istanza_id = ? AND assegnato_a_utente_id = ? LIMIT 1";
+        $result = $this->db->selectOne($sql, [$this->id, $userId]);
+        return $result !== false && !empty($result);
+    }
 }

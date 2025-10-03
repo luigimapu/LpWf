@@ -1,0 +1,24 @@
+{
+    "name": "lpwf/gestionale",
+    "description": "Suite di strumenti e test per il gestionale LpWF",
+    "type": "project",
+    "license": "proprietary",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^11.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lpwf\\Models\\": "models/",
+            "Lpwf\\Services\\": "services/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lpwf\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    }
+}

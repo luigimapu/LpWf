@@ -5,16 +5,18 @@ class Utente extends CrudBaseAbstract
 {
     protected $table_name = 'utenti';
 
-    protected $fillable_fields = ['nome', 'cognome', 'email', 'password_hash', 'tenant_id', 'attivo'];
+    protected $fillable_fields = ['nome', 'cognome', 'email', 'password_hash', 'ruolo', 'stato'];
 
     public $nome;
     public $cognome;
     public $email;
     public $password_hash;
     public $tenant_id;
-    public $data_creazione;
-    public $attivo;
-
+    public $creato_il;
+    public $aggiornato_il;
+    public $stato;
+    public $ruolo;
+    
     public function __construct(Database $db)
     {
         parent::__construct($db);
@@ -22,24 +24,44 @@ class Utente extends CrudBaseAbstract
 
     public function findAll($filters = [], $orderBy = ''): array
     {
-        $query = "SELECT id, nome, cognome, email, CONCAT(nome, ' ', cognome) as nome_completo, tenant_id, attivo
-                  FROM {$this->table_name}";
+        // Base select con alias per eventuali join
+        $query = "SELECT u.id, u.nome, u.cognome, u.email, CONCAT(u.nome, ' ', u.cognome) AS nome_completo, u.ruolo, u.stato, u.creato_il
+                  FROM {$this->table_name} u";
         $params = [];
 
-        $where_clauses = [];
-        if (!empty($filters['include_inactive'])) {
-            // nessun filtro
-        } else {
-            $where_clauses[] = 'attivo = 1';
+        $joins = [];
+        $where = [];
+
+        // Soft filter: escludi inattivi se non richiesto
+        if (empty($filters['include_inactive'])) {
+            $where[] = "COALESCE(u.stato, 'ATTIVO') = 'ATTIVO'";
         }
 
+        // Ricerca full name
         if (!empty($filters['search'])) {
-            $where_clauses[] = "CONCAT(nome, ' ', cognome) LIKE ?";
+            $where[] = "CONCAT(u.nome, ' ', u.cognome) LIKE ?";
             $params[] = '%' . $filters['search'] . '%';
         }
 
-        if ($where_clauses) {
-            $query .= ' WHERE ' . implode(' AND ', $where_clauses);
+        // Filtro per ruolo
+        if (!empty($filters['ruolo']) && in_array(strtoupper($filters['ruolo']), ['ADMIN','SUPERVISOR','USER'], true)) {
+            $where[] = "UCASE(u.ruolo) = ?";
+            $params[] = strtoupper($filters['ruolo']);
+        }
+
+        // Filtro per gruppo (server-side)
+        $groupId = $filters['group_id'] ?? $filters['gruppo_id'] ?? null;
+        if ($groupId !== null && $groupId !== '' && $groupId !== 'all') {
+            $joins[] = "JOIN utenti_gruppi ug ON ug.utente_id = u.id";
+            $where[] = "ug.gruppo_id = ?";
+            $params[] = (int)$groupId;
+        }
+
+        if ($joins) {
+            $query .= ' ' . implode(' ', $joins);
+        }
+        if ($where) {
+            $query .= ' WHERE ' . implode(' AND ', $where);
         }
 
         $orderBy = $orderBy ?: 'nome_completo ASC';

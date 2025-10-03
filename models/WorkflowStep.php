@@ -4,30 +4,30 @@ require_once __DIR__ . '/CrudBaseAbstract.php';
 class WorkflowStep extends CrudBaseAbstract
 
 {
-    protected $table_name = "workflow_steps";
+    protected $table_name = 'workflow_passi';
     protected $fillable_fields = [
-        'workflow_id', 'nome_passo', 'descrizione_passo', 'ordine', 'sottopasso',
-        'id_utente_responsabile', // Campo rinominato
-        'id_gruppo_responsabile',
-        'avanzamento_automatico', 'scadenza_giorni',
-        'azione_id', 'parametri_azione','attivo'
+        'workflow_modello_id', 'nome_passo', 'descrizione', 'ordine', 'sottopasso',
+        'tipo_azione_standard', 'parametri_azione',
+        'scadenza_standard_valore', 'scadenza_standard_unita',
+        'responsabile_utente_id', 'responsabile_gruppo_id',
+        // opzionale: se la colonna esiste abilita toggle attivo/disattivo
+        'attivo'
     ];
 
     // 3. Proprietà pubbliche aggiornate
     public $id;
-    public $workflow_id;
+    public $workflow_modello_id;
     public $nome_passo;
-    public $descrizione_passo;
+    public $descrizione;
     public $ordine;
     public $sottopasso;
-    public $id_utente_responsabile; // Campo rinominato
-    public $id_gruppo_responsabile; // Nuovo campo
-    public $avanzamento_automatico;
-    public $attivo;
-
-    public $scadenza_giorni;
-    public $azione_id;         // <-- NUOVO
-    public $parametri_azione;  // <-- NUOVO
+    public $responsabile_utente_id;
+    public $responsabile_gruppo_id;
+    public $tipo_azione_standard;
+    public $azione_id;
+    public $parametri_azione;
+    public $scadenza_standard_valore;
+    public $scadenza_standard_unita;
     public $data_creazione;
     public $data_aggiornamento;
 
@@ -49,21 +49,15 @@ class WorkflowStep extends CrudBaseAbstract
             $this->parametri_azione = json_encode($this->parametri_azione);
         }
 
-        // Assicurati che l'ordine sia un numero, altrimenti calcola il prossimo disponibile.
         if (!isset($this->ordine) || !is_numeric($this->ordine)) {
             $this->ordine = $this->getNextOrderValue();
         }
 
-        // 2. Controlla se esistono già passi a questo livello di 'ordine'.
-        $existing_steps_at_order = $this->findAll(['workflow_id' => $this->workflow_id, 'ordine' => $this->ordine]);
+        $existing_steps_at_order = $this->findAll(['workflow_modello_id' => $this->workflow_modello_id, 'ordine' => $this->ordine]);
 
         if (empty($existing_steps_at_order)) {
-            // --- Caso A: Inserimento in un nuovo livello (sequenziale) ---
-            // Non c'è nulla a questo livello, quindi questo è il primo passo (sottopasso 1).
             $this->sottopasso = 1;
         } else {
-            // --- Caso B: Inserimento in un livello esistente (parallelo) ---
-            // Esistono già uno o più passi. Troviamo il massimo 'sottopasso' e aggiungiamo 1.
             $max_sottopasso = 0;
             foreach ($existing_steps_at_order as $step) {
                 if ($step['sottopasso'] > $max_sottopasso) {
@@ -71,6 +65,15 @@ class WorkflowStep extends CrudBaseAbstract
                 }
             }
             $this->sottopasso = $max_sottopasso + 1;
+        }
+
+        if (!empty($this->azione_id) && empty($this->tipo_azione_standard)) {
+            $this->tipo_azione_standard = $this->azione_id;
+        }
+
+        if ($this->scadenza_standard_valore === '' || $this->scadenza_standard_valore === null) {
+            $this->scadenza_standard_valore = null;
+            $this->scadenza_standard_unita = null;
         }
 
         // 3. Esegui la creazione effettiva del record.
@@ -84,8 +87,8 @@ class WorkflowStep extends CrudBaseAbstract
      */
     private function getNextOrderValue(): int
     {
-        $sql = "SELECT MAX(ordine) as max_ordine FROM {$this->table_name} WHERE workflow_id = ?";
-        $result = $this->db->selectOne($sql, [$this->workflow_id]); // Usa selectOne per un solo risultato
+        $sql = "SELECT MAX(ordine) as max_ordine FROM {$this->table_name} WHERE workflow_modello_id = ?";
+        $result = $this->db->selectOne($sql, [$this->workflow_modello_id]);
         return ($result && isset($result['max_ordine'])) ? (int)$result['max_ordine'] + 1 : 1;
     }
 
@@ -105,10 +108,62 @@ class WorkflowStep extends CrudBaseAbstract
     protected function beforeSave()
     {
         // Se i parametri sono un array, li convertiamo in stringa JSON
-        if (is_array($this->parametri_azione)|| is_object($this->parametri_azione)
-        ) {
+        if (is_array($this->parametri_azione) || is_object($this->parametri_azione)) {
             $this->parametri_azione = json_encode($this->parametri_azione);
         }
+
+        if ($this->scadenza_standard_valore === '' || $this->scadenza_standard_valore === null) {
+            $this->scadenza_standard_valore = null;
+            $this->scadenza_standard_unita = null;
+        }
+
+        if ($this->responsabile_gruppo_id === '' || $this->responsabile_gruppo_id === null) {
+            $this->responsabile_gruppo_id = null;
+        }
+        if ($this->responsabile_utente_id === '' || $this->responsabile_utente_id === null) {
+            $this->responsabile_utente_id = null;
+        }
+    }
+
+    public function findAll($conditions = [], string $orderBy = ''): array
+    {
+        $rows = parent::findAll($conditions, $orderBy);
+        foreach ($rows as &$row) {
+            if (!isset($row['azione_id']) && array_key_exists('tipo_azione_standard', $row)) {
+                $row['azione_id'] = $row['tipo_azione_standard'];
+            }
+            if (!isset($row['descrizione_passo']) && array_key_exists('descrizione', $row)) {
+                $row['descrizione_passo'] = $row['descrizione'];
+            }
+        }
+        return $rows;
+    }
+
+    public function find($id): bool
+    {
+        $found = parent::find($id);
+        if ($found) {
+            $this->azione_id = $this->tipo_azione_standard;
+        }
+        return $found;
+    }
+
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+        if (!isset($data['azione_id']) && isset($data['tipo_azione_standard'])) {
+            $data['azione_id'] = $data['tipo_azione_standard'];
+        }
+        if (!isset($data['descrizione_passo']) && isset($data['descrizione'])) {
+            $data['descrizione_passo'] = $data['descrizione'];
+        }
+        if (!isset($data['scadenza_standard_valore'])) {
+            $data['scadenza_standard_valore'] = $this->scadenza_standard_valore;
+        }
+        if (!isset($data['scadenza_standard_unita'])) {
+            $data['scadenza_standard_unita'] = $this->scadenza_standard_unita;
+        }
+        return $data;
     }
 
 }

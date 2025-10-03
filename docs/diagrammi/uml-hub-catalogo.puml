@@ -1,0 +1,147 @@
+@startuml "ER Hub Catalogo"
+hide circle
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+}
+
+class Tenants {
+  +id : int
+  +ragione_sociale : string
+  +slug : string
+  +stato : string
+}
+
+class Articoli {
+  +id : int
+  +tenant_id : int
+  +sku_globale : string
+  +tipologia : string
+  +titolo : string
+  +stato_pubblicazione : string
+  +visibilita : string
+}
+
+class ArticoliVarianti {
+  +id : int
+  +articolo_id : int
+  +sku : string
+  +nome : string
+}
+
+class SetAttributi {
+  +id : int
+  +nome : string
+  +tipologia_destinazione : string
+}
+
+class Attributi {
+  +id : int
+  +set_attributi_id : int
+  +nome_tecnico : string
+  +tipo_dato : string
+}
+
+class ValoriAttributi {
+  +id : int
+  +articolo_id : int
+  +variante_id : int
+  +attributo_id : int
+  +valore : *
+}
+
+class Categorie {
+  +id : int
+  +categoria_padre_id : int
+  +nome : string
+}
+
+class ArticoliCategorie {
+  +articolo_id : int
+  +categoria_id : int
+}
+
+class Bundle {
+  +id : int
+  +articolo_id : int
+  +strategia_prezzo : string
+}
+
+class BundleComponenti {
+  +bundle_id : int
+  +articolo_component_id : int
+  +quantita : float
+  +opzionale : bool
+}
+
+class ArticoliRelazioni {
+  +id : int
+  +articolo_sorgente_id : int
+  +articolo_correlato_id : int
+  +tipo_relazione : string
+}
+
+class Scorte {
+  +id : int
+  +variante_id : int
+  +tenant_id : int
+  +quantita_disponibile : float
+  +versione_sync : int
+}
+
+class Listini {
+  +id : int
+  +tenant_id : int
+  +nome : string
+  +valuta : string
+}
+
+class PrezziArticoli {
+  +id : int
+  +listino_id : int
+  +variante_id : int
+  +prezzo : decimal
+}
+
+class DisponibilitaSlot {
+  +id : int
+  +variante_id : int
+  +inizio : datetime
+  +fine : datetime
+  +capacita_totale : int
+}
+
+class RisorseMultimediali {
+  +id : int
+  +articolo_id : int
+  +tipologia : string
+  +url : string
+}
+
+class EventiSync {
+  +id : int
+  +tenant_id : int
+  +entita : string
+  +tipo_evento : string
+  +stato_elaborazione : string
+}
+
+Tenants "1" -- "*" Articoli : pubblica
+Articoli "1" -- "*" ArticoliVarianti : ha
+Articoli "1" -- "*" ValoriAttributi : definisce
+ArticoliVarianti "1" -- "*" ValoriAttributi : override
+SetAttributi "1" -- "*" Attributi : contiene
+Attributi "1" -- "*" ValoriAttributi : valorizza
+Articoli "1" -- "*" ArticoliCategorie : classificato
+Categorie "1" -- "*" ArticoliCategorie : include
+Articoli "1" -- "0..1" Bundle : puo essere
+Bundle "1" -- "*" BundleComponenti : include
+Articoli "1" -- "*" ArticoliRelazioni : relaziona
+ArticoliVarianti "1" -- "*" Scorte : stock
+ArticoliVarianti "1" -- "*" PrezziArticoli : tariffa
+Listini "1" -- "*" PrezziArticoli : definisce
+ArticoliVarianti "1" -- "*" DisponibilitaSlot : agenda
+Articoli "1" -- "*" RisorseMultimediali : media
+Tenants "1" -- "*" EventiSync : eventi
+
+@enduml

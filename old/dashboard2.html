@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard API</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; background: #f4f7f9; color: #333; margin: 0; }
+        header { background: #fff; padding: 20px 40px; border-bottom: 1px solid #ddd; }
+        h1 { margin: 0; }
+        main { padding: 20px 40px; }
+        .endpoint-section { background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .endpoint-title { font-size: 1.2em; font-weight: 600; padding: 15px 20px; border-bottom: 1px solid #eee; }
+        .endpoint-content { padding: 20px; }
+        .endpoint-content.loading { color: #888; }
+        pre { background: #2d2d2d; color: #f1f1f1; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+        .error { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dashboard di Riepilogo API</h1>
+    </header>
+
+    <main id="dashboard-container">
+        <p>Caricamento degli endpoint...</p>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('dashboard-container');
+            if (!window.lpwfAuth || !window.lpwfAuth.getToken()) {
+                container.innerHTML = '<p>Autenticazione richiesta. Effettua prima il login.</p>';
+                return;
+            }
+
+            const apiBase = (window.lpwfAuth.ensureBaseForLocation() || '/api').replace(/\/$/, '');
+            const discoveryUrl = `${apiBase}/scopri_endpoint.php`;
+            const siteRoot = apiBase.replace(/\/api$/, '');
+            const authHeaders = window.lpwfAuth.buildHeaders();
+
+            // Funzione per creare una sezione per ogni endpoint
+            const createSectionForData = (title, data) => {
+                const section = document.createElement('div');
+                section.className = 'endpoint-section';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'endpoint-title';
+                titleEl.textContent = title;
+
+                const contentEl = document.createElement('div');
+                contentEl.className = 'endpoint-content';
+                
+                // Formatta il JSON per una migliore leggibilità
+                const pre = document.createElement('pre');
+                pre.textContent = JSON.stringify(data, null, 2);
+                
+                contentEl.appendChild(pre);
+                section.appendChild(titleEl);
+                section.appendChild(contentEl);
+                
+                return section;
+            };
+
+            // 1. Chiama lo script di scoperta
+            fetch(discoveryUrl, { headers: authHeaders })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Errore di rete: ${response.statusText}`);
+                    return response.json();
+                })
+                .then(endpoints => {
+                    container.innerHTML = ''; // Pulisci il messaggio di caricamento
+                    if (endpoints.length === 0) {
+                        container.textContent = 'Nessun endpoint "leggi.php" trovato.';
+                        return;
+                    }
+
+                    // 2. Per ogni endpoint trovato, esegui una chiamata fetch
+                    endpoints.forEach(endpointUrl => {
+                        const cleaned = endpointUrl.replace(/^\/+/, '');
+                        const fullUrl = `${siteRoot}/${cleaned}`;
+                        
+                        fetch(fullUrl, { headers: authHeaders })
+                            .then(response => response.json())
+                            .then(data => {
+                                // 3. Crea e aggiungi la sezione con i dati
+                                const section = createSectionForData(endpointUrl, data);
+                                container.appendChild(section);
+                            })
+                            .catch(error => {
+                                // Gestisce errori per i singoli endpoint
+                                const errorData = { error: true, message: `Impossibile caricare i dati da ${endpointUrl}`, details: error.message };
+                                const errorSection = createSectionForData(endpointUrl, errorData);
+                                container.appendChild(errorSection);
+                                console.error(`Errore nel caricare ${endpointUrl}:`, error);
+                            });
+                    });
+                })
+                .catch(error => {
+                    container.innerHTML = `<p class="error">Impossibile caricare la lista degli endpoint. Verifica che l'URL e lo script 'scopri_endpoint.php' siano corretti.</p>`;
+                    console.error('Errore nello script di scoperta:', error);
+                });
+        });
+    </script>
+
+</body>
+</html>

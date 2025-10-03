@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Login LpWF</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="auth-page">
+    <main class="auth-panel">
+        <h1>Accesso Gestionale</h1>
+        <p class="subtitle">Entra nella tua area di lavoro, gestisci workflow e sincronizzazioni centralizzate.</p>
+
+        <div class="form-group">
+            <label for="apiBase">URL API</label>
+            <input type="url" id="apiBase" placeholder="https://dominio.example.com/api">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="utente@example.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn">Accedi</button>
+
+        <div class="message" id="messageBox"></div>
+        <div class="token-box" id="tokenBox"></div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="clearTokenBtn">Svuota Token</button>
+            <button type="button" class="btn btn-secondary" id="copyTokenBtn">Copia Token</button>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        const apiInput = document.getElementById('apiBase');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const messageBox = document.getElementById('messageBox');
+        const tokenBox = document.getElementById('tokenBox');
+        const clearTokenBtn = document.getElementById('clearTokenBtn');
+        const copyTokenBtn = document.getElementById('copyTokenBtn');
+        const defaultApiBase = lpwfAuth.ensureBaseForLocation();
+
+        function showMessage(type, text) {
+            messageBox.textContent = text;
+            messageBox.className = `message ${type} show`;
+        }
+
+        function clearMessage() {
+            messageBox.textContent = '';
+            messageBox.className = 'message';
+        }
+
+        function setToken(token, user = null) {
+            if (token) {
+                lpwfAuth.setToken(token);
+                lpwfAuth.setCurrentUser(user);
+                tokenBox.textContent = token;
+            } else {
+                lpwfAuth.clearToken();
+                lpwfAuth.clearCurrentUser?.();
+                tokenBox.textContent = '';
+            }
+        }
+
+        function loadStoredToken() {
+            const token = lpwfAuth.getToken();
+            if (token) {
+                tokenBox.textContent = token;
+            }
+        }
+
+        async function login() {
+            const baseUrl = apiInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!baseUrl || !email || !password) {
+                showMessage('error', 'Compila tutti i campi.');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.classList.add('is-loading');
+            showMessage('info', 'Invio credenziali...');
+
+            try {
+                const apiBase = lpwfAuth.setApiBase(baseUrl) || baseUrl;
+                apiInput.value = apiBase;
+                const response = await fetch(`${apiBase}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login fallito');
+                }
+
+                showMessage('success', 'Login riuscito. Reindirizzamento in corso...');
+                setToken(data.access_token, data.user || null);
+                setTimeout(() => {
+                    window.location.href = 'mia_dashboard.html';
+                }, 600);
+            } catch (error) {
+                showMessage('error', error.message);
+                setToken(null);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('is-loading');
+            }
+        }
+
+        function initBaseInput() {
+            const stored = lpwfAuth.getApiBase() || defaultApiBase;
+            if (stored) {
+                apiInput.value = stored;
+            }
+        }
+
+        loginBtn.addEventListener('click', login);
+        passwordInput.addEventListener('keyup', (ev) => {
+            if (ev.key === 'Enter') {
+                login();
+            }
+        });
+
+        clearTokenBtn.addEventListener('click', () => {
+            setToken(null);
+            showMessage('info', 'Token rimosso dalla memoria.');
+        });
+
+        copyTokenBtn.addEventListener('click', async () => {
+            const token = tokenBox.textContent.trim();
+            if (!token) {
+                showMessage('error', 'Nessun token da copiare.');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(token);
+                showMessage('success', 'Token copiato negli appunti.');
+            } catch (err) {
+                showMessage('error', 'Impossibile copiare il token.');
+            }
+        });
+
+        apiInput.addEventListener('change', () => {
+            const value = apiInput.value.trim();
+            const cleaned = value ? (lpwfAuth.setApiBase(value) || value) : lpwfAuth.ensureBaseForLocation();
+            apiInput.value = cleaned;
+            showMessage('info', 'URL API aggiornato.');
+        });
+
+        initBaseInput();
+        loadStoredToken();
+    </script>
+</body>
+</html>

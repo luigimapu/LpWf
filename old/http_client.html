@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>API Test Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 1em; background-color: #f8f9fa; line-height: 1.5; }
+        h2 { border-bottom: 2px solid #007bff; padding-bottom: 8px; color: #343a40; margin-top: 2em; }
+        form { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 2em; display: grid; grid-template-columns: 180px 1fr; gap: 15px 10px; align-items: center; }
+        label { font-weight: 600; text-align: right; padding-right: 10px; color: #495057; }
+        input, select, textarea { width: 100%; max-width: 450px; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; }
+        input:focus, select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 .2rem rgba(0,123,255,.25); }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500; grid-column: 2 / 3; justify-self: start; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .ts-control { max-width: 450px; }
+        #parametri-container { grid-column: 1 / -1; display: grid; grid-template-columns: 180px 1fr; gap: 15px 10px; align-items: center; margin-top: 15px; border-top: 1px solid #e9ecef; padding-top: 15px; }
+    </style>
+</head>
+<body>
+<h2>Visualizza Task per Utente (To-Do List)</h2>
+<form id="userTasksForm">
+    <label for="select-user-todo">Seleziona Utente:</label>
+    <select id="select-user-todo" required placeholder="Cerca un utente..."></select>
+    <button type="submit">Mostra Task</button>
+</form>
+<div id="userTasksContainer" style="margin-top: 1em;"></div>
+<h2>Visualizza Istanza Workflow</h2>
+<form id="viewInstanceForm">
+    <label for="instance_id_view">ID Istanza:</label>
+    <input type="number" id="instance_id_view" placeholder="Inserisci l'ID dell'istanza" required>
+    <button type="submit">Visualizza Dettagli</button>
+</form>
+<div id="instanceDetailsContainer" style="margin-top: 1em;"></div>
+
+<!-- NUOVA SEZIONE PER L'AVVIO ISTANZA -->
+<h2>Avvia Istanza di Workflow</h2>
+<form id="startInstanceForm">
+    <label for="select-workflow-start">Modello di Workflow:</label>
+    <select id="select-workflow-start" name="workflow_id" required placeholder="Seleziona il modello da avviare..."></select>
+
+    <label for="entity_id">ID Entità (opz.):</label>
+    <input type="number" id="entity_id" name="id_entita_associata" placeholder="Es. 123">
+
+    <label for="entity_name">Nome Entità (opz.):</label>
+    <input type="text" id="entity_name" name="nome_entita_associata" placeholder="Es. fatture">
+
+    <button type="submit">Avvia Istanza</button>
+</form>
+
+<h2>Gestione Task (Assegna/Completa)</h2>
+<form id="taskManagementForm">
+    <label for="select-workflow-manage">Seleziona Workflow:</label>
+    <select id="select-workflow-manage" placeholder="Cerca un workflow..."></select>
+    <label for="select-task-manage">Seleziona Task:</label>
+    <select id="select-task-manage" placeholder="Prima seleziona un workflow..." disabled></select>
+    <label for="select-user-manage">Assegna a Utente:</label>
+    <select id="select-user-manage" placeholder="Cerca un utente..." disabled></select>
+    <label></label>
+    <div>
+        <button type="button" id="assignTaskBtn" disabled>Assegna Task</button>
+        <button type="button" id="completeTaskBtn" disabled style="background-color: #28a745;">Completa Task</button>
+    </div>
+</form>
+
+<h2>Crea Nuovo Workflow STEP</h2>
+<form id="createWorkflowStepForm">
+    <label for="step_workflow_id">Workflow di appartenenza:</label>
+    <select id="step_workflow_id" name="workflow_id" required placeholder="Cerca un workflow..."></select>
+    <label for="nome_passo">Nome Step:</label>
+    <input type="text" id="nome_passo" name="nome_passo" required>
+    <label for="descrizione_passo">Descrizione:</label>
+    <input type="text" id="descrizione_passo" name="descrizione_passo">
+    <label for="ordine">Ordine:</label>
+    <input type="number" id="ordine" name="ordine" value="1" required>
+    <label for="sottopasso">Sottopasso:</label>
+    <input type="number" id="sottopasso" name="sottopasso" value="1">
+    <label for="id_utente_responsabile">Assegna a Utente (opz.):</label>
+    <select id="id_utente_responsabile" name="id_utente_responsabile" placeholder="Cerca un utente..."></select>
+
+    <label for="id_gruppo_responsabile">O a Gruppo (opz.):</label>
+    <select id="id_gruppo_responsabile" name="id_gruppo_responsabile" placeholder="Cerca un gruppo..."></select>
+
+
+    <label for="avanzamento_step">Avanzamento Automatico:</label>
+    <input type="checkbox" id="avanzamento_step" name="avanzamento_automatico" value="1" style="width: auto; justify-self: start;">
+
+    <label for="azione-select">Azione da Eseguire:</label>
+    <select id="azione-select" name="azione_id" required placeholder="Seleziona un'azione..."></select>
+    <div id="parametri-container"></div>
+    <button type="submit">Crea Workflow STEP</button>
+</form>
+
+<h2>Crea Nuovo Task</h2>
+<form id="createTaskForm">
+    <label for="nome_task">Nome Task:</label>
+    <input type="text" id="nome_task" name="nome" required>
+    <label for="descrizione_task">Descrizione:</label>
+    <input type="text" id="descrizione_task" name="descrizione">
+    <label for="id_workflow_task">Workflow di appartenenza:</label>
+    <select id="id_workflow_task" name="id_workflow" required placeholder="Cerca un workflow..."></select>
+    <label for="select-user-task">Assegna a (opzionale):</label>
+    <select id="select-user-task" name="id_utente_assegnato" placeholder="Digita per cercare un utente..."></select>
+    <button type="submit">Crea Task</button>
+</form>
+<h2>Crea Nuovo Gruppo</h2>
+<form id="createGroupForm">
+    <label for="nome_gruppo">Nome Gruppo:</label>
+    <input type="text" id="nome_gruppo" name="nome_gruppo" required>
+    <label for="descrizione_gruppo">Descrizione:</label>
+    <input type="text" id="descrizione_gruppo" name="descrizione">
+    <button type="submit">Crea Gruppo</button>
+</form>
+
+<h2>Gestisci Appartenenza ai Gruppi</h2>
+<form id="manageGroupMembershipForm">
+    <label for="select-group-manage">Seleziona Gruppo:</label>
+    <select id="select-group-manage" required placeholder="Cerca un gruppo..."></select>
+
+    <label for="select-user-manage-group">Seleziona Utente:</label>
+    <select id="select-user-manage-group" required placeholder="Cerca un utente..."></select>
+
+    <label></label>
+    <div>
+        <button type="button" id="addUserToGroupBtn">Aggiungi Utente al Gruppo</button>
+        <button type="button" id="removeUserFromGroupBtn" style="background-color:#dc3545;">Rimuovi Utente dal Gruppo</button>
+    </div>
+</form>
+
+<h2>Crea Nuovo Utente</h2>
+<form id="createUserForm">
+    <label for="nome_utente">Nome:</label>
+    <input type="text" id="nome_utente" name="nome" required>
+    <label for="cognome_utente">Cognome:</label>
+    <input type="text" id="cognome_utente" name="cognome" required>
+    <label for="email_utente">Email:</label>
+    <input type="email" id="email_utente" name="email" required>
+    <button type="submit">Crea Utente</button>
+</form>
+
+<h2>Crea Nuovo Workflow</h2>
+<form id="createWorkflowForm">
+    <label for="nome_workflow">Nome Workflow:</label>
+    <input type="text" id="nome_workflow" name="nome_workflow" required>
+    <label for="descrizione_workflow">Descrizione:</label>
+    <input type="text" id="descrizione_workflow" name="descrizione">
+    <label for="attivo_workflow">Attivo:</label>
+    <input type="checkbox" id="attivo_workflow" name="attivo" value="1" style="width: auto; justify-self: start;">
+    <button type="submit">Crea Workflow</button>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="auth.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const effectiveBase = window.lpwfAuth?.ensureBaseForLocation?.() || window.lpwfAuth?.getApiBase?.();
+        const API_BASE_URL = (effectiveBase || '/api').replace(/\/$/, '');
+
+        if (!window.lpwfAuth || !window.lpwfAuth.getToken()) {
+            alert('Token non presente. Accedi da login.html prima di usare questo client.');
+            return;
+        }
+
+        const cleanEndpoint = (endpoint) => endpoint.replace(/^\//, '');
+        const authFetch = (endpoint, { method = 'GET', body, headers = {}, json = false } = {}) => {
+            const payload = json && body !== undefined && body !== null && typeof body !== 'string'
+                ? JSON.stringify(body)
+                : body;
+            const init = {
+                method,
+                headers: window.lpwfAuth.buildHeaders(headers, json),
+            };
+            if (payload !== undefined) {
+                init.body = payload;
+            }
+            return fetch(`${API_BASE_URL}/${cleanEndpoint(endpoint)}`, init);
+        };
+
+        const handleResponse = async (response) => {
+            const text = await response.text();
+            let data = null;
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    console.error('Risposta non JSON o JSON non valido:', text);
+                }
+            }
+            if (!response.ok) {
+                console.error('Errore API', { status: response.status, data });
+                if (response.status === 401) {
+                    window.lpwfAuth.clearToken();
+                    const msg = data && data.message ? data.message : 'Sessione scaduta o token non valido.';
+                    alert(`${msg}\nVerrai reindirizzato alla pagina di login.`);
+                    window.location.href = 'login.html';
+                }
+                const message = data && data.message ? data.message : `Errore HTTP ${response.status}`;
+                throw new Error(message);
+            }
+            return data;
+        };
+
+        const api = {
+            get: (endpoint) => authFetch(endpoint).then(handleResponse),
+            post: (endpoint, body) => {
+                const options = body === undefined ? { method: 'POST' } : { method: 'POST', body, json: true };
+                return authFetch(endpoint, options).then(handleResponse);
+            },
+            put: (endpoint, body) => {
+                const options = body === undefined ? { method: 'PUT' } : { method: 'PUT', body, json: true };
+                return authFetch(endpoint, options).then(handleResponse);
+            },
+            delete: (endpoint) => authFetch(endpoint, { method: 'DELETE' }).then(handleResponse),
+        };
+
+        // --- FUNZIONI DI AIUTO E DI CARICAMENTO ---
+        const loadData = (endpoint) => async (query) => {
+            const suffix = query ? `?search=${encodeURIComponent(query)}` : '';
+            return api.get(`${endpoint}${suffix}`);
+        };
+        const loadUsers = loadData('utenti');
+        const loadWorkflows = loadData('workflows');
+        const loadAzioni = () => api.get('azioni');
+        const loadGruppi = loadData('gruppi');
+
+//        const userRender = { render: { option: (d, e) => `<div>${e(d.nome)} ${e(d.cognome)}</div>`, item: (d, e) => `<div>${e(d.nome)} ${e(d.cognome)}</div>` }};
+        // Sostituisci la vecchia userRender
+        const userRender = {
+            labelField: 'nome_completo',
+            searchField: ['nome_completo'],
+            render: {
+                option: (data, escape) => `<div>${escape(data.nome_completo)}</div>`,
+                item: (data, escape) => `<div>${escape(data.nome_completo)}</div>`
+            }
+        };
+
+        const workflowRender = { labelField: 'nome_workflow', searchField: ['nome_workflow'] };
+        const groupRender = { labelField: 'nome_gruppo', searchField: ['nome_gruppo'] };
+
+        /*const createTomSelect = (selector, renderOptions = {}, loadFn) => {
+            if (!document.querySelector(selector)) return null;
+            const config = { valueField: 'id', searchField: ['nome', 'cognome'], create: false, ...renderOptions };
+            if (loadFn) config.load = (query, callback) => loadFn(query).then(callback).catch(() => callback());
+            return new TomSelect(selector, config);
+        };*/
+
+
+
+        const createTomSelect = (selector, renderOptions = {}, loadFn) => {
+            if (!document.querySelector(selector)) return null;
+            // 'searchField' viene ora preso da renderOptions, quindi possiamo rimuoverlo da qui
+            const config = { valueField: 'id', create: false, ...renderOptions };
+            if (loadFn) config.load = (query, callback) => loadFn(query).then(callback).catch(() => callback());
+            return new TomSelect(selector, config);
+        };
+
+        // --- INIZIALIZZAZIONE TOMSELECT ---
+        const tsWorkflowsStart = createTomSelect('#select-workflow-start', workflowRender, loadWorkflows);
+        const tsWorkflowsManage = createTomSelect('#select-workflow-manage', workflowRender, loadWorkflows);
+        const tsUsersManage = createTomSelect('#select-user-manage', userRender, loadUsers);
+        const tsManageGroup = createTomSelect('#select-group-manage', groupRender, loadGruppi);
+        const tsManageUser = createTomSelect('#select-user-manage-group', userRender, loadUsers);
+
+        const tsTasksManage = new TomSelect('#select-task-manage', {
+            valueField: 'id', searchField: ['nome'],
+            render: {
+                option: (d, e) => `<div>${e(d.nome)} <span style="color:#888;font-size:0.9em;">(${e(d.stato_nome||'N/D')})</span></div>`,
+                item: (d, e) => `<div>${e(d.nome)}</div>`
+            }
+        });
+
+        createTomSelect('#step_workflow_id', workflowRender, loadWorkflows);
+        createTomSelect('#id_workflow_task', workflowRender, loadWorkflows);
+        createTomSelect('#select-user-task', userRender, loadUsers);
+        createTomSelect('#id_utente_responsabile', userRender, loadUsers);
+        createTomSelect('#id_gruppo_responsabile', { labelField: 'nome_gruppo', searchField: ['nome_gruppo'] }, loadGruppi);
+
+
+        const tsAzioni = createTomSelect('#azione-select', { labelField: 'nome_azione', searchField: ['nome_azione'] });
+        const tsUsersTodo = createTomSelect('#select-user-todo', userRender, loadUsers);
+
+        // --- LOGICA GESTIONE TASK ---
+        const assignBtn = document.getElementById('assignTaskBtn');
+        const completeBtn = document.getElementById('completeTaskBtn');
+
+        const updateControlsState = (task) => {
+            const isOpen = task?.id_stato === 1;
+            const isInProgress = task?.id_stato === 2;
+            isOpen ? tsUsersManage.enable() : tsUsersManage.disable();
+            assignBtn.disabled = !isOpen;
+            completeBtn.disabled = !isInProgress;
+            if (!isOpen) tsUsersManage.clear();
+        };
+
+        tsWorkflowsManage.on('change', (workflowId) => {
+            const tasksSelect = tsTasksManage;
+            tasksSelect.clear();
+            tasksSelect.clearOptions();
+            tasksSelect.disable();
+            updateControlsState(null);
+            if (!workflowId) return;
+            api.get(`tasks?workflow_id=${workflowId}`)
+                .then(tasks => {
+                    tasksSelect.addOptions(tasks);
+                    tasksSelect.enable();
+                })
+                .catch(error => console.error('Errore durante il caricamento dei task:', error));
+        });
+
+        tsTasksManage.on('change', taskId => updateControlsState(taskId ? tsTasksManage.options[taskId] : null));
+        assignBtn.addEventListener('click', () => {
+            const taskId = tsTasksManage.getValue(), userId = tsUsersManage.getValue();
+            if (!taskId || !userId) return alert("Seleziona task e utente.");
+            api.put(`tasks/${taskId}/assign`, { user_id: parseInt(userId, 10) })
+                .then(data => {
+                    alert(data.message);
+                    tsWorkflowsManage.trigger('change', tsWorkflowsManage.getValue());
+                })
+                .catch(error => alert(error.message));
+        });
+        completeBtn.addEventListener('click', () => {
+            const taskId = tsTasksManage.getValue();
+            if (!taskId) return alert("Seleziona un task.");
+            api.put(`tasks/${taskId}/complete`)
+                .then(data => {
+                    alert(data.message);
+                    tsWorkflowsManage.trigger('change', tsWorkflowsManage.getValue());
+                })
+                .catch(error => alert(error.message));
+        });
+
+        // --- LOGICA GESTIONE WORKFLOW STEP ---
+        let azioniDisponibili = [];
+        const parametriContainer = document.getElementById('parametri-container');
+        loadAzioni().then(data => {
+            azioniDisponibili = data;
+            tsAzioni.addOptions(data);
+        });
+
+        tsAzioni.on('change', (azioneId) => {
+            parametriContainer.innerHTML = '';
+            const azione = azioniDisponibili.find(a => a.id == azioneId);
+            const params = azione ? JSON.parse(azione.parametri_richiesti || '[]') : [];
+            if (params.length === 0) return;
+            params.forEach(param => {
+                const label = document.createElement('label');
+                label.htmlFor = `param_${param}`;
+                label.textContent = `${param.replace(/_/g, ' ')}:`;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `param_${param}`;
+                input.name = `parametri_azione[${param}]`;
+                input.required = true;
+                parametriContainer.appendChild(label);
+                parametriContainer.appendChild(input);
+            });
+        });
+
+        const addUserBtn = document.getElementById('addUserToGroupBtn');
+        const removeUserBtn = document.getElementById('removeUserFromGroupBtn');
+
+        const manageGroupMembership = (action) => {
+            const groupId = tsManageGroup.getValue();
+            const userId = tsManageUser.getValue();
+            if (!groupId || !userId) {
+                alert("Seleziona sia un gruppo che un utente.");
+                return;
+            }
+
+            const endpoint = `gruppi/${groupId}/${action}/${userId}`;
+            const request = action === 'add' ? api.post(endpoint) : api.delete(endpoint);
+
+            request
+                .then(result => {
+                    alert(result.message);
+                    tsManageGroup.clear();
+                    tsManageUser.clear();
+                })
+                .catch(error => alert(`Errore: ${error.message || 'Operazione fallita.'}`));
+        };
+
+        addUserBtn.addEventListener('click', () => manageGroupMembership('add'));
+        removeUserBtn.addEventListener('click', () => manageGroupMembership('remove'));
+
+        // --- GESTIONE SUBMIT DEI FORM ---
+        const handleFormSubmit = (formId, endpoint) => {
+            const form = document.getElementById(formId);
+            if (!form) return;
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                const parametriAzione = {};
+                formData.forEach((value, key) => {
+                    if (key.startsWith('parametri_azione[')) {
+                        const paramName = key.match(/\[(.*?)\]/)[1];
+                        parametriAzione[paramName] = value;
+                        delete data[key];
+                    }
+                });
+                if (Object.keys(parametriAzione).length > 0) data.parametri_azione = parametriAzione;
+                this.querySelectorAll('input[type=checkbox]').forEach(cb => { data[cb.name] = cb.checked ? 1 : 0; });
+                api.post(endpoint, data)
+                    .then(result => {
+                        const createdId = result.id_creato ?? result.id;
+                        const message = result.message || (createdId ? `Record creato con ID: ${createdId}` : 'Operazione completata.');
+                        alert(`Successo: ${message}`);
+                        form.reset();
+                        form.querySelectorAll('select.tomselected').forEach(s => s.tomselect.clear());
+                    })
+                    .catch(error => alert(`Errore: ${error.message || 'Controlla la console.'}`));
+            });
+        };
+
+        handleFormSubmit('createTaskForm', 'tasks');
+        handleFormSubmit('createUserForm', 'utenti');
+        handleFormSubmit('createWorkflowForm', 'workflows');
+        handleFormSubmit('createWorkflowStepForm', 'workflowsteps');
+        handleFormSubmit('createGroupForm', 'gruppi');
+
+        document.getElementById('userTasksForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userId = tsUsersTodo.getValue();
+            if (!userId) {
+                alert("Seleziona un utente per vedere i suoi task.");
+                return;
+            }
+
+            // L'URL ora usa un parametro GET per filtrare
+            const container = document.getElementById('userTasksContainer');
+            container.innerHTML = '<p>Caricamento task...</p>';
+
+            api.get(`tasks?id_utente_assegnato=${userId}`)
+                .then(data => {
+                    if (data.length === 0) {
+                        container.innerHTML = '<p>Nessun task assegnato a questo utente.</p>';
+                        return;
+                    }
+                    container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    container.innerHTML = `<p style="color: red;">Errore: ${error.message || 'Impossibile caricare i dati.'}</p>`;
+                });
+        });
+
+        // NUOVO LISTENER PER IL FORM DI AVVIO ISTANZA
+        document.getElementById('startInstanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const workflowId = tsWorkflowsStart.getValue();
+            if (!workflowId) {
+                alert("Per favore, seleziona un modello di workflow da avviare.");
+                return;
+            }
+            const formData = new FormData(this);
+            const payload = {
+                id_entita_associata: formData.get('id_entita_associata') || null,
+                nome_entita_associata: formData.get('nome_entita_associata') || null
+            };
+
+            api.post(`workflows/${workflowId}/start`, payload)
+                .then(result => {
+                    // --- LOGICA CORRETTA PER LA NUOVA RISPOSTA API ---
+                    // Controlliamo se l'array di ID esiste e lo formattiamo
+                    const taskIdsString = (result.id_task_creati && result.id_task_creati.length > 0)
+                        ? result.id_task_creati.join(', ')
+                        : 'Nessuno';
+
+                    // Mostriamo l'alert con i dati corretti
+                    alert(`Successo: ${result.message}\nID Istanza: ${result.id_istanza_creata}\nID Task Creati: [${taskIdsString}]`);
+
+                    this.reset();
+                    tsWorkflowsStart.clear();
+                }).catch(error => {
+                alert(`Errore: ${error.message || 'Controlla la console.'}`);
+            });
+        });
+
+
+        document.getElementById('viewInstanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const instanceId = document.getElementById('instance_id_view').value;
+            if (!instanceId) {
+                alert("Inserisci un ID di istanza.");
+                return;
+            }
+
+            const container = document.getElementById('instanceDetailsContainer');
+            container.innerHTML = '<p>Caricamento...</p>';
+
+            api.get(`workflowistanze/${instanceId}`)
+                .then(data => {
+                    // Usiamo <pre> per formattare bene l'output JSON
+                    container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    container.innerHTML = `<p style="color: red;">Errore: ${error.message || 'Impossibile caricare i dati.'}</p>`;
+                });
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

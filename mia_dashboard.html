@@ -4,199 +4,964 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Mia Dashboard Workflow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/app.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f8fa; color: #333; margin: 0; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background-color: #fff; padding: 15px 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-        h1, h2, h3 { margin: 0; color: #0056b3; }
-        h2 { border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;}
-        h3 { color: #495057; font-size: 1.2em; }
-
-        .kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
-        .kanban-column { background-color: #e9ecef; border-radius: 8px; padding: 15px; }
-        .kanban-column h3 { padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid #ced4da; }
-
-        .task-card { background: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.08); transition: transform 0.2s; margin-bottom: 15px; }
-        .task-card-header { padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
-        .task-card-header h3 { font-size: 1em; }
-        .task-card-body { padding: 15px; font-size: 0.9em; }
-        .task-card-footer { padding: 10px 15px; background-color: #fcfcfc; border-top: 1px solid #eee; text-align: right; }
-
-        .report-section { margin-top: 40px; }
-        .report-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
-        .list-item { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid transparent; }
-        .list-item.active { border-left-color: #007bff; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; font-weight: 600; }
-        .item-details { display: none; padding: 15px; background-color: #f8f9fa; border-top: 1px solid #e9ecef; }
-        .list-item.active .item-details { display: block; }
-        .item-details table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        .item-details th, .item-details td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
-        .item-actions button { background: none; border:none; cursor: pointer; padding: 2px 5px; font-size: 1.1em; }
-        .item-actions .btn-start-instance { color: #28a745; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { position: relative; background: #fff; padding: 30px; border-radius: 8px; width: 90%; max-width: 600px; }
-        .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.8em; color: #aaa; background: none; border: none; cursor: pointer; }
-        .modal-content form .form-row { display: grid; grid-template-columns: 150px 1fr; align-items: center; margin-bottom: 15px; }
-        .modal-content form label { text-align: right; padding-right: 15px; }
-        .modal-actions { text-align: right; margin-top: 20px; }
-        .column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        button, input, select, textarea { font-family: inherit; font-size: inherit; }
-        button { border-radius: 5px; cursor: pointer; font-weight: 600; border: none; padding: 8px 15px; }
-        .btn-create { background-color: #007bff; color: white; }
-    </style>
 </head>
-<body>
-<div class="container">
-    <header>
-        <h1>Mia Dashboard</h1>
-        <div id="user-selector-container" style="width: 300px;">
-            <select id="user-selector" placeholder="Seleziona utente..."></select>
+<body class="dashboard-app">
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar__brand">LpWF Gestionale</div>
+        <nav class="sidebar__nav" aria-label="Sezioni principali">
+            <a href="#overview" class="sidebar__link">Dashboard</a>
+            <a href="#workflow-models" class="sidebar__link" hidden>Modelli</a>
+            <a href="#operations" class="sidebar__link">Operatività</a>
+            <a href="#catalogo" class="sidebar__link">Catalogo</a>
+            <a href="#sync" class="sidebar__link">Sincronizzazioni</a>
+            <a href="#report" class="sidebar__link">Reportistica</a>
+            <a href="#config" class="sidebar__link" hidden>Configurazione</a>
+        </nav>
+        <div class="sidebar__footer">
+            <small>&copy; LpWF Platform</small>
         </div>
-    </header>
-    <main id="dashboard-main">
-        <div class="board-controls">
-            <label for="task-search">Cerca Task:</label>
-            <input id="task-search" type="text" placeholder="Digita per filtrare..." style="width: 300px;">
-        </div>
-        <div class="kanban-board">
-            <div class="kanban-column"><h3>Da Fare</h3><div id="tasks-todo"></div></div>
-            <div class="kanban-column"><h3>In Gestione</h3><div id="tasks-doing"></div></div>
-            <div class="kanban-column"><h3>Completati</h3><div id="tasks-done"></div></div>
-        </div>
-        <section class="report-section">
-            <h2>Esplora Risorse</h2>
-            <div class="report-container">
-                <div class="report-column">
-                    <div class="column-header"><h3>Modelli di Workflow</h3><button class="btn-create" data-resource="workflows">+ Nuovo</button></div>
-                    <div id="workflows-list"></div>
-                </div>
-                <div class="report-column">
-                    <div class="column-header"><h3>Istanze Avviate</h3></div>
-                    <div id="instances-list"></div>
-                </div>
+    </aside>
+
+    <div class="main-area">
+        <header class="topbar">
+            <div class="topbar__info">
+                <h1>Centro di Controllo</h1>
+                <p>Gestisci workflow, sincronizzazioni e cataloghi da un'unica interfaccia.</p>
             </div>
-            <div class="report-container" style="margin-top: 20px;">
-                <div class="report-column" style="grid-column: 1 / -1;">
-                    <div class="column-header"><h3>Gruppi di Utenti</h3><button class="btn-create" data-resource="gruppi">+ Nuovo</button></div>
-                    <div id="gruppi-list"></div>
+            <div class="topbar__actions">
+                <div class="input-group">
+                    <label for="user-selector">Operatore</label>
+                    <select id="user-selector"></select>
                 </div>
+                <div class="input-group">
+                    <span>&nbsp;</span>
+                    <button type="button" class="btn btn-secondary" data-action="logout">Log out</button>
+                </div>
+                <div class="input-group">
+                    <span>&nbsp;</span>
+                    <button type="button" class="btn btn-primary" data-action="open-create-user" hidden>Nuovo utente</button>
+                </div>
+                <div id="supervisor-users-badge" class="input-group" hidden>
+                    <label>Utenti associati</label>
+                    <div id="supervisor-users-list" class="ops-legend"></div>
+                </div>
+
+                <!-- Spostato fuori dalla topbar: solo controlli rapidi qui -->
             </div>
-        </section>
-    </main>
+        </header>
 
-    <!-- Modal di Creazione -->
-    <div id="create-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="create-modal-title"></h3>
-            <form id="create-form"></form>
-            <div class="modal-actions">
-                <button class="close-modal-btn">Annulla</button>
-                <button id="create-modal-save" style="background-color: #28a745; color: white;">Crea</button>
+        <main id="dashboard-main" class="content-area">
+            <div class="statusbar" id="statusbar">
+                <span>Utente: <strong id="status-user">—</strong></span>
+                <span>Ruolo: <strong id="status-role">—</strong></span>
+                <span>API: <strong id="status-api">—</strong></span>
+                <span>Token: <strong id="status-token">—</strong></span>
+                <span>Ultima API: <strong id="status-api-last">—</strong></span>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal di Modifica -->
-    <div id="edit-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="edit-modal-title"></h3>
-            <form id="edit-form"></form>
-            <div class="modal-actions">
-                <button class="close-modal-btn">Annulla</button>
-                <button id="modal-save" style="background-color: #28a745; color: white;">Salva</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal per Avviare Istanza -->
-    <div id="start-instance-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="start-instance-modal-title"></h3>
-            <form id="start-instance-form">
-                <div class="form-row"><label>Nome Entità:</label><input name="nome_entita_associata"></div>
-                <div class="form-row"><label>ID Entità:</label><input name="id_entita_associata" type="number"></div>
-            </form>
-            <div class="modal-actions">
-                <button class="close-modal-btn">Annulla</button>
-                <button id="start-instance-save" style="background-color: #17a2b8; color: white;">Avvia</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Aggiungi Utente a Gruppo -->
-    <div id="add-user-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3>Aggiungi Utente al Gruppo</h3>
-            <form id="add-user-form">
-                <div class="form-row">
-                    <label for="select-user-to-add">Utente:</label>
-                    <select id="select-user-to-add" required placeholder="Cerca un utente..."></select>
+            
+            <section id="overview" class="section">
+                <header class="section__header">
+                    <h2>Panoramica</h2>
+                    <p>Indicatori chiave sull'operatività del gestionale.</p>
+                </header>
+                <div class="metrics-grid">
+                    <article class="metric-card">
+                        <h3>Task aperti</h3>
+                        <p class="metric-card__value" id="metric-open-tasks">--</p>
+                        <p class="metric-card__hint">Task non assegnati o in attesa di presa in carico.</p>
+                    </article>
+                    <article class="metric-card">
+                        <h3>Workflow in corso</h3>
+                        <p class="metric-card__value" id="metric-running-workflows">--</p>
+                        <p class="metric-card__hint">Istanze attive e non completate.</p>
+                    </article>
+                    <article class="metric-card">
+                        <h3>Sync pendenti</h3>
+                        <p class="metric-card__value" id="metric-sync-pending">--</p>
+                        <p class="metric-card__hint">Eventi in uscita verso l'hub centrale.</p>
+                    </article>
+                    <article class="metric-card">
+                        <h3>Segnalazioni</h3>
+                        <p class="metric-card__value" id="metric-alerts">--</p>
+                        <p class="metric-card__hint">Ticket o anomalie da verificare.</p>
+                    </article>
                 </div>
-                <div class="modal-actions">
-                    <button type="submit" style="background-color:#007bff; color:white;">Aggiungi</button>
-                </div>
-            </form>
-        </div>
-    </div>
+            </section>
 
-    <!-- Modal Avvia Sottoprocesso -->
-    <div id="subflow-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="subflow-modal-title">Avvia Sottoprocesso</h3>
-            <form id="start-subflow-form">
-                <div class="form-row">
-                    <label for="select-subflow-workflow">Workflow:</label>
-                    <select id="select-subflow-workflow" required placeholder="Cerca un workflow..."></select>
-                </div>
-                <div class="form-row">
-                    <label for="select-subflow-user">Assegna a (opzionale):</label>
-                    <select id="select-subflow-user" placeholder="Cerca un utente..."></select>
-                </div>
-                <div class="modal-actions">
-                    <button class="close-modal-btn">Annulla</button>
-                    <button type="submit" style="background-color:#fd7e14; color:white;">Avvia Sottoprocesso</button>
-                </div>
-            </form>
-        </div>
-    </div>
+            <section id="operations" class="section">
+                <header class="section__header">
+                    <div>
+                        <h2>Operatività</h2>
+                        <p>Gestione operativa dei task e monitoraggio delle istanze.</p>
+                    </div>
+                </header>
 
-    <!-- Modal Visualizza Sottoprocessi -->
-    <div id="view-subflows-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="view-subflows-modal-title">Sottoprocessi Correlati</h3>
-            <div id="subflows-list"></div>
-            <div class="modal-actions">
-                <button class="close-modal-btn">Chiudi</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Note -->
-    <div id="notes-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <h3 id="notes-modal-title">Note per il Task</h3>
-            <div id="notes-list"></div>
-            <form id="add-note-form" style="margin-top: 20px;">
-                <label for="new-note-text">Aggiungi una nuova nota:</label>
-                <textarea id="new-note-text" required style="width: 100%; min-height: 80px;"></textarea>
-                <div class="modal-actions">
-                    <button type="submit" style="background-color:#007bff; color:white;">Salva Nota</button>
+                <div class="kanban-board">
+                    <div class="kanban-column">
+                        <div class="column-header"><h3>Da Fare</h3></div>
+                        <div id="tasks-todo" class="kanban-column__body"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-header"><h3>In Gestione</h3></div>
+                        <div id="tasks-doing" class="kanban-column__body"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-header"><h3>Completati</h3></div>
+                        <div id="tasks-done" class="kanban-column__body"></div>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <!-- Operatività Task: pannello con card -->
+                <article class="panel panel--wide" id="task-ops-panel">
+                    <div class="panel__header">
+                        <h3>Operatività Task</h3>
+                        <p>Prendi in carico, lavora e monitora le attività a te assegnate.</p>
+                    </div>
+                    <div class="panel__body task-ops">
+                        <section class="task-ops__section" id="ops-section-assigned">
+                            <header class="task-ops__header">
+                                <h4>Task in carico</h4>
+                                <p>Attività già assegnate al tuo profilo.</p>
+                            </header>
+                            <p id="my-tasks-empty" class="empty-state" hidden>Nessun task attualmente in gestione.</p>
+                            <div id="ops-assigned-list" class="ops-cards"></div>
+                        </section>
+                        <section class="task-ops__section" id="ops-section-pending">
+                            <header class="task-ops__header">
+                                <h4>Task disponibili</h4>
+                                <p>Attività non ancora prese in carico dal tuo team.</p>
+                            </header>
+                            <p id="pending-tasks-empty" class="empty-state" hidden>Nessun task disponibile per l'assegnazione.</p>
+                            <div id="ops-pending-list" class="ops-cards"></div>
+                        </section>
+                    </div>
+                </article>
+
+                <div class="input-group" style="margin-top: 8px;">
+                    <label for="task-search">Ricerca Task</label>
+                    <input id="task-search" type="search" placeholder="Cerca per nome, ID o workflow...">
+                </div>
+
+                <div class="panel-grid">
+                    <article class="panel panel--wide" data-resource="workflowistanze">
+                        <div class="panel__header">
+                            <h3>Istanze attive</h3>
+                            <div class="section__actions" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+                                <p style="margin:0;">Monitora le istanze e accedi rapidamente ai task collegati.</p>
+                                <label class="input-group" style="min-width:260px;">
+                                    <span>Filtro Cliente</span>
+                                    <input type="hidden" id="instances-client-id">
+                                    <input type="text" id="instances-client-label" list="client-options-instances" placeholder="Cerca cliente…">
+                                    <datalist id="client-options-instances"></datalist>
+                                </label>
+                                <button type="button" class="btn" id="btn-clear-client-filter">Pulisci</button>
+                            </div>
+                        </div>
+                        <div class="instance-grid">
+                            <div id="instances-list" class="instance-list"></div>
+                            <section class="instance-detail" id="instance-detail" aria-live="polite">
+                                <header class="instance-detail__header">
+                                    <h4 id="instance-detail-name">Nessuna istanza selezionata</h4>
+                                    <p id="instance-detail-description">Seleziona una istanza per visualizzare workflow, progressi e task.</p>
+                                </header>
+                                <dl class="instance-detail__meta">
+                                    <div>
+                                        <dt>Workflow</dt>
+                                        <dd id="instance-detail-workflow">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Stato</dt>
+                                        <dd id="instance-detail-status">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Ultimo aggiornamento</dt>
+                                        <dd id="instance-detail-updated">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>In carico</dt>
+                                        <dd id="instance-detail-assignees">--</dd>
+                                    </div>
+                                </dl>
+                                <div class="instance-detail__tasks">
+                                    <h5>Task collegati</h5>
+                                    <div id="instance-tasks" class="instance-tasks"></div>
+                                </div>
+                            </section>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="workflow-models" class="section" hidden>
+                <header class="section__header">
+                    <div>
+                        <h2>Modelli Workflow</h2>
+                        <p>Creazione e gestione dei modelli di workflow e dei relativi passi.</p>
+                    </div>
+                    <div class="section__actions">
+                        <button class="btn btn-primary" data-action="open-create-workflow">+ Nuovo workflow</button>
+                    </div>
+                </header>
+
+                <!-- Kanban spostato nella sezione Operatività -->
+
+                <div class="workflow-grid">
+                    <aside class="workflow-list" aria-label="Elenco workflow">
+                        <header class="workflow-list__header">
+                            <h3>Modelli</h3>
+                            <p>Seleziona un workflow per visualizzare i dettagli.</p>
+                            <label class="form-control" style="margin-top:8px;">
+                                <span>Cerca</span>
+                                <input type="search" id="filter-workflows-search" placeholder="Cerca per nome...">
+                            </label>
+                            <label class="form-control form-control--inline" style="margin-top:8px;">
+                                <input type="checkbox" id="toggle-workflows-include-inactive">
+                                <span>Mostra anche disattivi</span>
+                            </label>
+                        </header>
+                        <div id="workflows-list" class="workflow-list__body"></div>
+                    </aside>
+
+                    <section class="workflow-detail" aria-live="polite">
+                        <header class="workflow-detail__header">
+                            <div>
+                                <h3 id="workflow-detail-name">Nessun workflow selezionato</h3>
+                                <p id="workflow-detail-description">Scegli un elemento dall'elenco per vedere passi, assegnazioni e impostazioni.</p>
+                            </div>
+                            <div class="workflow-detail__actions">
+                                <button class="btn btn-primary" data-action="open-start-instance" disabled id="btn-start-instance">Avvia istanza</button>
+                                <button class="btn btn-secondary" data-action="open-create-step" disabled id="btn-add-step">+ Nuovo passo</button>
+                                <button class="btn" data-action="open-edit-workflow" id="btn-edit-workflow" disabled>Modifica</button>
+                                <button class="btn btn-danger" data-action="toggle-workflow-active" id="btn-toggle-workflow" disabled>Disattiva</button>
+                            </div>
+                        </header>
+                        <div class="workflow-detail__content">
+                            <div class="workflow-info" id="workflow-info"></div>
+                            <div class="workflow-steps" id="workflow-steps"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="panel-grid">
+                    <article class="panel panel--wide" data-resource="workflowistanze">
+                        <div class="panel__header">
+                            <h3>Istanze attive</h3>
+                            <p>Monitora le istanze e accedi rapidamente ai task collegati.</p>
+                        </div>
+                        <div class="instance-grid">
+                            <div id="instances-list" class="instance-list"></div>
+                            <section class="instance-detail" id="instance-detail" aria-live="polite">
+                                <header class="instance-detail__header">
+                                    <h4 id="instance-detail-name">Nessuna istanza selezionata</h4>
+                                    <p id="instance-detail-description">Seleziona una istanza per visualizzare workflow, progressi e task.</p>
+                                </header>
+                                <dl class="instance-detail__meta">
+                                    <div>
+                                        <dt>Workflow</dt>
+                                        <dd id="instance-detail-workflow">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Stato</dt>
+                                        <dd id="instance-detail-status">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Avviata il</dt>
+                                        <dd id="instance-detail-started">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Avviata da</dt>
+                                        <dd id="instance-detail-started-by">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Ultimo aggiornamento</dt>
+                                        <dd id="instance-detail-updated">--</dd>
+                                    </div>
+                                    <div>
+                                        <dt>In carico</dt>
+                                        <dd id="instance-detail-assignees">--</dd>
+                                    </div>
+                                </dl>
+                                <div class="instance-detail__tasks">
+                                    <h5>Task collegati</h5>
+                                    <div id="instance-tasks" class="instance-tasks"></div>
+                                </div>
+                            </section>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="catalogo" class="section section--alt">
+                <header class="section__header">
+                    <h2>Catalogo Prodotti &amp; Servizi</h2>
+                    <p>Gestione centralizzata dell'offerta e dei pacchetti proposti ai tenant.</p>
+                </header>
+                <div class="placeholder">
+                    <p>Qui saranno presenti le tabelle catalogo, il marketplace interno e i suggerimenti di bundle.</p>
+                </div>
+            </section>
+
+            <section id="sync" class="section">
+                <header class="section__header">
+                    <h2>Sincronizzazioni Hub &rarr; Tenant</h2>
+                    <p>Monitoraggio delle code e dei job schedulati.</p>
+                </header>
+                <div class="placeholder">
+                    <p>Dashboard di stato delle code, cron job pianificati, storico ultima sincronizzazione.</p>
+                </div>
+            </section>
+
+            <section id="report" class="section section--alt">
+                <header class="section__header">
+                    <h2>Reportistica</h2>
+                    <p>Analisi finanziarie, KPI e scadenziari.</p>
+                </header>
+                <div class="placeholder">
+                    <p>Grafici, tabelle aggregati e pulsanti di esportazione saranno inseriti in questa sezione.</p>
+                </div>
+            </section>
+
+            <section id="config" class="section" hidden>
+                <header class="section__header">
+                    <h2>Configurazione</h2>
+                    <p>Gestione utenti, gruppi, integrazioni e preferenze di sistema.</p>
+                </header>
+                <div class="panel-grid">
+                    <article class="panel" data-resource="gruppi">
+                        <div class="panel__header">
+                            <h3 id="groups-panel-title">Gruppi di lavoro</h3>
+                            <div class="section__actions">
+                                <label class="input-group" style="min-width:220px;">
+                                    <span>Filtra gruppi</span>
+                                    <input type="text" id="filter-groups" placeholder="Cerca per nome o descrizione">
+                                </label>
+                                <label class="input-group" style="min-width:220px;">
+                                    <span>Contenuto</span>
+                                    <select id="filter-groups-hasusers">
+                                        <option value="all" selected>Tutti</option>
+                                        <option value="with">Solo con utenti</option>
+                                        <option value="without">Solo senza utenti</option>
+                                    </select>
+                                </label>
+                                <label class="form-control form-control--inline" title="Mostra anche gruppi disattivati">
+                                    <input type="checkbox" id="toggle-groups-inactive">
+                                    <span>Mostra disattivati</span>
+                                </label>
+                                <button type="button" class="btn btn-primary" data-action="open-create-group">Nuovo gruppo</button>
+                            </div>
+                        </div>
+                        <div id="gruppi-list" class="panel__body"></div>
+                    </article>
+                    
+                    <!-- Pannello Utenti rimosso: gestito da Ruoli & Permessi e filtri associati -->
+
+                    <article class="panel" data-resource="roles">
+                        <div class="panel__header">
+                            <h3>Ruoli & Permessi</h3>
+                        </div>
+                        <div class="panel__body">
+                            <div class="form-grid">
+                                <label class="form-control">
+                                    <span>Utente</span>
+                                    <select id="role-user-select">
+                                        <option value="">Seleziona utente…</option>
+                                    </select>
+                                </label>
+                                <label class="form-control">
+                                    <span>Ruolo</span>
+                                    <select id="role-role-select">
+                                        <option value="USER">User</option>
+                                        <option value="SUPERVISOR">Supervisor</option>
+                                        <option value="ADMIN">Admin</option>
+                                    </select>
+                                </label>
+                                <div class="form-control">
+                                    <span>&nbsp;</span>
+                                    <button type="button" class="btn btn-primary" id="btn-role-save">Salva ruolo</button>
+                                    <button type="button" class="btn" id="btn-role-edit-user">Modifica utente</button>
+                                    <button type="button" class="btn btn-danger" id="btn-role-deactivate-user">Disattiva utente</button>
+                                    <button type="button" class="btn btn-secondary" id="btn-role-restore-user" hidden>Ripristina utente</button>
+                                </div>
+                                <div class="form-control">
+                                    <span>&nbsp;</span>
+                                    <div id="role-save-status" class="form-hint" aria-live="polite"></div>
+                                </div>
+                            </div>
+                            <p class="form-hint">Solo gli amministratori possono modificare i ruoli. Cambiare il proprio ruolo potrebbe nascondere alcune sezioni della dashboard.</p>
+                            <div class="form-grid" style="margin-top: 8px;">
+                                <div>
+                                    <strong>Admin</strong>
+                                    <p class="form-hint">Pieno accesso: utenti, gruppi, workflow.</p>
+                                </div>
+                                <div>
+                                    <strong>Supervisor</strong>
+                                    <p class="form-hint">Gestione utenti/gruppi, avvio workflow.</p>
+                                </div>
+                                <div>
+                                    <strong>User</strong>
+                                    <p class="form-hint">Uso operativo, niente configurazioni.</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <section id="user-supervisor-field" class="form-grid" hidden>
+                                <label class="form-control">
+                                    <span>Supervisor (per utente ruolo USER)</span>
+                                    <select id="role-user-supervisor">
+                                        <option value="">— Nessuno —</option>
+                                    </select>
+                                </label>
+                                <div class="form-control">
+                                    <span>&nbsp;</span>
+                                    <button type="button" class="btn" id="btn-role-set-supervisor">Imposta supervisor</button>
+                                    <button type="button" class="btn btn-secondary" id="btn-role-create-supervisor">Crea Supervisor</button>
+                                    <div id="role-user-supervisor-status" class="form-hint"></div>
+                                </div>
+                            </section>
+                            <hr>
+                            <section id="supervisor-assoc" hidden>
+                                <h4>Associazioni Supervisor</h4>
+                                <label class="form-control">
+                                    <span>Utenti associati</span>
+                                    <select id="supervised-users-multi" multiple size="8"></select>
+                                    <p class="form-hint">Seleziona gli utenti (ruolo User) da associare al Supervisor selezionato sopra.</p>
+                                </label>
+                                <div class="form-control">
+                                    <span>&nbsp;</span>
+                                    <button type="button" class="btn btn-primary" id="btn-supervised-save">Salva associazioni</button>
+                                </div>
+                            </section>
+
+                            <hr>
+                            <section id="users-by-role">
+                                <h4>Utenti per Ruolo</h4>
+                                <div class="section__actions" style="margin-bottom: 8px;">
+                                    <label class="input-group" style="min-width:220px;">
+                                        <span>Filtra</span>
+                                        <input type="text" id="filter-users-by-role" placeholder="Cerca per nome/email">
+                                    </label>
+                                    <label class="input-group" style="min-width:220px;">
+                                        <span>Supervisor</span>
+                                        <select id="filter-users-by-role-supervisor">
+                                            <option value="all" selected>Tutti</option>
+                                        </select>
+                                    </label>
+                                    <label class="form-control form-control--inline">
+                                        <input type="checkbox" id="toggle-users-by-role-active" checked>
+                                        <span>Solo attivi</span>
+                                    </label>
+                                </div>
+                                <div class="layout-grid layout-grid-2">
+                                    <section>
+                                        <h4>Admin (<span id="count-role-admin">0</span>)</h4>
+                                        <div id="list-role-admin" class="list"></div>
+                                    </section>
+                                    <section>
+                                        <h4>Supervisor (<span id="count-role-supervisor">0</span>)</h4>
+                                        <div id="list-role-supervisor" class="list"></div>
+                                    </section>
+                                    <section>
+                                        <h4>User (<span id="count-role-user">0</span>)</h4>
+                                        <div id="list-role-user" class="list"></div>
+                                    </section>
+                                </div>
+                            </section>
+                        </div>
+                    </article>
+
+                    <article class="panel" data-resource="diagnostics">
+                        <div class="panel__header">
+                            <h3>Diagnostica</h3>
+                            <div class="section__actions">
+                                <button type="button" class="btn" id="btn-run-diagnostics">Esegui diagnostica</button>
+                                <button type="button" class="btn btn-secondary" id="btn-test-logout">Test Logout</button>
+                                <button type="button" class="btn btn-primary" id="btn-open-audit-auth">Apri Audit Autenticazione</button>
+                                <button type="button" class="btn btn-secondary" id="btn-auth-limit-500">Mostra ultimi 500</button>
+                                <button type="button" class="btn" id="btn-open-audit-roles">Apri Audit Ruoli</button>
+                                <button type="button" class="btn btn-secondary" id="btn-roles-limit-500">Mostra ultimi 500 Ruoli</button>
+                            </div>
+                        </div>
+                        <div class="panel__body" id="diag-results">
+                            <p class="form-hint">Verifica configurazione API, autenticazione e audit. Premi “Esegui diagnostica”.</p>
+                        </div>
+                    </article>
+
+                    <article class="panel" data-resource="audit-roles">
+                        <div class="panel__header">
+                            <h3>Audit Ruoli</h3>
+                            <small id="badge-audit-roles-limit" class="badge">—</small>
+                        </div>
+                        <div class="panel__body" id="audit-roles-list">
+                            <p class="form-hint">Storico cambi ruolo.</p>
+                        </div>
+                    </article>
+
+                    <article class="panel" data-resource="audit-auth">
+                        <div class="panel__header">
+                            <h3>Audit Autenticazione</h3>
+                            <small id="badge-audit-auth-limit" class="badge">—</small>
+                        </div>
+                        <div class="panel__body" id="audit-auth-list">
+                            <div class="filters-row" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:8px;">
+                                <label class="form-control" style="min-width:220px;">
+                                    <span>Utente</span>
+                                    <select id="filter-auth-user">
+                                        <option value="all">Tutti</option>
+                                    </select>
+                                </label>
+                                <label class="form-control" style="min-width:180px;">
+                                    <span>Azione</span>
+                                    <select id="filter-auth-action">
+                                        <option value="all">Tutte</option>
+                                        <option value="LOGIN">Login</option>
+                                        <option value="LOGOUT">Logout</option>
+                                    </select>
+                                </label>
+                                <label class="form-control" style="min-width:180px;">
+                                    <span>Mostra ultimi</span>
+                                    <select id="filter-auth-limit">
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="200" selected>200</option>
+                                        <option value="500">500</option>
+                                    </select>
+                                </label>
+                                <button type="button" class="btn btn-secondary" id="btn-auth-audit-refresh">Aggiorna</button>
+                                <label class="form-control" style="min-width:160px;">
+                                    <span>Dal</span>
+                                    <input type="date" id="filter-auth-from">
+                                </label>
+                                <label class="form-control" style="min-width:160px;">
+                                    <span>Al</span>
+                                    <input type="date" id="filter-auth-to">
+                                </label>
+                                <button type="button" class="btn" id="btn-auth-audit-reset">Reset</button>
+                            </div>
+                            <div id="audit-auth-results">
+                                <p class="form-hint">Eventi di accesso e uscita (login/logout).</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    
+                </div>
+            </section>
+        </main>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="auth.js" defer></script>
 <script src="dashboard.js" defer></script>
+
+<!-- Toast container -->
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Modale impostazione supervisor rapida -->
+<div class="modal" id="modal-set-supervisor" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-set-supervisor-title">
+        <header class="modal__header">
+            <h3 id="modal-set-supervisor-title">Imposta supervisor</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-set-supervisor" class="modal__body">
+            <input type="hidden" name="user_id" id="set-supervisor-user-id">
+            <label class="form-control">
+                <span>Supervisor</span>
+                <select id="set-supervisor-select">
+                    <option value="">— Nessuno —</option>
+                </select>
+            </label>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Salva</button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<!-- Modale gestione gruppo -->
+<div class="modal" id="modal-manage-group" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog modal--wide" role="dialog" aria-modal="true" aria-labelledby="modal-manage-group-title">
+        <header class="modal__header">
+            <h3 id="modal-manage-group-title">Nuovo gruppo</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-manage-group" class="modal__body">
+            <input type="hidden" name="id">
+            <label class="form-control">
+                <span>Nome gruppo</span>
+                <input type="text" name="nome_gruppo" required>
+            </label>
+            <label class="form-control">
+                <span>Descrizione</span>
+                <textarea name="descrizione" rows="2"></textarea>
+            </label>
+            
+
+            <section id="group-members-section" class="task-modal__section" hidden>
+                <h4>Membri del gruppo</h4>
+                <div class="form-grid">
+                    <label class="form-control">
+                        <span>Aggiungi utente</span>
+                        <input type="hidden" id="group-user-id">
+                        <input type="text" id="group-user-label" list="user-options-admin" placeholder="Cerca utente...">
+                        <datalist id="user-options-admin"></datalist>
+                    </label>
+                    <div class="form-control">
+                        <span>&nbsp;</span>
+                        <button type="button" class="btn btn-secondary" id="btn-group-add-user">Aggiungi</button>
+                    </div>
+                </div>
+                <div id="group-members-list" class="task-modal__notes"></div>
+            </section>
+
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Salva</button>
+                <button type="button" class="btn btn-danger" id="btn-delete-group" hidden>Elimina gruppo</button>
+            </footer>
+        </form>
+    </div>
+    </div>
+
+<!-- Modale gestione utente -->
+<div class="modal" id="modal-manage-user" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-manage-user-title">
+        <header class="modal__header">
+            <h3 id="modal-manage-user-title">Nuovo utente</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-manage-user" class="modal__body">
+            <input type="hidden" name="id">
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Nome</span>
+                    <input type="text" name="nome" required>
+                </label>
+                <label class="form-control">
+                    <span>Cognome</span>
+                    <input type="text" name="cognome" required>
+                </label>
+            </div>
+            <label class="form-control">
+                <span>Email</span>
+                <input type="email" name="email" required>
+            </label>
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Ruolo</span>
+                    <select name="ruolo">
+                        <option value="">—</option>
+                        <option value="USER">User</option>
+                        <option value="SUPERVISOR">Supervisor</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </label>
+                <label class="form-control">
+                    <span>Stato</span>
+                    <select name="stato">
+                        <option value="ATTIVO" selected>Attivo</option>
+                        <option value="INATTIVO">Inattivo</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="form-control">
+                <span>Supervisor</span>
+                <select id="user-supervisor-select">
+                    <option value="">— Nessuno —</option>
+                </select>
+                <p class="form-hint">Admin e Supervisor possono assegnare un supervisor all'utente. I Supervisor possono impostare solo se stessi.</p>
+            </label>
+
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Password</span>
+                    <input type="password" name="password" autocomplete="new-password" minlength="8" pattern="(?=.*[A-Za-z])(?=.*\d).{8,}" title="Almeno 8 caratteri, con lettere e numeri">
+                </label>
+                <label class="form-control">
+                    <span>Conferma password</span>
+                    <input type="password" name="password_confirm" autocomplete="new-password" minlength="8" pattern="(?=.*[A-Za-z])(?=.*\d).{8,}">
+                </label>
+            </div>
+            <p class="form-hint">Requisiti: almeno 8 caratteri, con lettere e numeri. In modifica, lascia vuoto per non cambiare password.</p>
+
+            <label class="form-control">
+                <span>Gruppi</span>
+                <select id="user-groups-multi" multiple size="6"></select>
+                <p class="form-hint">Seleziona uno o più gruppi. Le assegnazioni saranno salvate insieme all'utente.</p>
+            </label>
+
+            <section class="task-modal__section" id="user-groups-section" hidden>
+                <h4>Gruppi dell'utente</h4>
+                <div class="form-grid">
+                    <label class="form-control">
+                        <span>Aggiungi al gruppo</span>
+                        <input type="hidden" id="user-group-id">
+                        <input type="text" id="user-group-label" list="group-options-admin" placeholder="Cerca gruppo...">
+                        <datalist id="group-options-admin"></datalist>
+                    </label>
+                    <div class="form-control">
+                        <span>&nbsp;</span>
+                        <button type="button" class="btn btn-secondary" id="btn-user-add-group">Aggiungi</button>
+                    </div>
+                </div>
+                <div id="user-groups-list" class="task-modal__notes"></div>
+            </section>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Salva</button>
+                <button type="button" class="btn btn-danger" id="btn-delete-user" hidden>Elimina utente</button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<!-- Modale gestione task -->
+<div class="modal" id="modal-task-work" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog modal__dialog--drawer" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+        <header class="modal__header">
+            <div>
+                <h3 id="task-modal-title">Dettaglio task</h3>
+                <p id="task-modal-workflow" class="modal__subtitle"></p>
+            </div>
+            <div class="modal__actions">
+                <button class="btn btn-secondary" id="btn-task-take" hidden>Prendi in carico</button>
+                <button class="btn btn-success" id="btn-task-complete" hidden>Completa</button>
+                <button class="btn" id="btn-task-open-instance" title="Apri istanza">Apri istanza</button>
+                <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+            </div>
+        </header>
+        <div class="modal__body task-modal">
+            <section class="task-modal__section">
+                <dl class="task-modal__meta">
+                    <div>
+                        <dt>Stato</dt>
+                        <dd id="task-modal-status">--</dd>
+                    </div>
+                    <div>
+                        <dt>Assegnato a</dt>
+                        <dd id="task-modal-assignee">--</dd>
+                    </div>
+                    <div>
+                        <dt>Ultimo aggiornamento</dt>
+                        <dd id="task-modal-updated">--</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="task-modal__section">
+                <h4>Note operative</h4>
+                <div id="task-modal-notes" class="task-modal__notes"></div>
+                <form id="form-task-note" class="task-modal__note-form">
+                    <label for="task-note-text">Aggiungi nota</label>
+                    <textarea id="task-note-text" rows="3" placeholder="Scrivi aggiornamenti per il team..."></textarea>
+                    <label class="form-control" style="margin-top:8px;">
+                        <span>Allega file (opzionale)</span>
+                        <input type="file" id="task-note-files" multiple>
+                    </label>
+                    <p id="task-note-message" class="form-hint"></p>
+                    <div class="task-modal__note-actions">
+                        <button type="submit" class="btn btn-primary">Salva nota</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="task-modal__section">
+                <h4>Richiedi supporto</h4>
+                <form id="form-task-subflow" class="task-modal__subflow-form">
+                    <div class="form-grid">
+                        <label class="form-control">
+                            <span>Workflow</span>
+                            <select id="task-subflow-workflow" required></select>
+                        </label>
+                        <label class="form-control">
+                            <span>Operatore</span>
+                            <select id="task-subflow-user"></select>
+                        </label>
+                    </div>
+                    <p id="task-subflow-message" class="form-hint"></p>
+                    <div class="task-modal__note-actions">
+                        <button type="submit" class="btn btn-secondary">Avvia sottoworkflow</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+<!-- Modale creazione workflow -->
+<div class="modal" id="modal-create-workflow" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-create-workflow-title">
+        <header class="modal__header">
+            <h3 id="modal-create-workflow-title">Nuovo workflow</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-create-workflow" class="modal__body">
+            <label class="form-control">
+                <span>Nome workflow</span>
+                <input type="text" name="nome" required>
+            </label>
+            <label class="form-control">
+                <span>Descrizione</span>
+                <textarea name="descrizione" rows="3"></textarea>
+            </label>
+            <label class="form-control form-control--inline">
+                <input type="checkbox" name="attivo" checked>
+                <span>Workflow attivo</span>
+            </label>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Crea</button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<!-- Modale avvio istanza -->
+<div class="modal" id="modal-start-instance" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-start-instance-title">
+        <header class="modal__header">
+            <h3 id="modal-start-instance-title">Avvia istanza</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-start-instance" class="modal__body">
+            <p class="modal__hint">L'istanza verrà avviata a nome dell'operatore selezionato nel filtro in alto.</p>
+            <label class="form-control">
+                <span>Cliente collegato</span>
+                <input type="hidden" id="start-customer-id">
+                <input type="text" id="start-customer-label" list="client-options" placeholder="Digita per cercare cliente…">
+                <datalist id="client-options"></datalist>
+                <p class="form-hint">Seleziona un cliente: imposteremo automaticamente l'entità collegata come CLIENTE con l'ID selezionato.</p>
+            </label>
+            <details class="form-control">
+                <summary>Altro tipo entità (opzionale)</summary>
+                <label class="form-control">
+                    <span>Tipo entità collegata</span>
+                    <input type="text" name="entita_collegata_tipo" placeholder="Es. PRATICA, CONTRATTO...">
+                </label>
+                <label class="form-control">
+                    <span>ID entità collegata</span>
+                    <input type="text" name="entita_collegata_id" placeholder="Es. 12345">
+                </label>
+            </details>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Avvia</button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<!-- Modale modifica workflow -->
+<div class="modal" id="modal-edit-workflow" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-edit-workflow-title">
+        <header class="modal__header">
+            <h3 id="modal-edit-workflow-title">Modifica workflow</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-edit-workflow" class="modal__body">
+            <input type="hidden" name="id" id="edit-workflow-id">
+            <label class="form-control">
+                <span>Nome workflow</span>
+                <input type="text" name="nome" id="edit-workflow-name" required>
+            </label>
+            <label class="form-control">
+                <span>Descrizione</span>
+                <textarea name="descrizione" id="edit-workflow-description" rows="3"></textarea>
+            </label>
+            <label class="form-control form-control--inline">
+                <input type="checkbox" name="attivo" id="edit-workflow-active">
+                <span>Workflow attivo</span>
+            </label>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Salva modifiche</button>
+            </footer>
+        </form>
+    </div>
+    </div>
+
+<!-- Modale creazione passo -->
+<div class="modal" id="modal-create-step" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog modal--wide" role="dialog" aria-modal="true" aria-labelledby="modal-create-step-title">
+        <header class="modal__header">
+            <h3 id="modal-create-step-title">Nuovo passo</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-create-step" class="modal__body">
+            <label class="form-control">
+                <span>Nome passo</span>
+                <input type="text" name="nome_passo" required>
+            </label>
+            <label class="form-control">
+                <span>Descrizione</span>
+                <textarea name="descrizione" rows="3"></textarea>
+            </label>
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Ordine</span>
+                    <input type="number" name="ordine" min="1" value="1">
+                </label>
+                <label class="form-control">
+                    <span>Sottopasso</span>
+                    <input type="number" name="sottopasso" min="1" value="1">
+                </label>
+            </div>
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Scadenza standard</span>
+                    <input type="number" name="scadenza_standard_valore" min="0" placeholder="0">
+                </label>
+                <label class="form-control">
+                    <span>Unità</span>
+                    <select name="scadenza_standard_unita">
+                        <option value="">Nessuna</option>
+                        <option value="ORE">Ore</option>
+                        <option value="GIORNI">Giorni</option>
+                    </select>
+                </label>
+            </div>
+            <label class="form-control">
+                <span>Azione automatica</span>
+                <select name="tipo_azione_standard" id="select-step-action">
+                    <option value="">Nessuna</option>
+                </select>
+            </label>
+            <div class="form-control" id="action-params-section" hidden>
+                <span>Parametri azione</span>
+                <div id="action-params-container" class="form-control__group"></div>
+            </div>
+            <label class="form-control">
+                <span>Gruppo responsabile</span>
+                <input type="hidden" name="responsabile_gruppo_id">
+                <input type="text" name="responsabile_gruppo_label" data-role="group-picker" list="workflow-group-options" placeholder="Digita per cercare un gruppo">
+            </label>
+            <datalist id="workflow-group-options"></datalist>
+            <label class="form-control">
+                <span>Utente responsabile</span>
+                <input type="hidden" name="responsabile_utente_id">
+                <input type="text" name="responsabile_utente_label" data-role="user-picker" list="workflow-user-options" placeholder="Digita per cercare un utente">
+            </label>
+            <datalist id="workflow-user-options"></datalist>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Aggiungi passo</button>
+            </footer>
+        </form>
+    </div>
+</div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const API_BASE_URL = '/LpWF/api';
+    const effectiveBase = window.lpwfAuth?.ensureBaseForLocation?.() || window.lpwfAuth?.getApiBase?.();
+    const API_BASE_URL = (effectiveBase || '/api').replace(/\/$/, '');
     let currentUserId = null;
 
     // Riferimenti agli elementi DOM principali
@@ -16,6 +17,65 @@ document.addEventListener('DOMContentLoaded', () => {
     // Riferimenti per la sezione report
     const workflowsListEl = document.getElementById('workflows-list');
     const instancesListEl = document.getElementById('instances-list');
+
+    if (!window.lpwfAuth || !window.lpwfAuth.getToken()) {
+        if (dashboardMainEl) {
+            dashboardMainEl.innerHTML = '<p>Autenticazione richiesta. Effettua il login da <a href="login.html">login.html</a>.</p>';
+        }
+        return;
+    }
+
+    const cleanEndpoint = (endpoint) => endpoint.replace(/^\//, '');
+    const authFetch = (endpoint, { method = 'GET', body, headers = {}, json = false } = {}) => {
+        const payload = json && body !== undefined && body !== null && typeof body !== 'string'
+            ? JSON.stringify(body)
+            : body;
+        const init = {
+            method,
+            headers: window.lpwfAuth.buildHeaders(headers, json),
+        };
+        if (payload !== undefined) {
+            init.body = payload;
+        }
+        return fetch(`${API_BASE_URL}/${cleanEndpoint(endpoint)}`, init);
+    };
+
+    const handleResponse = async (response) => {
+        const text = await response.text();
+        let data = null;
+        if (text) {
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error('Risposta non JSON o JSON non valido:', text);
+            }
+        }
+        if (!response.ok) {
+            console.error('Errore API', { status: response.status, data });
+            if (response.status === 401) {
+                window.lpwfAuth.clearToken();
+                const msg = data && data.message ? data.message : 'Sessione scaduta o token non valido.';
+                alert(`${msg}\nVerrai reindirizzato alla pagina di login.`);
+                window.location.href = 'login.html';
+            }
+            const message = data && data.message ? data.message : `Errore HTTP ${response.status}`;
+            throw new Error(message);
+        }
+        return data;
+    };
+
+    const api = {
+        get: (endpoint) => authFetch(endpoint).then(handleResponse),
+        post: (endpoint, body) => {
+            const options = body === undefined ? { method: 'POST' } : { method: 'POST', body, json: true };
+            return authFetch(endpoint, options).then(handleResponse);
+        },
+        put: (endpoint, body) => {
+            const options = body === undefined ? { method: 'PUT' } : { method: 'PUT', body, json: true };
+            return authFetch(endpoint, options).then(handleResponse);
+        },
+        delete: (endpoint) => authFetch(endpoint, { method: 'DELETE' }).then(handleResponse),
+    };
 
     // --- FUNZIONI DI RENDERING PER LE CARD DEI TASK (KANBAN) ---
 
@@ -106,14 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const { resource, id } = currentEditData;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message);
-            alert('Successo: ' + result.message);
+            const result = await api.put(`${resource}/${id}`, data);
+            alert('Successo: ' + (result.message || 'Aggiornamento eseguito.'));
             closeEditModal();
             loadReportData(); // Ricarica i dati per vedere le modifiche
         } catch (error) {
@@ -140,10 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation(); // Impedisce l'apertura/chiusura dei dettagli
             if (confirm(`Sei sicuro di voler eliminare ${resource} con ID ${id}?`)) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/${resource}/${id}`, { method: 'DELETE' });
-                    const result = await response.json();
-                    if (!response.ok) throw new Error(result.message);
-                    alert('Successo: ' + result.message);
+                    const result = await api.delete(`${resource}/${id}`);
+                    alert('Successo: ' + (result.message || 'Elemento eliminato.'));
                     loadReportData(); // Ricarica le liste
                 } catch (error) {
                     alert('Errore: ' + error.message);
@@ -154,8 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (target.matches('.btn-edit')) {
             e.stopPropagation();
             // Recuperiamo i dati completi dell'entità prima di aprire il modal
-            const response = await fetch(`${API_BASE_URL}/${resource}/${id}`);
-            const data = await response.json();
+            const data = await api.get(`${resource}/${id}`);
             openEditModal(resource, id, data);
         }
         // Click sull'elemento della lista per espandere i dettagli
@@ -198,18 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Aggiungiamo il parametro di ricerca alle chiamate API
             const [todoRes, doingRes, doneRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/tasks?id_stato=1${searchParam}`),
-                fetch(`${API_BASE_URL}/tasks?id_utente_assegnato=${currentUserId}&id_stato=2${searchParam}`),
-                fetch(`${API_BASE_URL}/tasks?id_utente_assegnato=${currentUserId}&id_stato=3${searchParam}`)
+                api.get(`tasks?id_stato=1${searchParam}`),
+                api.get(`tasks?id_utente_assegnato=${currentUserId}&id_stato=2${searchParam}`),
+                api.get(`tasks?id_utente_assegnato=${currentUserId}&id_stato=3${searchParam}`)
             ]);
 
-
-
-            if (!todoRes.ok || !doingRes.ok || !doneRes.ok) throw new Error('Errore di rete nel caricare i task.');
-
-            const todoTasks = (await todoRes.json()).filter(task => !task.id_utente_assegnato);
-            const doingTasks = await doingRes.json();
-            const doneTasks = await doneRes.json();
+            const todoTasks = (todoRes || []).filter(task => !task.id_utente_assegnato);
+            const doingTasks = doingRes || [];
+            const doneTasks = doneRes || [];
 
             tasksTodoEl.innerHTML = '';
             if (todoTasks.length === 0) tasksTodoEl.innerHTML = '<p>Nessun task disponibile.</p>';
@@ -278,10 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const detailsContainer = item.querySelector('.item-details');
 
         try {
-            const url = `${API_BASE_URL}/${resourceType}/${resourceId}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Risposta non valida dal server');
-            const data = await response.json();
+            const data = await api.get(`${resourceType}/${resourceId}`);
 
             if (resourceType === 'workflows') detailsContainer.innerHTML = renderWorkflowSteps(data.steps);
             else if (resourceType === 'workflowistanze') detailsContainer.innerHTML = renderInstanceTasks(data.tasks);
@@ -292,12 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadReportData = async () => {
         try {
-            const [workflowsRes, instancesRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/workflows`),
-                fetch(`${API_BASE_URL}/workflowistanze`)
+            const [workflows, instances] = await Promise.all([
+                api.get('workflows'),
+                api.get('workflowistanze')
             ]);
-            const workflows = await workflowsRes.json();
-            const instances = await instancesRes.json();
 
             workflowsListEl.innerHTML = '';
             workflows.forEach(wf => workflowsListEl.appendChild(createClickableListItem(wf, wf.nome_workflow, wf.attivo ? 'Attivo' : 'Non Attivo', 'workflows')));
@@ -317,19 +359,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.matches('.btn-assign, .btn-complete')) {
             const taskId = target.dataset.taskId;
             if (!taskId) return;
-            let url, options = { method: 'PUT', headers: { 'Content-Type': 'application/json' } };
-            if (target.classList.contains('btn-assign')) {
-                url = `${API_BASE_URL}/tasks/${taskId}/assign`;
-                options.body = JSON.stringify({ user_id: currentUserId });
-            } else {
-                url = `${API_BASE_URL}/tasks/${taskId}/complete`;
-            }
             target.disabled = true;
             try {
-                const response = await fetch(url, options);
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.message);
-                alert(result.message);
+                const result = target.classList.contains('btn-assign')
+                    ? await api.put(`tasks/${taskId}/assign`, { user_id: currentUserId })
+                    : await api.put(`tasks/${taskId}/complete`);
+                alert(result.message || 'Operazione completata.');
                 fetchAndRenderTasks();
                 loadReportData();
             } catch (error) {
@@ -359,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labelField: 'nome_completo',
         searchField: 'nome_completo',
         load: (query, callback) => {
-            fetch(`${API_BASE_URL}/utenti?search=${encodeURIComponent(query)}`).then(res => res.json()).then(callback).catch(() => callback());
+            api.get(`utenti?search=${encodeURIComponent(query)}`).then(callback).catch(() => callback());
         },
         onChange: (value) => {
             currentUserId = value;

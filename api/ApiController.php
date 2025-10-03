@@ -10,7 +10,11 @@ require_once __DIR__ . '/../models/AzioneStandard.php';
 require_once __DIR__ . '/../models/TaskNota.php';
 require_once __DIR__ . '/../models/Gruppo.php';
 require_once __DIR__ . '/../models/UtenteGruppo.php';
+require_once __DIR__ . '/../models/UserRoleAudit.php';
+require_once __DIR__ . '/../models/AuthAudit.php';
+require_once __DIR__ . '/../models/SupervisorUtente.php';
 require_once __DIR__ . '/../models/TaskNotaAllegato.php';
+require_once __DIR__ . '/../models/Cliente.php';
 
 class ApiController
 {
@@ -25,6 +29,9 @@ class ApiController
         'workflowistanze'=> 'WorkflowIstanza',
         'azioni'         => 'AzioneStandard',
         'gruppi'         => 'Gruppo',
+        'audit_roles'    => 'UserRoleAudit',
+        'auth_audit'     => 'AuthAudit',
+        'clienti'        => 'Cliente',
     ];
 
     public function __construct(Database $database, string $method)
@@ -93,6 +100,10 @@ class ApiController
                     else if ($this->request_method === 'POST') $this->handleAddTaskNote($id);
                     else $this->sendResponse(405);
                     return;
+                case 'note_attach':
+                    if ($this->request_method !== 'POST') { $this->sendResponse(405); return; }
+                    $this->handleAddTaskNoteAttachment($id);
+                    return;
                 case 'start_subflow':
                     if ($this->request_method === 'POST' && $extra_id) {
                         $this->handleStartSubflow($id, $extra_id);
@@ -116,23 +127,236 @@ class ApiController
             }
         }
 
+        if ($resource === 'utenti' && $action === 'groups') {
+            if ($this->request_method !== 'GET') { $this->sendResponse(405, ["message" => "Metodo non consentito."]); return; }
+            $sql = "SELECT g.* FROM gruppi g JOIN utenti_gruppi ug ON ug.gruppo_id = g.id WHERE ug.utente_id = ?";
+            $rows = $this->db_instance->select($sql, [$id]) ?: [];
+            $this->sendResponse(200, $rows);
+            return;
+        }
+
+        // Associazioni Supervisor -> Users
+        if ($resource === 'utenti') {
+            switch ($action) {
+                case 'supervised':
+                    if ($this->request_method !== 'GET') { $this->sendResponse(405); return; }
+                    $sql = "SELECT u.id, u.nome, u.cognome, u.email, u.ruolo FROM utenti u
+                            JOIN supervisori_utenti su ON su.user_id = u.id
+                            WHERE su.supervisor_id = ?";
+                    $rows = $this->db_instance->select($sql, [$id]) ?: [];
+                    $this->sendResponse(200, $rows);
+                    return;
+                case 'add_supervised':
+                    if ($this->request_method !== 'POST' || !$extra_id) { $this->sendResponse(405); return; }
+                    $currentUser = $_SERVER['AUTH_USER'] ?? null;
+                    $role = strtoupper($currentUser['ruolo'] ?? '');
+                    if (!in_array($role, ['ADMIN','SUPERVISOR'], true)) { $this->sendResponse(403, ["message"=>"Permesso negato."]); return; }
+                    if ($role === 'SUPERVISOR' && (int)$currentUser['id'] !== (int)$id) { $this->sendResponse(403, ["message"=>"Un supervisor può associare solo i propri utenti."]); return; }
+                    $su = new SupervisorUtente($this->db_instance);
+                    $su->supervisor_id = $id;
+                    $su->user_id = $extra_id;
+                    if ($su->create()) $this->sendResponse(201, ["message" => "Associazione creata."]);
+                    else $this->sendResponse(409, ["message" => "Già associato o errore."]);
+                    return;
+                case 'remove_supervised':
+                    if ($this->request_method !== 'DELETE' || !$extra_id) { $this->sendResponse(405); return; }
+                    $currentUser = $_SERVER['AUTH_USER'] ?? null;
+                    $role = strtoupper($currentUser['ruolo'] ?? '');
+                    if (!in_array($role, ['ADMIN','SUPERVISOR'], true)) { $this->sendResponse(403, ["message"=>"Permesso negato."]); return; }
+                    if ($role === 'SUPERVISOR' && (int)$currentUser['id'] !== (int)$id) { $this->sendResponse(403, ["message"=>"Un supervisor può disassociare solo i propri utenti."]); return; }
+                    $sql = "DELETE FROM supervisori_utenti WHERE supervisor_id = ? AND user_id = ?";
+                    $cnt = $this->db_instance->executeStatement($sql, [$id, $extra_id]);
+                    if ($cnt > 0) $this->sendResponse(200, ["message" => "Associazione rimossa."]);
+                    else $this->sendResponse(404, ["message" => "Associazione non trovata."]);
+                    return;
+                case 'supervisors':
+                    if ($this->request_method !== 'GET') { $this->sendResponse(405); return; }
+                    $sql = "SELECT u.id, u.nome, u.cognome, u.email, u.ruolo FROM utenti u
+                            JOIN supervisori_utenti su ON su.supervisor_id = u.id
+                            WHERE su.user_id = ?";
+                    $rows = $this->db_instance->select($sql, [$id]) ?: [];
+                    $this->sendResponse(200, $rows);
+                    return;
+                case 'set_supervisor':
+                    if ($this->request_method !== 'POST') { $this->sendResponse(405); return; }
+                    $currentUser = $_SERVER['AUTH_USER'] ?? null;
+                    $role = strtoupper($currentUser['ruolo'] ?? '');
+                    if (!in_array($role, ['ADMIN','SUPERVISOR'], true)) { $this->sendResponse(403, ["message"=>"Permesso negato."]); return; }
+                    if ($role === 'SUPERVISOR' && (int)$currentUser['id'] !== (int)$extra_id) { $this->sendResponse(403, ["message"=>"Un supervisor può impostare solo se stesso."]); return; }
+                    // reset mapping and set new
+                    $this->db_instance->executeStatement("DELETE FROM supervisori_utenti WHERE user_id = ?", [$id]);
+                    $supId = (int)$extra_id;
+                    if ($supId > 0) {
+                        $su = new SupervisorUtente($this->db_instance);
+                        $su->supervisor_id = $supId;
+                        $su->user_id = $id;
+                        $su->create();
+                    }
+                    $this->sendResponse(200, ["message"=>"Supervisor aggiornato."]);
+                    return;
+            }
+        }
+
         $this->sendResponse(400, ["message" => "Azione '{$action}' non valida per la risorsa '{$resource}'."]);
     }
 
     private function handleReadAll($model, $resource_name) {
         $params = $_GET;
         if (isset($params['url'])) unset($params['url']);
+
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN', 'SUPERVISOR'], true);
+
+        if ($resource_name === 'tasks' && $currentUser) {
+            $unassigned = isset($params['unassigned']) && filter_var($params['unassigned'], FILTER_VALIDATE_BOOLEAN);
+            if (!$isAdmin && !$unassigned) {
+                $params['id_utente_assegnato'] = $params['id_utente_assegnato'] ?? $currentUser['id'];
+            }
+        }
+
+        if ($resource_name === 'workflowistanze' && $currentUser && !$isAdmin) {
+            $params['visible_for_user_id'] = $currentUser['id'];
+        }
+
+        if ($model instanceof Utente) {
+            $results = $model->findAll($params);
+
+            // Opzionale: includi gruppi per utente se richiesto
+            $withGroups = isset($params['with_groups']) && filter_var($params['with_groups'], FILTER_VALIDATE_BOOLEAN);
+            $groupsMap = [];
+            if ($withGroups && count($results) > 0) {
+                $ids = array_map(fn($u) => (int)$u['id'], $results);
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $sql = "SELECT ug.utente_id, g.*
+                        FROM utenti_gruppi ug
+                        JOIN gruppi g ON g.id = ug.gruppo_id
+                        WHERE ug.utente_id IN ($placeholders)";
+                $rows = $this->db_instance->select($sql, $ids) ?: [];
+                foreach ($rows as $row) {
+                    $uid = (int)$row['utente_id'];
+                    unset($row['utente_id']);
+                    $groupsMap[$uid] = $groupsMap[$uid] ?? [];
+                    $groupsMap[$uid][] = $row;
+                }
+            }
+
+            // Opzionale: includi supervisor per utente
+            $withSupervisors = isset($params['with_supervisors']) && filter_var($params['with_supervisors'], FILTER_VALIDATE_BOOLEAN);
+            $supMap = [];
+            if ($withSupervisors && count($results) > 0) {
+                $ids = array_map(fn($u) => (int)$u['id'], $results);
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $sql = "SELECT su.user_id, s.id, s.nome, s.cognome, s.email, s.ruolo
+                        FROM supervisori_utenti su
+                        JOIN utenti s ON s.id = su.supervisor_id
+                        WHERE su.user_id IN ($placeholders)";
+                $rows = $this->db_instance->select($sql, $ids) ?: [];
+                foreach ($rows as $row) {
+                    $uid = (int)$row['user_id'];
+                    unset($row['user_id']);
+                    $supMap[$uid] = $supMap[$uid] ?? [];
+                    $supMap[$uid][] = $row;
+                }
+            }
+
+            // Build payload masking password
+            $clean = array_map(function ($row) use ($withGroups, $groupsMap, $withSupervisors, $supMap) {
+                unset($row['password_hash']);
+                if ($withGroups) {
+                    $row['gruppi'] = $groupsMap[(int)$row['id']] ?? [];
+                }
+                if ($withSupervisors) {
+                    $row['supervisors'] = $supMap[(int)$row['id']] ?? [];
+                }
+                return $row;
+            }, $results);
+
+            $payload = [
+                'count' => count($clean),
+                'utenti' => $clean,
+            ];
+            $this->sendResponse(200, $payload);
+            return;
+        }
+
+        // Gruppi: opzionale conteggio utenti per filtro client
+        if ($model instanceof Gruppo) {
+            // Ignora i parametri query non di colonna (es. with_user_counts) per evitare WHERE non validi
+            $results = $model->findAll();
+            $withCounts = isset($params['with_user_counts']) && filter_var($params['with_user_counts'], FILTER_VALIDATE_BOOLEAN);
+            if ($withCounts && count($results) > 0) {
+                $ids = array_map(fn($g) => (int)$g['id'], $results);
+                if (count($ids)) {
+                    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                    $sql = "SELECT ug.gruppo_id AS id, COUNT(*) AS users_count
+                            FROM utenti_gruppi ug
+                            WHERE ug.gruppo_id IN ($placeholders)
+                            GROUP BY ug.gruppo_id";
+                    $rows = $this->db_instance->select($sql, $ids) ?: [];
+                    $map = [];
+                    foreach ($rows as $r) { $map[(int)$r['id']] = (int)$r['users_count']; }
+                    foreach ($results as &$g) { $g['users_count'] = $map[(int)$g['id']] ?? 0; }
+                }
+            }
+            $this->sendResponse(200, $results);
+            return;
+        }
+
+        if ($model instanceof UserRoleAudit) {
+            $limit = isset($params['limit']) && is_numeric($params['limit']) ? (int)$params['limit'] : 0;
+            if ($limit > 0) {
+                // Ottimizzato con LIMIT se richiesto
+                if ($limit > 1000) { $limit = 1000; }
+                $sql = "SELECT * FROM user_role_audit ORDER BY changed_at DESC LIMIT $limit";
+                $rows = $this->db_instance->select($sql, []) ?: [];
+                $this->sendResponse(200, $rows);
+                return;
+            } else {
+                $results = $model->findAll([], 'changed_at DESC');
+                $this->sendResponse(200, $results);
+                return;
+            }
+        }
+        if ($model instanceof AuthAudit) {
+            $limit = isset($params['limit']) && is_numeric($params['limit']) ? (int)$params['limit'] : 200;
+            if ($limit < 1) { $limit = 200; }
+            if ($limit > 1000) { $limit = 1000; }
+            // Ottimizzato: usa LIMIT direttamente in SQL invece di caricare tutto
+            $sql = "SELECT * FROM auth_audit ORDER BY created_at DESC LIMIT $limit";
+            $rows = $this->db_instance->select($sql, []) ?: [];
+            $this->sendResponse(200, $rows);
+            return;
+        }
+
         $results = $model->findAll($params);
         $this->sendResponse(200, $results);
     }
 
     private function handleReadOne($model, int $id) {
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN', 'SUPERVISOR'], true);
+
         if ($model instanceof Workflow) {
             if(!$model->findWithSteps($id)) { $this->sendResponse(404, ["message" => "Workflow non trovato."]); return; }
         } elseif ($model instanceof WorkflowIstanza) {
             if(!$model->findWithDetails($id)) { $this->sendResponse(404, ["message" => "Istanza non trovata."]); return; }
+            if ($currentUser && !$isAdmin) {
+                $userId = (int)$currentUser['id'];
+                $isOwner = ((int)$model->avviato_da === $userId);
+                $hasAssignment = $model->utenteCoinvolto($userId);
+                if (!$isOwner && !$hasAssignment) {
+                    $this->sendResponse(403, ["message" => "Accesso negato alla istanza richiesta."]); return;
+                }
+            }
         } elseif ($model instanceof Gruppo) {
             if(!$model->findWithUsers($id)) { $this->sendResponse(404, ["message" => "Gruppo non trovato."]); return; }
+        } elseif ($model instanceof Utente) {
+            if(!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
+            // Non esporre mai l'hash della password
+            $this->sendResponse(200, $model->toPublicArray());
+            return;
         } elseif (!$model->find($id)) {
             $this->sendResponse(404, ["message" => "Record non trovato."]); return;
         }
@@ -140,8 +364,53 @@ class ApiController
     }
 
     private function handleCreate($model) {
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        if (($model instanceof Utente || $model instanceof Gruppo) && $role !== 'ADMIN') {
+            $this->sendResponse(403, ["message" => "Solo ADMIN può eseguire l'operazione richiesta."]); return;
+        }
         $data = json_decode(file_get_contents("php://input"));
         if (json_last_error() !== JSON_ERROR_NONE) { $this->sendResponse(400, ["message" => "Dati JSON non validi."]); return; }
+
+        if ($model instanceof WorkflowStep) {
+            if (isset($data->azione_id) && !isset($data->tipo_azione_standard)) {
+                $data->tipo_azione_standard = $data->azione_id;
+            }
+            if (isset($data->workflow_id) && !isset($data->workflow_modello_id)) {
+                $data->workflow_modello_id = $data->workflow_id;
+            }
+            if (isset($data->descrizione_passo) && !isset($data->descrizione)) {
+                $data->descrizione = $data->descrizione_passo;
+            }
+            if (isset($data->scadenza_standard_valore) && $data->scadenza_standard_valore === '') {
+                $data->scadenza_standard_valore = null;
+                $data->scadenza_standard_unita = null;
+            }
+            if (empty($data->responsabile_utente_id) && empty($data->responsabile_gruppo_id)) {
+                $this->sendResponse(400, ['message' => 'Specificare un responsabile utente o un gruppo per il passo.']);
+                return;
+            }
+        }
+
+        // Normalizzazioni specifiche per modello
+        if ($model instanceof Gruppo) {
+            if (isset($data->nome_gruppo) && !isset($data->nome)) {
+                $data->nome = $data->nome_gruppo;
+            }
+        }
+
+        // Normalizzazioni specifiche per modello
+        if ($model instanceof Gruppo) {
+            if (isset($data->nome_gruppo) && !isset($data->nome)) {
+                $data->nome = $data->nome_gruppo;
+            }
+        }
+        if ($model instanceof Utente) {
+            if (isset($data->password) && $data->password !== '') {
+                $model->password_hash = password_hash((string)$data->password, PASSWORD_BCRYPT);
+                unset($data->password);
+            }
+        }
 
         $fillable = $model->getFillableFields();
         foreach ($data as $key => $value) {
@@ -158,32 +427,138 @@ class ApiController
     }
 
     private function handleUpdate($model, int $id) {
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        if (($model instanceof Utente || $model instanceof Gruppo) && !in_array($role, ['ADMIN','SUPERVISOR'], true)) {
+            $this->sendResponse(403, ["message" => "Permesso negato."]); return;
+        }
         $data = json_decode(file_get_contents("php://input"), true);
         if (json_last_error() !== JSON_ERROR_NONE) { $this->sendResponse(400, ["message" => "Dati JSON non validi."]); return; }
         if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
 
-        if ($model->update($data)) {
-            $this->sendResponse(200, ["message" => "Record aggiornato con successo."]);
-        } else {
-            $this->sendResponse(503, ["message" => "Impossibile aggiornare il record."]);
+        if ($model instanceof WorkflowStep) {
+            if (isset($data['azione_id']) && !isset($data['tipo_azione_standard'])) {
+                $data['tipo_azione_standard'] = $data['azione_id'];
+            }
+            if (isset($data['workflow_id']) && !isset($data['workflow_modello_id'])) {
+                $data['workflow_modello_id'] = $data['workflow_id'];
+            }
+            if (isset($data['descrizione_passo']) && !isset($data['descrizione'])) {
+                $data['descrizione'] = $data['descrizione_passo'];
+            }
+            if (array_key_exists('scadenza_standard_valore', $data) && ($data['scadenza_standard_valore'] === '' || $data['scadenza_standard_valore'] === null)) {
+                $data['scadenza_standard_valore'] = null;
+                $data['scadenza_standard_unita'] = null;
+            }
+            // Verifica responsabile solo se il payload sta modificando uno o entrambi i campi
+            $hasRespUserKey = array_key_exists('responsabile_utente_id', $data);
+            $hasRespGroupKey = array_key_exists('responsabile_gruppo_id', $data);
+            if ($hasRespUserKey || $hasRespGroupKey) {
+                // Usa il valore inviato o, se assente, quello già presente a DB
+                $responsabileUtente = $data['responsabile_utente_id'] ?? $model->responsabile_utente_id ?? null;
+                $responsabileGruppo = $data['responsabile_gruppo_id'] ?? $model->responsabile_gruppo_id ?? null;
+                if ((empty($responsabileUtente) || $responsabileUtente === '0') && (empty($responsabileGruppo) || $responsabileGruppo === '0')) {
+                    $this->sendResponse(400, ['message' => 'Specificare un responsabile utente o un gruppo per il passo.']);
+                    return;
+                }
+            }
         }
+        // Normalizzazioni specifiche per modello in update
+        if ($model instanceof Gruppo) {
+            if (isset($data['nome_gruppo']) && !isset($data['nome'])) {
+                $data['nome'] = $data['nome_gruppo'];
+            }
+        }
+        $oldRoleForAudit = null;
+        if ($model instanceof Utente) {
+            if (isset($data['password']) && $data['password'] !== '') {
+                $data['password_hash'] = password_hash((string)$data['password'], PASSWORD_BCRYPT);
+            }
+            unset($data['password']);
+            if (isset($data['ruolo'])) {
+                // Carica il record per leggere il ruolo precedente
+                if ($model->find($id)) {
+                    $oldRoleForAudit = strtoupper($model->ruolo ?? '');
+                } else {
+                    $oldRoleForAudit = null;
+                }
+            }
+        }
+
+        // Solo ADMIN può cambiare il ruolo degli utenti
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $roleCurrent = strtoupper($currentUser['ruolo'] ?? '');
+        if ($model instanceof Utente && isset($data['ruolo']) && $roleCurrent !== 'ADMIN') {
+            $this->sendResponse(403, ["message" => "Solo ADMIN può cambiare il ruolo degli utenti."]); return;
+        }
+
+            if ($model->update($data)) {
+                // Audit: log cambio ruolo utente
+                if ($model instanceof Utente && isset($data['ruolo'])) {
+                    $newRole = strtoupper($data['ruolo'] ?? '');
+                    if ($oldRoleForAudit !== null && $oldRoleForAudit !== $newRole) {
+                        $changerId = (int)($_SERVER['AUTH_USER']['id'] ?? 0);
+                    $insSql = "INSERT INTO user_role_audit (target_user_id, old_role, new_role, changed_by_user_id) VALUES (?, ?, ?, ?)";
+                    $ok = $this->db_instance->executeStatement($insSql, [$id, $oldRoleForAudit, $newRole, $changerId]);
+                    if ($ok === false) {
+                        // Auto-provision tabella audit e ritenta
+                        $ddl = "CREATE TABLE IF NOT EXISTS user_role_audit (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  target_user_id BIGINT UNSIGNED NOT NULL,
+  old_role VARCHAR(64) NULL,
+  new_role VARCHAR(64) NOT NULL,
+  changed_by_user_id BIGINT UNSIGNED NOT NULL,
+  changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user_role_target (target_user_id),
+  INDEX idx_user_role_changed_at (changed_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+                        $this->db_instance->executeStatement($ddl);
+                        $this->db_instance->executeStatement($insSql, [$id, $oldRoleForAudit, $newRole, $changerId]);
+                    }
+                    }
+                }
+                $this->sendResponse(200, ["message" => "Record aggiornato con successo."]);
+            } else {
+                $this->sendResponse(503, ["message" => "Impossibile aggiornare il record."]);
+            }
     }
 
     private function handleDelete($model, int $id) {
-        if (!property_exists($model, 'attivo')) {
-            if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
-            if ($model->delete()) { $this->sendResponse(200, ["message" => "Record cancellato fisicamente."]); }
-            else { $this->sendResponse(503, ["message" => "Impossibile cancellare il record."]); }
-        } else {
-            if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
-            if ($model->update(['attivo' => 0])) { $this->sendResponse(200, ["message" => "Record disattivato."]); }
-            else { $this->sendResponse(503, ["message" => "Impossibile aggiornare lo stato."]); }
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        if (($model instanceof Utente || $model instanceof Gruppo) && !in_array($role, ['ADMIN','SUPERVISOR'], true)) {
+            $this->sendResponse(403, ["message" => "Permesso negato."]); return;
         }
+        // Soft delete per Utente: imposta stato = 'INATTIVO'
+        if ($model instanceof Utente) {
+            if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
+            if ($model->update(['stato' => 'INATTIVO'])) { $this->sendResponse(200, ["message" => "Utente disattivato."]); }
+            else { $this->sendResponse(503, ["message" => "Impossibile disattivare l'utente."]); }
+            return;
+        }
+
+        // Soft delete per Gruppo se disponibile la colonna attivo, altrimenti fallback a delete fisico
+        if ($model instanceof Gruppo) {
+            if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
+            $sql = "UPDATE gruppi SET attivo = 0 WHERE id = ?";
+            $res = $this->db_instance->executeStatement($sql, [$id]);
+            if ($res !== false && $res > 0) { $this->sendResponse(200, ["message" => "Gruppo disattivato."]); return; }
+            // Se l'update fallisce (colonna assente), effettuiamo cancellazione fisica
+            if ($model->delete()) { $this->sendResponse(200, ["message" => "Gruppo cancellato fisicamente (soft delete non disponibile)."]); }
+            else { $this->sendResponse(503, ["message" => "Impossibile cancellare il gruppo."]); }
+            return;
+        }
+
+        // Default: physical delete
+        if (!$model->find($id)) { $this->sendResponse(404, ["message" => "Record non trovato."]); return; }
+        if ($model->delete()) { $this->sendResponse(200, ["message" => "Record cancellato fisicamente."]); }
+        else { $this->sendResponse(503, ["message" => "Impossibile cancellare il record."]); }
     }
 
     private function handleStartInstance(int $workflowModelId) {
         $data = json_decode(file_get_contents("php://input"));
-        if (empty($data->id_utente_avvio)) { $this->sendResponse(400, ["message" => "ID utente avvio mancante."]); return; }
+        $utenteAvvio = isset($data->id_utente_avvio) ? (int)$data->id_utente_avvio : (int)($_SERVER['AUTH_USER']['id'] ?? 0);
+        if ($utenteAvvio <= 0) { $this->sendResponse(400, ["message" => "ID utente avvio mancante."]); return; }
 
         try {
             $this->db_instance->conn->beginTransaction();
@@ -191,28 +566,28 @@ class ApiController
             if (!$workflow_model->find($workflowModelId)) throw new Exception("Modello workflow non trovato.", 404);
 
             $istanza = new WorkflowIstanza($this->db_instance);
-            $istanza->workflow_id = $workflowModelId;
-            $istanza->id_entita_associata = $data->id_entita_associata ?? null;
-            $istanza->nome_entita_associata = $data->nome_entita_associata ?? null;
-            $istanza->stato_istanza = 'IN_CORSO';
-            $istanza->id_utente_avvio = (int)$data->id_utente_avvio;
+            $istanza->workflow_modello_id = $workflowModelId;
+            $istanza->entita_collegata_tipo = $data->entita_collegata_tipo ?? null;
+            $istanza->entita_collegata_id = $data->entita_collegata_id ?? null;
+            $istanza->stato = 'IN_CORSO';
+            $istanza->avviato_da = $utenteAvvio;
             if (!$istanza->create()) throw new Exception("Impossibile creare istanza.");
 
             $step_model = new WorkflowStep($this->db_instance);
-            $primi_passi = $step_model->findAll(['workflow_id' => $workflowModelId, 'ordine' => 1]);
+            $primi_passi = $step_model->findAll(['workflow_modello_id' => $workflowModelId, 'ordine' => 1]);
             if (empty($primi_passi)) throw new Exception("Nessun primo passo definito per questo workflow.");
 
             foreach ($primi_passi as $passo) {
                 $task = new Task($this->db_instance);
-                $id_utente_da_assegnare = $this->findUserForTask($istanza->id, $passo['id_gruppo_responsabile']);
+                $id_utente_da_assegnare = $this->resolveAssignee($passo, $istanza->id);
 
                 $task->nome = $passo['nome_passo'];
-                $task->descrizione = $passo['descrizione_passo'];
-                $task->id_workflow = $workflowModelId;
-                $task->workflow_step_id = $passo['id'];
-                $task->id_istanza_workflow = $istanza->id;
-                $task->id_utente_assegnato = $id_utente_da_assegnare;
-                $task->id_stato = $id_utente_da_assegnare ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
+                $task->descrizione = $passo['descrizione'];
+                $task->workflow_modello_id = $workflowModelId;
+                $task->workflow_passo_id = $passo['id'];
+                $task->workflow_istanza_id = $istanza->id;
+                $task->assegnato_a_utente_id = $id_utente_da_assegnare;
+                $task->stato = $id_utente_da_assegnare ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
                 if (!$task->create()) throw new Exception("Impossibile creare task per il passo {$passo['id']}.");
             }
             $this->db_instance->conn->commit();
@@ -228,39 +603,50 @@ class ApiController
         try {
             $parentTask = new Task($this->db_instance);
             if (!$parentTask->find($parentTaskId)) throw new Exception("Task genitore non trovato.", 404);
-            if ($parentTask->id_stato != Task::STATO_IN_LAVORAZIONE) throw new Exception("Un sottoprocesso può essere avviato solo da un task 'In Gestione'.", 409);
+            if ($parentTask->stato !== Task::STATO_IN_LAVORAZIONE) throw new Exception("Un sottoprocesso può essere avviato solo da un task 'In Gestione'.", 409);
 
-            $id_istanza_padre = $parentTask->id_istanza_workflow;
+            $id_istanza_padre = $parentTask->workflow_istanza_id;
             $data = json_decode(file_get_contents("php://input"));
-            if (empty($data->id_utente_avvio)) { $this->sendResponse(400, ["message" => "ID utente avvio mancante."]); return; }
+            $utenteAvvio = isset($data->id_utente_avvio) ? (int)$data->id_utente_avvio : (int)($_SERVER['AUTH_USER']['id'] ?? 0);
+            if ($utenteAvvio <= 0) { $this->sendResponse(400, ["message" => "ID utente avvio mancante."]); return; }
+
+            $currentUser = $_SERVER['AUTH_USER'] ?? null;
+            $role = strtoupper($currentUser['ruolo'] ?? '');
+            $isAdmin = in_array($role, ['ADMIN', 'SUPERVISOR'], true);
+            if (!$isAdmin && (int)$parentTask->assegnato_a_utente_id !== (int)$utenteAvvio) {
+                throw new Exception('Solo il responsabile del task può avviare un sottoworkflow.', 403);
+            }
 
             $this->db_instance->beginTransaction();
 
             $istanza = new WorkflowIstanza($this->db_instance);
-            $istanza->workflow_id = $subflowWorkflowId;
+            $istanza->workflow_modello_id = $subflowWorkflowId;
             $istanza->id_istanza_padre = $id_istanza_padre;
-            $istanza->nome_entita_associata = "Sottoprocesso del Task #" . $parentTaskId;
-            $istanza->id_utente_avvio = (int)$data->id_utente_avvio;
-            $istanza->stato_istanza = 'IN_CORSO';
+            $istanza->entita_collegata_tipo = 'SOTTOPROCESSO';
+            $istanza->entita_collegata_id = (string)$parentTaskId;
+            $istanza->avviato_da = $utenteAvvio;
+            $istanza->stato = 'IN_CORSO';
             if (!$istanza->create()) throw new Exception("Impossibile creare l'istanza del sottoprocesso.");
 
             $nuova_istanza_id = $istanza->id;
 
             $step_model = new WorkflowStep($this->db_instance);
-            $primi_passi = $step_model->findAll(['workflow_id' => $subflowWorkflowId, 'ordine' => 1]);
+            $primi_passi = $step_model->findAll(['workflow_modello_id' => $subflowWorkflowId, 'ordine' => 1]);
             if (empty($primi_passi)) throw new Exception("Il workflow del sottoprocesso non ha un primo passo definito.");
 
             foreach ($primi_passi as $passo) {
                 $task = new Task($this->db_instance);
-                $id_utente_da_assegnare = $this->findUserForTask($nuova_istanza_id, $passo['id_gruppo_responsabile']);
-                if (isset($data->assegna_a_utente_id) && !empty($data->assegna_a_utente_id)) $id_utente_da_assegnare = $data->assegna_a_utente_id;
+                $id_utente_da_assegnare = $this->resolveAssignee($passo, $nuova_istanza_id);
+                if (isset($data->assegna_a_utente_id) && !empty($data->assegna_a_utente_id)) {
+                    $id_utente_da_assegnare = $data->assegna_a_utente_id;
+                }
 
                 $task->nome = $passo['nome_passo'];
-                $task->id_workflow = $subflowWorkflowId;
-                $task->workflow_step_id = $passo['id'];
-                $task->id_istanza_workflow = $nuova_istanza_id;
-                $task->id_utente_assegnato = $id_utente_da_assegnare;
-                $task->id_stato = $id_utente_da_assegnare ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
+                $task->workflow_modello_id = $subflowWorkflowId;
+                $task->workflow_passo_id = $passo['id'];
+                $task->workflow_istanza_id = $nuova_istanza_id;
+                $task->assegnato_a_utente_id = $id_utente_da_assegnare;
+                $task->stato = $id_utente_da_assegnare ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
                 if (!$task->create()) throw new Exception("Impossibile creare il task del sottoprocesso.");
             }
 
@@ -275,15 +661,38 @@ class ApiController
 
     private function handleAssignTask(int $taskId) {
         $data = json_decode(file_get_contents("php://input"));
-        if (!isset($data->user_id)) { $this->sendResponse(400, ["message" => "'user_id' mancante."]); return; }
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        if (!$currentUser) { $this->sendResponse(401, ["message" => "Non autenticato."]); return; }
+
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN', 'SUPERVISOR'], true);
+
+        $targetUserId = isset($data->user_id) ? (int)$data->user_id : (int)$currentUser['id'];
+        if ($targetUserId <= 0) { $this->sendResponse(400, ["message" => "'user_id' mancante o non valido."]); return; }
+        if (!$isAdmin && $targetUserId !== (int)$currentUser['id']) {
+            $this->sendResponse(403, ["message" => "Puoi prendere in carico solo i task per te stesso."]); return;
+        }
 
         $task = new Task($this->db_instance);
         if (!$task->find($taskId)) { $this->sendResponse(404, ["message" => "Task non trovato."]); return; }
 
-        if (!$task->assegnaUtente((int)$data->user_id)) { $this->sendResponse(409, ["message" => "Impossibile assegnare il task (probabilmente non è aperto)."]); return; }
+        if (!$isAdmin && $task->assegnato_a_utente_id && (int)$task->assegnato_a_utente_id !== (int)$currentUser['id']) {
+            $this->sendResponse(409, ["message" => "Task già assegnato ad un altro utente."]); return;
+        }
 
-        if ($task->update(['id_utente_assegnato' => $task->id_utente_assegnato, 'id_stato' => $task->id_stato])) {
-            $this->sendResponse(200, ["message" => "Task assegnato."]);
+        if (!$task->assegnaUtente($targetUserId)) {
+            $this->sendResponse(409, ["message" => "Impossibile assegnare il task (probabilmente non è aperto)." ]);
+            return;
+        }
+
+        $updatePayload = [
+            'assegnato_a_utente_id' => $task->assegnato_a_utente_id,
+            'stato' => $task->stato,
+            'assegnato_il' => $task->assegnato_il,
+        ];
+
+        if ($task->update($updatePayload)) {
+            $this->sendResponse(200, ["message" => "Task assegnato.", "task" => $task->toArray()]);
         } else {
             $this->sendResponse(503, ["message" => "Errore durante il salvataggio dell'assegnazione."]);
         }
@@ -292,81 +701,137 @@ class ApiController
     private function handleCompleteTask(int $taskId) {
         try {
             $this->db_instance->conn->beginTransaction();
-            $task_corrente = new Task($this->db_instance);
-            if (!$task_corrente->find($taskId)) throw new Exception("Task non trovato.", 404);
-            if (!$task_corrente->completaTask()) throw new Exception("Impossibile completare. Stato non è 'In Lavorazione'.", 409);
-            if (!$task_corrente->update(['id_stato' => $task_corrente->id_stato])) throw new Exception("Errore nel salvataggio dello stato 'Completato'.");
-
-            if (empty($task_corrente->workflow_step_id)) {
-                $this->db_instance->conn->commit();
-                $this->sendResponse(200, ["message" => "Task manuale completato."]); return;
+            $task = new Task($this->db_instance);
+            if (!$task->find($taskId)) {
+                throw new Exception('Task non trovato.', 404);
             }
 
-            $step_corrente = new WorkflowStep($this->db_instance);
-            if (!$step_corrente->find($task_corrente->workflow_step_id)) throw new Exception("Passo del workflow non trovato (ID: {$task_corrente->workflow_step_id}).");
-
-            $query_check = "SELECT COUNT(t.id) as pending_tasks FROM task t WHERE t.id_istanza_workflow = ? AND t.id != ? AND t.id_stato != ? AND t.workflow_step_id IN (SELECT id FROM workflow_steps WHERE ordine = ? AND workflow_id = ?)";
-            $check_pending = $this->db_instance->selectOne($query_check, [$task_corrente->id_istanza_workflow, $taskId, Task::STATO_CHIUSO, $step_corrente->ordine, $task_corrente->id_workflow]);
-
-            if ($check_pending && $check_pending['pending_tasks'] > 0 && !$step_corrente->avanzamento_automatico) {
-                $this->db_instance->conn->commit();
-                $this->sendResponse(200, ["message" => "Task completato. In attesa di altri passi paralleli."]); return;
+            if (!$task->completaTask()) {
+                throw new Exception("Impossibile completare. Stato non è 'In Lavorazione'.", 409);
             }
 
-            $step_successivo = new WorkflowStep($this->db_instance);
-            $passi_successivi = $step_successivo->findAll(['workflow_id' => $task_corrente->id_workflow, 'ordine' => $step_corrente->ordine + 1], 'sottopasso ASC');
+            if (!$task->update(['stato' => $task->stato, 'completato_il' => $task->completato_il])) {
+                throw new Exception("Errore nel salvataggio dello stato 'Completato'.");
+            }
 
-            if (empty($passi_successivi)) {
+            if (empty($task->workflow_passo_id)) {
+                $this->db_instance->conn->commit();
+                $this->sendResponse(200, ['message' => 'Task manuale completato.']);
+                return;
+            }
+
+            $passoCorrente = new WorkflowStep($this->db_instance);
+            if (!$passoCorrente->find($task->workflow_passo_id)) {
+                throw new Exception('Passo del workflow non trovato (ID: ' . $task->workflow_passo_id . ').');
+            }
+
+            $sqlParallel = "SELECT COUNT(id) AS pending_tasks FROM workflow_task WHERE workflow_istanza_id = ? AND id != ? AND stato != ? AND workflow_passo_id IN (SELECT id FROM workflow_passi WHERE ordine = ? AND workflow_modello_id = ?)";
+            $pending = $this->db_instance->selectOne($sqlParallel, [
+                $task->workflow_istanza_id,
+                $taskId,
+                Task::STATO_CHIUSO,
+                $passoCorrente->ordine,
+                $task->workflow_modello_id
+            ]);
+
+            if ($pending && $pending['pending_tasks'] > 0) {
+                $this->db_instance->conn->commit();
+                $this->sendResponse(200, ['message' => 'Task completato. In attesa di altri passi paralleli.']);
+                return;
+            }
+
+            $stepModel = new WorkflowStep($this->db_instance);
+            $nextSteps = $stepModel->findAll(['workflow_modello_id' => $task->workflow_modello_id, 'ordine' => $passoCorrente->ordine + 1], 'sottopasso ASC');
+
+            if (empty($nextSteps)) {
                 $istanza = new WorkflowIstanza($this->db_instance);
-                if ($istanza->find($task_corrente->id_istanza_workflow)) {
-                    $istanza->update(['stato_istanza' => 'COMPLETATO', 'data_completamento' => date('Y-m-d H:i:s')]);
+                if ($istanza->find($task->workflow_istanza_id)) {
+                    $istanza->update(['stato' => 'COMPLETATO', 'completato_il' => date('Y-m-d H:i:s')]);
                 }
-                $messaggio_successo = "Task completato. Workflow terminato!";
+                $message = 'Task completato. Workflow terminato!';
             } else {
-                foreach($passi_successivi as $passo) {
-                    $nuovo_task = new Task($this->db_instance);
-                    $id_utente_da_assegnare = $this->findUserForTask($task_corrente->id_istanza_workflow, $passo['id_gruppo_responsabile']);
-                    $nuovo_task->nome = $passo['nome_passo'];
-                    $nuovo_task->descrizione = $passo['descrizione_passo'];
-                    $nuovo_task->id_workflow = $task_corrente->id_workflow;
-                    $nuovo_task->id_istanza_workflow = $task_corrente->id_istanza_workflow;
-                    $nuovo_task->workflow_step_id = $passo['id'];
-                    $nuovo_task->id_utente_assegnato = $id_utente_da_assegnare;
-                    $nuovo_task->id_stato = $id_utente_da_assegnare ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
-                    if (!$nuovo_task->create()) throw new Exception("Impossibile creare task successivo (Step ID: {$passo['id']}).");
+                foreach ($nextSteps as $passo) {
+                    $nuovoTask = new Task($this->db_instance);
+                    $idUtente = $this->resolveAssignee($passo, $task->workflow_istanza_id);
+                    $nuovoTask->nome = $passo['nome_passo'];
+                    $nuovoTask->descrizione = $passo['descrizione'];
+                    $nuovoTask->workflow_modello_id = $task->workflow_modello_id;
+                    $nuovoTask->workflow_istanza_id = $task->workflow_istanza_id;
+                    $nuovoTask->workflow_passo_id = $passo['id'];
+                    $nuovoTask->assegnato_a_utente_id = $idUtente;
+                    $nuovoTask->stato = $idUtente ? Task::STATO_IN_LAVORAZIONE : Task::STATO_APERTO;
+                    if (!$nuovoTask->create()) {
+                        throw new Exception('Impossibile creare task successivo (Step ID: ' . $passo['id'] . ').');
+                    }
                 }
-                $messaggio_successo = "Task completato. Creati " . count($passi_successivi) . " task successivi.";
+                $message = 'Task completato. Creati ' . count($nextSteps) . ' task successivi.';
             }
+
             $this->db_instance->conn->commit();
-            $this->sendResponse(200, ["message" => $messaggio_successo]);
+            $this->sendResponse(200, ['message' => $message]);
         } catch (Exception $e) {
             $this->db_instance->conn->rollBack();
-            $this->sendResponse(503, ["message" => "Errore: " . $e->getMessage()]);
+            $code = $e->getCode() > 0 ? $e->getCode() : 503;
+            $this->sendResponse($code, ['message' => 'Errore: ' . $e->getMessage()]);
         }
     }
 
-    private function findUserForTask(int $id_istanza, ?int $id_gruppo): ?int {
-        if (is_null($id_gruppo)) return null;
-        $sql_continuity = "SELECT t.id_utente_assegnato FROM task t JOIN utenti_gruppi ug ON t.id_utente_assegnato = ug.id_utente WHERE t.id_istanza_workflow = ? AND ug.id_gruppo = ? AND t.id_utente_assegnato IS NOT NULL ORDER BY t.data_aggiornamento DESC LIMIT 1";
-        $result = $this->db_instance->selectOne($sql_continuity, [$id_istanza, $id_gruppo]);
-        if ($result && !empty($result['id_utente_assegnato'])) return (int) $result['id_utente_assegnato'];
+    private function resolveAssignee(array $passo, int $workflowIstanzaId): ?int {
+        if (!empty($passo['responsabile_utente_id'])) {
+            return (int)$passo['responsabile_utente_id'];
+        }
+        if (!empty($passo['responsabile_gruppo_id'])) {
+            return $this->findUserForTask($workflowIstanzaId, (int)$passo['responsabile_gruppo_id']);
+        }
+        return null;
+    }
 
-        $sql_load_balance = "SELECT ug.id_utente, COUNT(t.id) AS task_count FROM utenti_gruppi ug LEFT JOIN task t ON ug.id_utente = t.id_utente_assegnato AND t.id_stato != ? WHERE ug.id_gruppo = ? GROUP BY ug.id_utente ORDER BY task_count ASC, RAND() LIMIT 1";
-        $result = $this->db_instance->selectOne($sql_load_balance, [Task::STATO_CHIUSO, $id_gruppo]);
-        if ($result && isset($result['id_utente'])) return (int) $result['id_utente'];
+    private function findUserForTask(int $workflowIstanzaId, ?int $gruppoId): ?int {
+        if (is_null($gruppoId)) {
+            return null;
+        }
+
+        $sqlContinuity = "SELECT t.assegnato_a_utente_id
+                          FROM workflow_task t
+                          JOIN utenti_gruppi ug ON t.assegnato_a_utente_id = ug.utente_id
+                          WHERE t.workflow_istanza_id = ?
+                            AND ug.gruppo_id = ?
+                            AND t.assegnato_a_utente_id IS NOT NULL
+                          ORDER BY COALESCE(t.completato_il, t.assegnato_il) DESC, t.id DESC
+                          LIMIT 1";
+        $result = $this->db_instance->selectOne($sqlContinuity, [$workflowIstanzaId, $gruppoId]);
+        if ($result && !empty($result['assegnato_a_utente_id'])) {
+            return (int) $result['assegnato_a_utente_id'];
+        }
+
+        $sqlLoadBalance = "SELECT ug.utente_id, COUNT(t.id) AS task_count
+                            FROM utenti_gruppi ug
+                            LEFT JOIN workflow_task t
+                              ON ug.utente_id = t.assegnato_a_utente_id
+                             AND t.stato != ?
+                            WHERE ug.gruppo_id = ?
+                            GROUP BY ug.utente_id
+                            ORDER BY task_count ASC, RAND()
+                            LIMIT 1";
+        $result = $this->db_instance->selectOne($sqlLoadBalance, [Task::STATO_CHIUSO, $gruppoId]);
+        if ($result && isset($result['utente_id'])) {
+            return (int) $result['utente_id'];
+        }
+
         return null;
     }
 
     private function addUserToGroup(int $groupId, int $userId) {
         $userGroup = new UtenteGruppo($this->db_instance);
-        $userGroup->id_gruppo = $groupId;
-        $userGroup->id_utente = $userId;
+        // Campi conformi allo schema: utenti_gruppi(utente_id, gruppo_id)
+        $userGroup->utente_id = $userId;
+        $userGroup->gruppo_id = $groupId;
         if ($userGroup->create()) $this->sendResponse(201, ["message" => "Utente aggiunto."]);
         else $this->sendResponse(409, ["message" => "Utente già presente o errore."]);
     }
 
     private function removeUserFromGroup(int $groupId, int $userId) {
-        $sql = "DELETE FROM utenti_gruppi WHERE id_gruppo = ? AND id_utente = ?";
+        $sql = "DELETE FROM utenti_gruppi WHERE gruppo_id = ? AND utente_id = ?";
         $rowCount = $this->db_instance->executeStatement($sql, [$groupId, $userId]);
         if ($rowCount > 0) $this->sendResponse(200, ["message" => "Utente rimosso."]);
         else $this->sendResponse(404, ["message" => "Relazione non trovata."]);
@@ -390,12 +855,93 @@ class ApiController
             $note->nota = htmlspecialchars(strip_tags($data->nota));
             if (!$note->create()) throw new Exception("Impossibile salvare la nota.");
 
+            // Aggiorna il timestamp di aggiornamento del task per riflettere la nuova nota
+            try {
+                $this->db_instance->executeStatement(
+                    "UPDATE workflow_task SET data_aggiornamento = NOW() WHERE id = ?",
+                    [ (int)$taskId ]
+                );
+            } catch (Throwable $e) {
+                // Non bloccare il salvataggio della nota se l'update del timestamp fallisce
+            }
+
             $this->db_instance->commit();
-            $this->sendResponse(201, ["message" => "Nota aggiunta."]);
+            $this->sendResponse(201, ["message" => "Nota aggiunta.", "id" => (int)$note->id]);
         } catch (Exception $e) {
             $this->db_instance->rollBack();
             $this->sendResponse(503, ["message" => "Errore salvataggio nota: " . $e->getMessage()]);
         }
+    }
+
+    private function handleAddTaskNoteAttachment(int $taskId) {
+        // Expect multipart/form-data with fields: note_id, file
+        $noteId = isset($_POST['note_id']) ? (int)$_POST['note_id'] : 0;
+        if ($noteId <= 0 || !isset($_FILES['file'])) { $this->sendResponse(400, ["message" => "Parametri mancanti (note_id o file)."]); return; }
+
+        // Verifica appartenenza nota al task
+        $row = $this->db_instance->selectOne("SELECT id_task FROM task_note WHERE id = ?", [$noteId]);
+        if (!$row || (int)$row['id_task'] !== (int)$taskId) { $this->sendResponse(404, ["message" => "Nota non trovata per questo task."]); return; }
+
+        $upload = $_FILES['file'];
+        $err = (int)($upload['error'] ?? UPLOAD_ERR_OK);
+        if ($err !== UPLOAD_ERR_OK) {
+            $map = [
+                UPLOAD_ERR_INI_SIZE => 'File oltre il limite del server.',
+                UPLOAD_ERR_FORM_SIZE => 'File oltre il limite consentito.',
+                UPLOAD_ERR_PARTIAL => 'Upload parziale, riprova.',
+                UPLOAD_ERR_NO_FILE => 'Nessun file inviato.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Cartella temporanea mancante.',
+                UPLOAD_ERR_CANT_WRITE => 'Impossibile scrivere su disco.',
+                UPLOAD_ERR_EXTENSION => 'Upload bloccato da estensione PHP.',
+            ];
+            $msg = $map[$err] ?? 'Errore upload.';
+            $this->sendResponse(400, ["message" => $msg]);
+            return;
+        }
+        if (!is_uploaded_file($upload['tmp_name'])) { $this->sendResponse(400, ["message" => "Upload non valido."]); return; }
+
+        $origName = $upload['name'];
+        $safeName = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $origName);
+        $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+        $maxMb = (int)(getenv('MAX_NOTE_ATTACHMENT_MB') ?: 10);
+        $maxBytes = $maxMb > 0 ? ($maxMb * 1024 * 1024) : (10 * 1024 * 1024);
+        $size = (int)($upload['size'] ?? 0);
+        if ($size <= 0) { $this->sendResponse(400, ["message" => "File vuoto o non valido."]); return; }
+        if ($size > $maxBytes) { $this->sendResponse(400, ["message" => "File troppo grande. Massimo {$maxMb} MB."]); return; }
+        $allowedExt = ['pdf','png','jpg','jpeg','gif','doc','docx','xls','xlsx','txt','csv','zip'];
+        if (!$ext || !in_array($ext, $allowedExt, true)) {
+            $this->sendResponse(400, [
+                'message' => 'Estensione file non consentita. Ammesse: ' . implode(', ', $allowedExt),
+            ]);
+            return;
+        }
+        $destDir = __DIR__ . '/../uploads';
+        if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
+        // Assicura permessi di scrittura (tentativi progressivi)
+        if (!is_writable($destDir)) { @chmod($destDir, 02775); }
+        $destName = uniqid('note_', true) . ($ext ? ('.' . $ext) : '');
+        $destPath = $destDir . '/' . $destName;
+        if (!move_uploaded_file($upload['tmp_name'], $destPath)) {
+            // Fallback: allarga permessi e ritenta una volta
+            @chmod($destDir, 0777);
+            if (!move_uploaded_file($upload['tmp_name'], $destPath)) {
+                $this->sendResponse(500, ["message" => "Impossibile salvare il file."]); return;
+            }
+        }
+
+        $publicPath = 'uploads/' . $destName;
+        $att = new TaskNotaAllegato($this->db_instance);
+        $att->id_nota = $noteId;
+        $att->nome_file_originale = $origName;
+        $att->percorso_file = $publicPath;
+        if (!$att->create()) { $this->sendResponse(503, ["message" => "Impossibile registrare l'allegato."]); return; }
+
+        $this->sendResponse(201, [
+            'message' => 'Allegato caricato.',
+            'id' => (int)$att->id,
+            'nome_file' => $origName,
+            'percorso' => $publicPath,
+        ]);
     }
 
     private function getModelInstance(string $resource_name) {

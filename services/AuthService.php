@@ -31,7 +31,13 @@ class AuthService
             throw new AuthException('Credenziali non valide.');
         }
 
-        if ((int)($user['attivo'] ?? 0) !== 1) {
+        $isActive = null;
+        if (array_key_exists('attivo', $user)) {
+            $isActive = (int)$user['attivo'];
+        } elseif (array_key_exists('stato', $user)) {
+            $isActive = strtoupper((string)$user['stato']) === 'ATTIVO' ? 1 : 0;
+        }
+        if ($isActive !== null && $isActive !== 1) {
             throw new AuthException('Utente disattivato.');
         }
 
@@ -83,7 +89,13 @@ class AuthService
             throw new AuthException('Utente non trovato.');
         }
 
-        if ((int)$utente->attivo !== 1) {
+        $isActive = null;
+        if (property_exists($utente, 'attivo') && $utente->attivo !== null) {
+            $isActive = (int)$utente->attivo;
+        } elseif (property_exists($utente, 'stato') && $utente->stato !== null) {
+            $isActive = strtoupper((string)$utente->stato) === 'ATTIVO' ? 1 : 0;
+        }
+        if ($isActive !== null && $isActive !== 1) {
             throw new AuthException('Utente disattivato.');
         }
 
@@ -92,8 +104,50 @@ class AuthService
             'email' => $utente->email,
             'nome' => $utente->nome,
             'cognome' => $utente->cognome,
+            'ruolo' => $utente->ruolo ?? null,
+            'stato' => $utente->stato ?? null,
+            'attivo' => $isActive ?? null,
             'tenant_id' => $utente->tenant_id ?? ($payload['tenant_id'] ?? null),
         ];
+    }
+
+    public function logAuthEvent(int $userId, string $action, ?string $ip = null, ?string $userAgent = null): void
+    {
+        $action = strtoupper($action);
+        if (!in_array($action, ['LOGIN','LOGOUT'], true)) return;
+        $sql = 'INSERT INTO auth_audit (user_id, action, ip, user_agent) VALUES (?, ?, ?, ?)';
+        try {
+            $ok = $this->db->executeStatement($sql, [$userId, $action, $ip, $userAgent]);
+            if ($ok === false) {
+                $this->ensureAuthAuditTable();
+                $this->db->executeStatement($sql, [$userId, $action, $ip, $userAgent]);
+            }
+        } catch (Throwable $e) {
+            // Prova a creare la tabella e ripeti una volta
+            try {
+                $this->ensureAuthAuditTable();
+                $this->db->executeStatement($sql, [$userId, $action, $ip, $userAgent]);
+            } catch (Throwable $e2) {
+                // Non bloccare il flusso in caso di errore di logging
+            }
+        }
+    }
+
+    private function ensureAuthAuditTable(): void
+    {
+        $ddl = "CREATE TABLE IF NOT EXISTS auth_audit (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  action ENUM('LOGIN','LOGOUT') NOT NULL,
+  ip VARCHAR(64) NULL,
+  user_agent VARCHAR(255) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_auth_audit_user (user_id),
+  INDEX idx_auth_audit_action (action),
+  INDEX idx_auth_audit_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        // Ignora eventuali errori
+        $this->db->executeStatement($ddl);
     }
 
     public function changePassword(int $userId, string $currentPassword, string $newPassword): void

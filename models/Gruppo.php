@@ -4,12 +4,14 @@ require_once 'CrudBaseAbstract.php';
 class Gruppo extends CrudBaseAbstract
 {
     protected $table_name = "gruppi";
-    protected $fillable_fields = ['nome_gruppo', 'descrizione', 'attivo'];
+    // Allineato allo schema: colonna "nome". Manteniamo compat nomi storici via mapping in API.
+    protected $fillable_fields = ['nome', 'descrizione', 'attivo'];
 
     public $id;
-    public $nome_gruppo;
+    public $nome;         // colonna reale in DB
+    public $nome_gruppo;  // alias legacy per compatibilità UI
     public $descrizione;
-    public $attivo;
+    public $attivo;       // se presente nel DB, usato per soft delete/filtri
 
     // Aggiungiamo una proprietà pubblica per contenere gli utenti del gruppo
     public $users = [];
@@ -34,10 +36,15 @@ class Gruppo extends CrudBaseAbstract
         // 2. Se il gruppo è stato trovato, carica i suoi utenti
         $query = "SELECT u.id, u.nome, u.cognome, u.email 
                   FROM utenti u
-                  JOIN utenti_gruppi ug ON u.id = ug.id_utente
-                  WHERE ug.id_gruppo = ?";
+                  JOIN utenti_gruppi ug ON u.id = ug.utente_id
+                  WHERE ug.gruppo_id = ?";
 
         $this->users = $this->db->select($query, [$this->id]) ?: [];
+
+        // Propaga alias legacy per facilitare i client che si aspettano nome_gruppo
+        if (empty($this->nome_gruppo) && !empty($this->nome)) {
+            $this->nome_gruppo = $this->nome;
+        }
 
         return true;
     }

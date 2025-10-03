@@ -1,6 +1,10 @@
 # PHP / Composer
 /vendor/
 /composer.lock
+/node_modules/
+
+# PHPUnit cache
+/.phpunit.cache/
 
 # IDE
 /.idea/

@@ -27,10 +27,21 @@ class AuthController
                 $this->resetPassword();
                 return;
             }
+            if ($action === 'logout') {
+                $this->logout();
+                return;
+            }
             if ($action === 'login' || $action === null) {
                 $this->login();
                 return;
             }
+        }
+
+        if ($method === 'GET' && ($action === 'me' || $action === null)) {
+            $this->currentUser !== null
+                ? $this->sendJson(200, $this->currentUser)
+                : $this->sendJson(401, ['message' => 'Utente non autenticato.']);
+            return;
         }
 
         $this->sendJson(405, ['message' => 'Metodo o azione non consentiti per auth.']);
@@ -53,6 +64,15 @@ class AuthController
 
         try {
             $result = $this->authService->login($email, $password);
+            // Audit: traccia login riuscito
+            try {
+                $uid = (int)($result['user']['id'] ?? 0);
+                $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+                $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
+                if ($uid > 0) {
+                    $this->authService->logAuthEvent($uid, 'LOGIN', $ip, $ua);
+                }
+            } catch (Throwable $e) { /* ignore */ }
             $this->sendJson(200, $result);
         } catch (AuthException $ex) {
             $this->sendJson(401, ['message' => $ex->getMessage()]);
@@ -119,6 +139,21 @@ class AuthController
         } catch (Throwable $ex) {
             $this->sendJson(500, ['message' => 'Errore durante il reset della password.']);
         }
+    }
+
+    private function logout(): void
+    {
+        // Con JWT stateless non c'è invalidazione server-side di default.
+        // Tracciamo comunque l'evento in audit.
+        try {
+            $uid = (int)($this->currentUser['id'] ?? 0);
+            $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+            $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
+            if ($uid > 0) {
+                $this->authService->logAuthEvent($uid, 'LOGOUT', $ip, $ua);
+            }
+        } catch (Throwable $e) { /* ignore */ }
+        $this->sendJson(200, ['message' => 'Logout eseguito.']);
     }
 
     private function readJsonBody(): ?array

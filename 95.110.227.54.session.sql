@@ -1,0 +1,1 @@
+update utenti SET password_hash='$2y$10$2gl/TPygUfLnDJoc.ZqIYuCQau/FZCo33wqRTFiKBbft8Bi788a6.' where email='damato@lprent.it';

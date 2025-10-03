@@ -1,0 +1,191 @@
+@startuml "ER Tenant Gestionale"
+hide circle
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+}
+
+class Utenti {
+  +id : int
+  +nome : string
+  +email : string
+  +ruolo : string
+}
+
+class WorkflowModelli {
+  +id : int
+  +nome : string
+  +descrizione : string
+  +attivo : bool
+  +creato_da : int
+}
+
+class WorkflowPassi {
+  +id : int
+  +workflow_modello_id : int
+  +nome_passo : string
+  +ordine : int
+  +sottopasso : int
+  +tipo_azione_standard : int
+}
+
+class WorkflowIstanze {
+  +id : int
+  +workflow_modello_id : int
+  +stato : string
+  +avviato_da : int
+}
+
+class WorkflowTask {
+  +id : int
+  +workflow_istanza_id : int
+  +workflow_passo_id : int
+  +stato : string
+  +assegnato_a_utente_id : int
+}
+
+class AzioniStandard {
+  +id : int
+  +codice : string
+  +nome : string
+}
+
+class Clienti {
+  +id : int
+  +ragione_sociale : string
+  +partita_iva : string
+}
+
+class Fornitori {
+  +id : int
+  +ragione_sociale : string
+  +partita_iva : string
+}
+
+class Documenti {
+  +id : int
+  +tipo_documento : string
+  +numero : string
+  +cliente_id : int
+  +fornitore_id : int
+  +totale_documento : decimal
+  +valuta : string
+  +stato : string
+}
+
+class DocumentiRighe {
+  +id : int
+  +documento_id : int
+  +descrizione : string
+  +quantita : float
+  +prezzo_unitario : decimal
+  +totale_riga : decimal
+}
+
+class DocumentiAliquote {
+  +id : int
+  +documento_id : int
+  +aliquota : float
+  +base_imponibile : decimal
+  +imposta : decimal
+}
+
+class DocumentiAllegati {
+  +id : int
+  +documento_id : int
+  +nome_file : string
+  +percorso : string
+}
+
+class Scadenze {
+  +id : int
+  +documento_id : int
+  +numero_rata : int
+  +data_scadenza : datetime
+  +importo : decimal
+  +stato : string
+}
+
+class Pagamenti {
+  +id : int
+  +direzione : string
+  +cliente_id : int
+  +fornitore_id : int
+  +conti_finanziari_id : int
+  +metodo_pagamento_id : int
+  +importo : decimal
+  +stato : string
+}
+
+class PagamentiDocumenti {
+  +pagamento_id : int
+  +documento_id : int
+  +scadenza_id : int
+  +importo_allocato : decimal
+}
+
+class MetodiPagamento {
+  +id : int
+  +nome : string
+  +tipologia : string
+}
+
+class ContiFinanziari {
+  +id : int
+  +nome : string
+  +tipologia : string
+  +valuta : string
+}
+
+class TransazioniGateway {
+  +id : int
+  +pagamento_id : int
+  +gateway : string
+  +stato : string
+}
+
+class PrimaNota {
+  +id : int
+  +conti_finanziari_id : int
+  +riferimento_documento_id : int
+  +data : datetime
+  +importo : decimal
+  +tipo_movimento : string
+}
+
+class SyncUscita {
+  +id : int
+  +entita : string
+  +tipo_evento : string
+  +stato : string
+}
+
+class LogSync {
+  +id : int
+  +sync_uscita_id : int
+  +stato : string
+  +messaggio : string
+}
+
+Utenti "1" -- "*" WorkflowModelli : crea
+WorkflowModelli "1" -- "*" WorkflowPassi : ha
+WorkflowModelli "1" -- "*" WorkflowIstanze : genera
+WorkflowPassi "1" -- "*" WorkflowTask : produce
+WorkflowIstanze "1" -- "*" WorkflowTask : contiene
+AzioniStandard "1" -- "*" WorkflowPassi : usa
+Clienti "1" -- "*" Documenti : destinatario
+Fornitori "1" -- "*" Documenti : fornitore
+Documenti "1" -- "*" DocumentiRighe : dettagli
+Documenti "1" -- "*" DocumentiAliquote : iva
+Documenti "1" -- "*" DocumentiAllegati : allegati
+Documenti "1" -- "*" Scadenze : rateizza
+Scadenze "1" -- "*" PagamentiDocumenti : coperta
+Pagamenti "1" -- "*" PagamentiDocumenti : imputa
+MetodiPagamento "1" -- "*" Pagamenti : utilizza
+ContiFinanziari "1" -- "*" Pagamenti : movimenta
+Pagamenti "1" -- "*" TransazioniGateway : traccia
+ContiFinanziari "1" -- "*" PrimaNota : aggiorna
+Documenti "1" -- "*" PrimaNota : origine
+SyncUscita "1" -- "*" LogSync : log
+
+@enduml

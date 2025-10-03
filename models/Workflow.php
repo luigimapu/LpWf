@@ -6,13 +6,14 @@ class Workflow extends CrudBaseAbstract
 
 {
     // Nome della tabella nel database
-    protected $table_name = "workflows";
+    protected $table_name = 'workflow_modelli';
 
     // Campi compilabili (usati da create e update)
-    protected $fillable_fields = ['nome_workflow', 'descrizione', 'attivo'];
+    protected $fillable_fields = ['nome', 'descrizione', 'attivo', 'creato_da'];
 
     // Proprietà pubbliche per i dati del record
     public $id;
+    public $nome;
     public $nome_workflow;
     public $descrizione;
     public $attivo;
@@ -25,15 +26,21 @@ class Workflow extends CrudBaseAbstract
      */
     public function findAll( $conditions = [], string $orderBy = ''): array
     {
-        $query = "SELECT * FROM {$this->table_name}";
+        $query = "SELECT id, nome, descrizione, attivo FROM {$this->table_name}";
         $params = [];
 
+        $where = [];
         if (!empty($conditions['search'])) {
-            $query .= " WHERE nome_workflow LIKE ?";
+            $where[] = 'nome LIKE ?';
             $params[] = '%' . $conditions['search'] . '%';
-        } else {
-            // Aggiungo un filtro per attivo se non c'è una ricerca
-            $query .= " WHERE attivo = 1";
+        }
+        // include_inactive=1 per mostrare anche disattivi
+        $includeInactive = !empty($conditions['include_inactive']);
+        if (!$includeInactive) {
+            $where[] = 'attivo = 1';
+        }
+        if ($where) {
+            $query .= ' WHERE ' . implode(' AND ', $where);
         }
 
         return $this->db->select($query, $params) ?: [];
@@ -52,14 +59,24 @@ class Workflow extends CrudBaseAbstract
         }
 
         // 2. Se il workflow è stato trovato, carica i suoi passi
+        $this->nome_workflow = $this->nome;
         $step_model = new WorkflowStep($this->db);
 
         // Usiamo il nuovo findAll() con filtro e ordinamento
         $this->steps = $step_model->findAll(
-            ['workflow_id' => $this->id], // Condizione: cerca solo i passi con questo ID workflow
+            ['workflow_modello_id' => $this->id], // Condizione: cerca solo i passi con questo modello
             'ordine ASC, sottopasso ASC'                   // Ordinamento: per numero di passo crescente
         );
 
         return true;
+    }
+
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+        if (isset($data['nome']) && !isset($data['nome_workflow'])) {
+            $data['nome_workflow'] = $data['nome'];
+        }
+        return $data;
     }
 }
