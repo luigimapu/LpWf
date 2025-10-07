@@ -22,3 +22,64 @@
   - `php tools/setup_hub_db.php`
   - `php tools/setup_tenant_db.php`
 
+---
+
+## Deploy con GitHub Actions (SSH)
+
+In alternativa all'estensione Git di Plesk, puoi fare deploy automatico via GitHub Actions con rsync/SSH.
+
+### Dati necessari
+- Host/porta/utente SSH (es. `95.110.227.54`, `22`, `root`)
+- Path di deploy:
+  - Staging: `/var/www/vhosts/lprent.it/httpdocs/LpWf_staging`
+  - Produzione: `/var/www/vhosts/lprent.it/httpdocs/LpWF_refactor`
+- PHP CLI: `/opt/plesk/php/8.3/bin/php`
+
+### Step 1 — Genera chiave SSH (locally)
+```bash
+ssh-keygen -t ed25519 -C "deploy@LpWf" -f ~/.ssh/lpwf_deploy
+cat ~/.ssh/lpwf_deploy.pub
+```
+Copia la chiave pubblica sul server (utente scelto, es. root):
+```bash
+ssh-copy-id -i ~/.ssh/lpwf_deploy.pub -p 22 root@95.110.227.54
+# Oppure manualmente: append a ~/.ssh/authorized_keys
+```
+
+### Step 2 — Imposta i GitHub Secrets del repo
+Repository Settings → Secrets → Actions → New repository secret
+
+- `SSH_HOST_STAGING` = `95.110.227.54`
+- `SSH_HOST_PROD` = `95.110.227.54`
+- `SSH_PORT` = `22`
+- `SSH_USER` = `root`
+- `SSH_KEY` = contenuto di `~/.ssh/lpwf_deploy` (chiave privata ED25519)
+- `DEPLOY_PATH_STAGING` = `/var/www/vhosts/lprent.it/httpdocs/LpWf_staging`
+- `DEPLOY_PATH_PROD` = `/var/www/vhosts/lprent.it/httpdocs/LpWF_refactor`
+- `PHP_BIN` = `/opt/plesk/php/8.3/bin/php`
+- (Opzionale ma consigliato) `SSH_KNOWN_HOSTS` = output di `ssh-keyscan -p 22 95.110.227.54`
+
+Per ottenere la host key:
+```bash
+ssh-keyscan -p 22 95.110.227.54 > known_hosts
+cat known_hosts
+```
+Incolla il contenuto nel secret `SSH_KNOWN_HOSTS`. Così evitiamo `StrictHostKeyChecking=no`.
+
+### Step 3 — Workflow
+Il file `.github/workflows/deploy.yml` è già in repo e:
+- Al push su `staging` deploya su `DEPLOY_PATH_STAGING`.
+- Al push su `main` deploya su `DEPLOY_PATH_PROD`.
+- Esegue post-deploy:
+  - `${PHP_BIN} tools/setup_hub_db.php`
+  - `${PHP_BIN} tools/setup_tenant_db.php`
+
+Puoi anche lanciare manualmente il deploy da GitHub → Actions → Deploy → Run workflow scegliendo `staging` o `production`.
+
+### Step 4 — Protezione branch / status checks
+- Imposta branch protection per `main` e `staging` e abilita:
+  - Require a pull request before merging
+  - Require status checks to pass (seleziona i job della CI)
+  - (Opzionale) Limita chi può fare merge
+
+Assicurati che il file `.env` esista sul server (non committato) con le credenziali corrette; gli script di setup lo leggono.

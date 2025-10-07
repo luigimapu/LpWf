@@ -1,0 +1,103 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main, staging ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Ambiente di deploy"
+        required: true
+        type: choice
+        default: staging
+        options:
+          - staging
+          - production
+
+jobs:
+  # Evita run sovrapposti per la stessa branch/ambiente
+  # (richiede required status checks per garantire ordine)
+  # Concurrency è definita a livello di job via il nome della branch
+  # e del workflow stesso.
+  verify:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: verify-${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax check
+        run: |
+          find . -type f -name "*.php" \
+            -not -path "./vendor/*" \
+            -print0 | xargs -0 -n1 -P4 php -l
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier check
+        run: npm run format
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set target based on branch
+        run: |
+          # Se avviato manualmente, usa l'input; altrimenti deduci dalla branch
+          if [ -n "${{ github.event.inputs.target }}" ]; then
+            TARGET_INPUT="${{ github.event.inputs.target }}"
+            if [ "$TARGET_INPUT" = "staging" ]; then BRANCH="staging"; else BRANCH="main"; fi
+          else
+            BRANCH="${GITHUB_REF##*/}"
+          fi
+          if [ "$BRANCH" = "staging" ]; then
+            echo "TARGET_HOST=${{ secrets.SSH_HOST_STAGING }}" >> $GITHUB_ENV
+            echo "TARGET_PATH=${{ secrets.DEPLOY_PATH_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "TARGET_HOST=${{ secrets.SSH_HOST_PROD }}" >> $GITHUB_ENV
+            echo "TARGET_PATH=${{ secrets.DEPLOY_PATH_PROD }}" >> $GITHUB_ENV
+          fi
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Configure known_hosts (if provided)
+        run: |
+          if [ -n "${{ secrets.SSH_KNOWN_HOSTS }}" ]; then
+            mkdir -p ~/.ssh
+            echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+            echo "Using provided SSH_KNOWN_HOSTS"
+            echo "SSH_OPTS=-p ${{ secrets.SSH_PORT }}" >> $GITHUB_ENV
+          else
+            echo "SSH_OPTS=-p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" >> $GITHUB_ENV
+          fi
+
+      - name: Rsync files to server
+        run: |
+          RSYNC_RSH="ssh $SSH_OPTS"
+          rsync -az --delete \
+            --exclude ".git/" \
+            --exclude ".github/" \
+            --exclude "node_modules/" \
+            --exclude ".phpunit.cache/" \
+            --exclude "out/" \
+            -e "$RSYNC_RSH" ./ "${{ secrets.SSH_USER }}@${TARGET_HOST}:${TARGET_PATH}/"
+
+      - name: Post-deploy scripts (DB setup)
+        run: |
+          ssh $SSH_OPTS "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
+            "${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_hub_db.php && \
+             ${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_tenant_db.php"
