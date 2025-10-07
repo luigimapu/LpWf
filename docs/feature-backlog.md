@@ -267,15 +267,11 @@ Copia il template qui sotto nella sezione INBOX e compila i campi essenziali (ti
 
 ### Later (parcheggiate)
 
--
-
----
+- ***
 
 ## DONE (storico sintetico)
 
--
-
----
+- ***
 
 ## Note & decisioni
 
