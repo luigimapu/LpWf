@@ -1,34 +1,33 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, staging ]
-  pull_request:
-    branches: [ main, staging ]
+    push:
+        branches: [main, staging]
+    pull_request:
+        branches: [main, staging]
 
 jobs:
-  php-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: PHP syntax check
-        run: |
-          find . -type f -name "*.php" \
-            -not -path "./vendor/*" \
-            -print0 | xargs -0 -n1 -P4 php -l
+    php-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: PHP syntax check
+              run: |
+                  find . -type f -name "*.php" \
+                    -not -path "./vendor/*" \
+                    -print0 | xargs -0 -n1 -P4 php -l
 
-  js-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-      - name: Install deps
-        run: npm ci
-      - name: ESLint
-        run: npm run lint
-      - name: Prettier check
-        run: npm run format
-
+    js-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  cache: 'npm'
+            - name: Install deps
+              run: npm ci
+            - name: ESLint
+              run: npm run lint
+            - name: Prettier check
+              run: npm run format

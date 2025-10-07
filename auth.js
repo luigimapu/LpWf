@@ -9,7 +9,9 @@
         }
         try {
             const trimmed = url.trim();
-            const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `${window.location.protocol}//${trimmed.replace(/^\/+/, '')}`;
+            const withProtocol = /^https?:\/\//i.test(trimmed)
+                ? trimmed
+                : `${window.location.protocol}//${trimmed.replace(/^\/+/, '')}`;
             const u = new URL(withProtocol);
             return `${u.origin}${u.pathname.replace(/\/$/, '')}`;
         } catch (err) {
@@ -20,7 +22,9 @@
     const computeDefaultApiBase = () => {
         const currentPath = window.location.pathname;
         const basePath = currentPath.includes('/') ? currentPath.replace(/\/[^/]*$/, '') : '';
-        const normalizedBase = basePath.endsWith('/api') ? basePath : `${basePath.replace(/\/$/, '')}/api`;
+        const normalizedBase = basePath.endsWith('/api')
+            ? basePath
+            : `${basePath.replace(/\/$/, '')}/api`;
         return `${window.location.origin}${normalizedBase}`;
     };
 
@@ -135,7 +139,7 @@
                 headers.Authorization = `Bearer ${token}`;
             }
             return headers;
-        }
+        },
     };
 
     window.lpwfAuth = authApi;

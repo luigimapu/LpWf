@@ -1,32 +1,32 @@
 {
-  "name": "lpwf_refactor",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "Strumenti di controllo qualità per LpWF gestionale",
-  "main": "dashboard.js",
-  "scripts": {
-    "lint": "eslint --max-warnings=0 \"{dashboard.js,assets/**/*.js,hub_api/**/*.js}\"",
-    "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --check \"**/*.{js,json,css,md,yml,yaml}\"",
-    "format:write": "prettier --write \"**/*.{js,json,css,md,yml,yaml}\"",
-    "test": "npm run lint"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/luigimapu/LpWf.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/luigimapu/LpWf/issues"
-  },
-  "homepage": "https://github.com/luigimapu/LpWf#readme",
-  "devDependencies": {
-    "@eslint/js": "^9.36.0",
-    "eslint": "^9.36.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "prettier": "^3.6.2"
-  }
+    "name": "lpwf_refactor",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Strumenti di controllo qualità per LpWF gestionale",
+    "main": "dashboard.js",
+    "scripts": {
+        "lint": "eslint --max-warnings=0 \"{dashboard.js,assets/**/*.js,hub_api/**/*.js}\"",
+        "lint:fix": "npm run lint -- --fix",
+        "format": "prettier --check \"**/*.{js,json,css,md,yml,yaml}\"",
+        "format:write": "prettier --write \"**/*.{js,json,css,md,yml,yaml}\"",
+        "test": "npm run lint"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/luigimapu/LpWf.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/luigimapu/LpWf/issues"
+    },
+    "homepage": "https://github.com/luigimapu/LpWf#readme",
+    "devDependencies": {
+        "@eslint/js": "^9.36.0",
+        "eslint": "^9.36.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-import": "^2.32.0",
+        "prettier": "^3.6.2"
+    }
 }

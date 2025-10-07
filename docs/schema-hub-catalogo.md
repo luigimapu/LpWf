@@ -3,6 +3,7 @@
 Il presente documento descrive le entità e le relazioni del database centrale condiviso fra tutti i tenant. Lo scopo è raccogliere e normalizzare le informazioni di catalogo (prodotti, servizi, bundle), disponibilità, prezzi e correlazioni per alimentare il marketplace e i suggerimenti automatici.
 
 ## Panoramica
+
 - Ogni tenant pubblica sul catalogo centrale gli articoli che desidera rendere visibili agli altri.
 - Il catalogo deve gestire beni fisici, servizi, asset digitali e combinazioni (bundle) mantenendo attributi dinamici e relazioni tra articoli.
 - Le quantità e i listini sono versionati per supportare aggiornamenti frequenti e risoluzione dei conflitti.
@@ -11,7 +12,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 ## Entità principali
 
 ### Anagrafica tenant
+
 `tenants`
+
 - `id` (PK)
 - `ragione_sociale`
 - `slug` (identificativo URL)
@@ -19,7 +22,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `creato_il`, `aggiornato_il`
 
 ### Articoli di catalogo
+
 `articoli`
+
 - `id` (PK)
 - `tenant_id` (FK → tenants)
 - `sku_globale` (unique)
@@ -33,7 +38,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `creato_il`, `aggiornato_il`
 
 ### Varianti
+
 `articoli_varianti`
+
 - `id` (PK)
 - `articolo_id` (FK → articoli)
 - `sku`
@@ -43,13 +50,16 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `creato_il`, `aggiornato_il`
 
 ### Set di attributi
+
 `set_attributi`
+
 - `id` (PK)
 - `nome`
 - `descrizione`
 - `tipologia_destinazione` (`FISICO`, `SERVIZIO`, …)
 
 `attributi`
+
 - `id` (PK)
 - `set_attributi_id` (FK)
 - `nome_tecnico`
@@ -59,6 +69,7 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `opzioni` (JSON, per valori enumerati)
 
 `valori_attributi`
+
 - `id` (PK)
 - `articolo_id` (FK)
 - `variante_id` (FK opzionale)
@@ -69,7 +80,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `valore_json`
 
 ### Tassonomie e categorie
+
 `categorie`
+
 - `id` (PK)
 - `categoria_padre_id` (FK su categorie)
 - `nome`
@@ -77,11 +90,14 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `lft`, `rgt` (nested set) oppure `percorso`
 
 `articoli_categorie`
+
 - `articolo_id`
 - `categoria_id`
 
 ### Bundle
+
 `bundle`
+
 - `id` (PK)
 - `articolo_id` (FK, con tipologia = BUNDLE)
 - `strategia_prezzo` (`FISSO`, `DINAMICO`, `SCONTO_PERCENTUALE`)
@@ -89,6 +105,7 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `creato_il`, `aggiornato_il`
 
 `bundle_componenti`
+
 - `bundle_id` (FK)
 - `articolo_component_id` (FK → articoli)
 - `quantita`
@@ -96,7 +113,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `preselezionato` (boolean)
 
 ### Relazioni e suggerimenti
+
 `articoli_relazioni`
+
 - `id` (PK)
 - `articolo_sorgente_id`
 - `articolo_correlato_id`
@@ -105,7 +124,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `creato_il`
 
 ### Disponibilità (scorte / agenda)
+
 `scorte`
+
 - `id` (PK)
 - `variante_id`
 - `tenant_id`
@@ -117,6 +138,7 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `versione_sync`
 
 `disponibilita_slot`
+
 - `id` (PK)
 - `variante_id`
 - `inizio`
@@ -125,7 +147,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `capacita_prenotata`
 
 ### Listini e prezzi
+
 `listini`
+
 - `id` (PK)
 - `tenant_id`
 - `nome`
@@ -134,6 +158,7 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `priorita`
 
 `prezzi_articoli`
+
 - `id` (PK)
 - `listino_id`
 - `variante_id`
@@ -144,7 +169,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `condizioni_aggiuntive` (JSON)
 
 ### Contenuti multimediali
+
 `risorse_multimediali`
+
 - `id` (PK)
 - `tenant_id`
 - `articolo_id`
@@ -154,7 +181,9 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `posizione`
 
 ### Sincronizzazione
+
 `eventi_sync`
+
 - `id` (PK)
 - `tenant_id`
 - `entita` (`ARTICOLO`, `SCORTA`, `PREZZO`, …)
@@ -166,16 +195,18 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - `errore`
 
 ## Relazioni principali
-- Un tenant pubblica più articoli (`tenants` 1─* `articoli`).
-- Un articolo può avere più varianti (`articoli` 1─* `articoli_varianti`).
-- Ogni articolo eredita un set di attributi (`set_attributi` 1─* `attributi` → `valori_attributi`).
-- Le categorie collegano articoli a tassonomie (`articoli` *─* `categorie`).
-- I bundle sono articoli speciali con componenti (`bundle` 1─* `bundle_componenti`).
+
+- Un tenant pubblica più articoli (`tenants` 1─\* `articoli`).
+- Un articolo può avere più varianti (`articoli` 1─\* `articoli_varianti`).
+- Ogni articolo eredita un set di attributi (`set_attributi` 1─\* `attributi` → `valori_attributi`).
+- Le categorie collegano articoli a tassonomie (`articoli` _─_ `categorie`).
+- I bundle sono articoli speciali con componenti (`bundle` 1─\* `bundle_componenti`).
 - Le relazioni collegano articoli per suggerimenti (`articoli_relazioni`).
-- Le scorte e i listini fanno riferimento alle varianti (`articoli_varianti` 1─* `scorte` / `prezzi_articoli`).
+- Le scorte e i listini fanno riferimento alle varianti (`articoli_varianti` 1─\* `scorte` / `prezzi_articoli`).
 - Gli eventi di sincronizzazione registrano ogni modifica ricevuta (`eventi_sync`).
 
 ## Note implementative
+
 - Utilizzare `deleted_il` (soft delete) sulle tabelle principali per mantenere lo storico.
 - Indici full-text su `titolo`, `descrizione`, attributi chiave per la ricerca, eventualmente replica verso motore dedicato (Elastic/Meilisearch).
 - Versionamento di scorte e prezzi (`versione_sync`) per prevenire sovrascritture provenienti da upload obsoleti.
@@ -183,6 +214,7 @@ Il presente documento descrive le entità e le relazioni del database centrale c
 - Possibilità di generare relazioni automatiche (es. servizi ausiliari in base alla categoria) salvando comunque il risultato in `articoli_relazioni`.
 
 ## Prossimi passi
+
 - Mappare campi e formati da inviare nella sincronizzazione tenant → hub.
 - Definire gli endpoint API (REST/GraphQL) per pubblicazione, aggiornamento, ricerca e suggerimenti.
 - Integrare gli eventi del workflow (es. completamento ordine) con aggiornamenti a scorte e disponibilità.

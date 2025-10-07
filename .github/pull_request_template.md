@@ -28,4 +28,3 @@ Allega screenshot o una GIF se hai modifiche visive.
 - [ ] Lint/format ok (ESLint/Prettier)
 - [ ] `.env.example` aggiornato se servono nuove variabili
 - [ ] Documentazione aggiornata (se necessario)
-

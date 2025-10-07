@@ -14,8 +14,8 @@
 
 - Copia `.env.example` in `.env` e compila.
 - Esegui:
-  - `php tools/setup_hub_db.php`
-  - `php tools/setup_tenant_db.php`
+    - `php tools/setup_hub_db.php`
+    - `php tools/setup_tenant_db.php`
 - Test hub (read-only): `/hub_catalogo/index.php?path=articoli`
 - Test API (autenticate): `/api/*`
 
@@ -26,13 +26,14 @@ Vedi `CONTRIBUTING.md`, `docs/DEV_SETUP.md` e `docs/DEPLOY_PLESK.md`.
 ## Ambienti
 
 - Produzione: https://www.lprent.it/LpWF_refactor/
-  - Hub catalogo: https://www.lprent.it/LpWF_refactor/hub_catalogo/index.php?path=articoli
+    - Hub catalogo: https://www.lprent.it/LpWF_refactor/hub_catalogo/index.php?path=articoli
 - Staging: https://www.lprent.it/LpWf_staging/
-  - Hub catalogo: https://www.lprent.it/LpWf_staging/hub_catalogo/index.php?path=articoli
+    - Hub catalogo: https://www.lprent.it/LpWf_staging/hub_catalogo/index.php?path=articoli
 
 ## Quick links
 
 Produzione
+
 - Login: https://www.lprent.it/LpWF_refactor/login.html
 - Dashboard: https://www.lprent.it/LpWF_refactor/mia_dashboard.html
 - API health: https://www.lprent.it/LpWF_refactor/api/health
@@ -40,6 +41,7 @@ Produzione
 - Hub (read-only): https://www.lprent.it/LpWF_refactor/hub_catalogo/index.php?path=articoli
 
 Staging
+
 - Login: https://www.lprent.it/LpWf_staging/login.html
 - Dashboard: https://www.lprent.it/LpWf_staging/mia_dashboard.html
 - API health: https://www.lprent.it/LpWf_staging/api/health
@@ -47,5 +49,6 @@ Staging
 - Hub (read-only): https://www.lprent.it/LpWf_staging/hub_catalogo/index.php?path=articoli
 
 Autenticazione API
+
 - Endpoint login: `POST /api/auth/login` (body JSON: `{ "email": "...", "password": "..." }`)
 - Le richieste successive includono header `Authorization: Bearer <token>`

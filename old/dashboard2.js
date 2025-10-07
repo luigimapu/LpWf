@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    const effectiveBase = window.lpwfAuth?.ensureBaseForLocation?.() || window.lpwfAuth?.getApiBase?.();
+    const effectiveBase =
+        window.lpwfAuth?.ensureBaseForLocation?.() || window.lpwfAuth?.getApiBase?.();
     const API_BASE_URL = (effectiveBase || '/api').replace(/\/$/, '');
     let currentUserId = null;
 
@@ -20,16 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!window.lpwfAuth || !window.lpwfAuth.getToken()) {
         if (dashboardMainEl) {
-            dashboardMainEl.innerHTML = '<p>Autenticazione richiesta. Effettua il login da <a href="login.html">login.html</a>.</p>';
+            dashboardMainEl.innerHTML =
+                '<p>Autenticazione richiesta. Effettua il login da <a href="login.html">login.html</a>.</p>';
         }
         return;
     }
 
     const cleanEndpoint = (endpoint) => endpoint.replace(/^\//, '');
     const authFetch = (endpoint, { method = 'GET', body, headers = {}, json = false } = {}) => {
-        const payload = json && body !== undefined && body !== null && typeof body !== 'string'
-            ? JSON.stringify(body)
-            : body;
+        const payload =
+            json && body !== undefined && body !== null && typeof body !== 'string'
+                ? JSON.stringify(body)
+                : body;
         const init = {
             method,
             headers: window.lpwfAuth.buildHeaders(headers, json),
@@ -54,7 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Errore API', { status: response.status, data });
             if (response.status === 401) {
                 window.lpwfAuth.clearToken();
-                const msg = data && data.message ? data.message : 'Sessione scaduta o token non valido.';
+                const msg =
+                    data && data.message ? data.message : 'Sessione scaduta o token non valido.';
                 alert(`${msg}\nVerrai reindirizzato alla pagina di login.`);
                 window.location.href = 'login.html';
             }
@@ -67,11 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const api = {
         get: (endpoint) => authFetch(endpoint).then(handleResponse),
         post: (endpoint, body) => {
-            const options = body === undefined ? { method: 'POST' } : { method: 'POST', body, json: true };
+            const options =
+                body === undefined ? { method: 'POST' } : { method: 'POST', body, json: true };
             return authFetch(endpoint, options).then(handleResponse);
         },
         put: (endpoint, body) => {
-            const options = body === undefined ? { method: 'PUT' } : { method: 'PUT', body, json: true };
+            const options =
+                body === undefined ? { method: 'PUT' } : { method: 'PUT', body, json: true };
             return authFetch(endpoint, options).then(handleResponse);
         },
         delete: (endpoint) => authFetch(endpoint, { method: 'DELETE' }).then(handleResponse),
@@ -84,9 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'task-card';
 
         let statusBadge = '';
-        if (task.id_stato === 1) statusBadge = '<span class="status-badge status-aperto">Aperto</span>';
-        if (task.id_stato === 2) statusBadge = '<span class="status-badge status-lavorazione">In Lavorazione</span>';
-        if (task.id_stato === 3) statusBadge = '<span class="status-badge status-chiuso">Chiuso</span>';
+        if (task.id_stato === 1)
+            statusBadge = '<span class="status-badge status-aperto">Aperto</span>';
+        if (task.id_stato === 2)
+            statusBadge = '<span class="status-badge status-lavorazione">In Lavorazione</span>';
+        if (task.id_stato === 3)
+            statusBadge = '<span class="status-badge status-chiuso">Chiuso</span>';
 
         let footerButtons = '';
         if (task.id_stato === 1 && !task.id_utente_assegnato) {
@@ -215,8 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-// --- NUOVA FUNZIONE PER IL FILTRO DEI TASK ---
- /*   const filterTasks = () => {
+    // --- NUOVA FUNZIONE PER IL FILTRO DEI TASK ---
+    /*   const filterTasks = () => {
         const searchTerm = taskSearchEl.value.toLowerCase();
 
         // Seleziona tutte le card delle tre colonne
@@ -237,10 +245,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndRenderTasks = async () => {
         if (!currentUserId) {
-            [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(el => el.innerHTML = '<p>Seleziona un utente.</p>');
+            [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(
+                (el) => (el.innerHTML = '<p>Seleziona un utente.</p>'),
+            );
             return;
         }
-        [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(el => el.innerHTML = '<p>Caricamento...</p>');
+        [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(
+            (el) => (el.innerHTML = '<p>Caricamento...</p>'),
+        );
 
         try {
             // Prendiamo il valore attuale della barra di ricerca
@@ -251,33 +263,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const [todoRes, doingRes, doneRes] = await Promise.all([
                 api.get(`tasks?id_stato=1${searchParam}`),
                 api.get(`tasks?id_utente_assegnato=${currentUserId}&id_stato=2${searchParam}`),
-                api.get(`tasks?id_utente_assegnato=${currentUserId}&id_stato=3${searchParam}`)
+                api.get(`tasks?id_utente_assegnato=${currentUserId}&id_stato=3${searchParam}`),
             ]);
 
-            const todoTasks = (todoRes || []).filter(task => !task.id_utente_assegnato);
+            const todoTasks = (todoRes || []).filter((task) => !task.id_utente_assegnato);
             const doingTasks = doingRes || [];
             const doneTasks = doneRes || [];
 
             tasksTodoEl.innerHTML = '';
             if (todoTasks.length === 0) tasksTodoEl.innerHTML = '<p>Nessun task disponibile.</p>';
-            else todoTasks.forEach(task => tasksTodoEl.appendChild(createTaskCard(task)));
+            else todoTasks.forEach((task) => tasksTodoEl.appendChild(createTaskCard(task)));
 
             tasksDoingEl.innerHTML = '';
             if (doingTasks.length === 0) tasksDoingEl.innerHTML = '<p>Nessun task in gestione.</p>';
-            else doingTasks.forEach(task => tasksDoingEl.appendChild(createTaskCard(task)));
+            else doingTasks.forEach((task) => tasksDoingEl.appendChild(createTaskCard(task)));
 
             tasksDoneEl.innerHTML = '';
             if (doneTasks.length === 0) tasksDoneEl.innerHTML = '<p>Nessun task completato.</p>';
-            else doneTasks.forEach(task => tasksDoneEl.appendChild(createTaskCard(task)));
-
+            else doneTasks.forEach((task) => tasksDoneEl.appendChild(createTaskCard(task)));
         } catch (error) {
-            [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(el => el.innerHTML = `<p style="color:red;">${error.message}</p>`);
+            [tasksTodoEl, tasksDoingEl, tasksDoneEl].forEach(
+                (el) => (el.innerHTML = `<p style="color:red;">${error.message}</p>`),
+            );
         }
     };
 
     // --- FUNZIONI PER LA SEZIONE DI REPORTISTICA ---
 
-  /*  const createClickableListItem = (item, primaryText, secondaryText, resourceType) => {
+    /*  const createClickableListItem = (item, primaryText, secondaryText, resourceType) => {
         const div = document.createElement('div');
         div.className = 'list-item';
         div.dataset.id = item.id;
@@ -292,9 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };*/
 
     const renderWorkflowSteps = (steps) => {
-        if (!steps || steps.length === 0) return '<p>Nessun passo definito per questo workflow.</p>';
-        let table = '<table><thead><tr><th>Ordine</th><th>Nome Passo</th><th>Avanz. Auto</th></tr></thead><tbody>';
-        steps.forEach(s => {
+        if (!steps || steps.length === 0)
+            return '<p>Nessun passo definito per questo workflow.</p>';
+        let table =
+            '<table><thead><tr><th>Ordine</th><th>Nome Passo</th><th>Avanz. Auto</th></tr></thead><tbody>';
+        steps.forEach((s) => {
             table += `<tr><td>${s.ordine}.${s.sottopasso}</td><td>${s.nome_passo}</td><td>${s.avanzamento_automatico ? 'Sì' : 'No'}</td></tr>`;
         });
         return table + '</tbody></table>';
@@ -302,8 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderInstanceTasks = (tasks) => {
         if (!tasks || tasks.length === 0) return '<p>Nessun task trovato per questa istanza.</p>';
-        let table = '<table><thead><tr><th>ID</th><th>Livello</th><th>Nome Task</th><th>Stato</th><th>Assegnato a</th></tr></thead><tbody>';
-        tasks.forEach(t => {
+        let table =
+            '<table><thead><tr><th>ID</th><th>Livello</th><th>Nome Task</th><th>Stato</th><th>Assegnato a</th></tr></thead><tbody>';
+        tasks.forEach((t) => {
             table += `<tr><td>${t.id}</td><td>${t.step_ordine || '?'}.${t.step_sottopasso || '?'}</td><td>${t.nome}</td><td>${t.stato_nome || 'N/D'}</td><td>${t.nome_utente_assegnato || '-'}</td></tr>`;
         });
         return table + '</tbody></table>';
@@ -313,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = e.target.closest('.list-item');
         if (!item) return;
 
-        document.querySelectorAll('.report-section .list-item.active').forEach(activeItem => {
+        document.querySelectorAll('.report-section .list-item.active').forEach((activeItem) => {
             if (activeItem !== item) activeItem.classList.remove('active');
         });
         item.classList.toggle('active');
@@ -327,8 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await api.get(`${resourceType}/${resourceId}`);
 
-            if (resourceType === 'workflows') detailsContainer.innerHTML = renderWorkflowSteps(data.steps);
-            else if (resourceType === 'workflowistanze') detailsContainer.innerHTML = renderInstanceTasks(data.tasks);
+            if (resourceType === 'workflows')
+                detailsContainer.innerHTML = renderWorkflowSteps(data.steps);
+            else if (resourceType === 'workflowistanze')
+                detailsContainer.innerHTML = renderInstanceTasks(data.tasks);
         } catch (error) {
             detailsContainer.innerHTML = `<p style="color:red;">Errore nel caricamento dei dettagli.</p>`;
         }
@@ -338,14 +356,32 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const [workflows, instances] = await Promise.all([
                 api.get('workflows'),
-                api.get('workflowistanze')
+                api.get('workflowistanze'),
             ]);
 
             workflowsListEl.innerHTML = '';
-            workflows.forEach(wf => workflowsListEl.appendChild(createClickableListItem(wf, wf.nome_workflow, wf.attivo ? 'Attivo' : 'Non Attivo', 'workflows')));
+            workflows.forEach((wf) =>
+                workflowsListEl.appendChild(
+                    createClickableListItem(
+                        wf,
+                        wf.nome_workflow,
+                        wf.attivo ? 'Attivo' : 'Non Attivo',
+                        'workflows',
+                    ),
+                ),
+            );
 
             instancesListEl.innerHTML = '';
-            instances.forEach(inst => instancesListEl.appendChild(createClickableListItem(inst, `Istanza del WF #${inst.workflow_id}`, inst.stato_istanza, 'workflowistanze')));
+            instances.forEach((inst) =>
+                instancesListEl.appendChild(
+                    createClickableListItem(
+                        inst,
+                        `Istanza del WF #${inst.workflow_id}`,
+                        inst.stato_istanza,
+                        'workflowistanze',
+                    ),
+                ),
+            );
         } catch (error) {
             workflowsListEl.innerHTML = '<p style="color:red;">Errore caricamento workflows.</p>';
             instancesListEl.innerHTML = '<p style="color:red;">Errore caricamento istanze.</p>';
@@ -394,12 +430,14 @@ document.addEventListener('DOMContentLoaded', () => {
         labelField: 'nome_completo',
         searchField: 'nome_completo',
         load: (query, callback) => {
-            api.get(`utenti?search=${encodeURIComponent(query)}`).then(callback).catch(() => callback());
+            api.get(`utenti?search=${encodeURIComponent(query)}`)
+                .then(callback)
+                .catch(() => callback());
         },
         onChange: (value) => {
             currentUserId = value;
             fetchAndRenderTasks();
-        }
+        },
     });
 
     loadReportData();

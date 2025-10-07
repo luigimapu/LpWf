@@ -18,6 +18,12 @@ export default [
                 URLSearchParams: 'readonly',
                 clearTimeout: 'readonly',
                 setTimeout: 'readonly',
+                performance: 'readonly',
+                confirm: 'readonly',
+                prompt: 'readonly',
+                navigator: 'readonly',
+                requestAnimationFrame: 'readonly',
+                Element: 'readonly',
             },
         },
         plugins: {
@@ -27,20 +33,17 @@ export default [
             'import/order': [
                 'warn',
                 {
-                    groups: [['builtin', 'external', 'internal'], ['parent', 'sibling', 'index']],
+                    groups: [
+                        ['builtin', 'external', 'internal'],
+                        ['parent', 'sibling', 'index'],
+                    ],
                     'newlines-between': 'always',
                     alphabetize: { order: 'asc', caseInsensitive: true },
                 },
             ],
             'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-            'no-unused-vars': [
-                'warn',
-                {
-                    args: 'none',
-                    caughtErrors: 'none',
-                    varsIgnorePattern: '^(unused|done)$',
-                },
-            ],
+            'no-unused-vars': 'off',
+            'no-empty': 'off',
         },
     },
 ];

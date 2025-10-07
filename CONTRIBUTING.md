@@ -34,8 +34,8 @@ Usa [Conventional Commits](https://www.conventionalcommits.org/):
 - Versiona solo `.env.example` con chiavi fittizie/placeholder.
 - Non committare `.env` reali.
 - Per testare in locale/hosting:
-  - Hub: `php tools/setup_hub_db.php`
-  - Tenant: `php tools/setup_tenant_db.php`
+    - Hub: `php tools/setup_hub_db.php`
+    - Tenant: `php tools/setup_tenant_db.php`
 
 ## Migrazioni DB
 
@@ -58,4 +58,3 @@ Usa [Conventional Commits](https://www.conventionalcommits.org/):
 
 - Staging: usa branch `staging` (vedi `docs/DEPLOY_PLESK.md`).
 - Produzione: merge su `main` dopo review.
-

@@ -5,6 +5,7 @@ Questo schema descrive la componente dati presente in ciascun database di tenant
 ## Sezione anagrafiche principali
 
 ### `utenti`
+
 - `id` (PK)
 - `nome`, `cognome`
 - `email`
@@ -14,6 +15,7 @@ Questo schema descrive la componente dati presente in ciascun database di tenant
 - `creato_il`, `aggiornato_il`, `ultimo_accesso`
 
 ### `clienti`
+
 - `id` (PK)
 - `ragione_sociale`
 - `partita_iva` / `codice_fiscale`
@@ -24,10 +26,13 @@ Questo schema descrive la componente dati presente in ciascun database di tenant
 - `creato_il`, `aggiornato_il`
 
 ### `fornitori`
+
 Stessa struttura di `clienti` (si può valutare tabella unica `anagrafiche` con flag).
 
 ### `conti_finanziari`
+
 Rappresenta casse, conti correnti, carte.
+
 - `id` (PK)
 - `nome`
 - `tipologia` (`CASSA`, `BANCA`, `CARTA`, `GATEWAY_DIGITALE`)
@@ -39,6 +44,7 @@ Rappresenta casse, conti correnti, carte.
 ## Workflow e azioni
 
 ### `workflow_modelli`
+
 - `id` (PK)
 - `nome`
 - `descrizione`
@@ -47,6 +53,7 @@ Rappresenta casse, conti correnti, carte.
 - `creato_il`, `aggiornato_il`
 
 ### `workflow_passi`
+
 - `id` (PK)
 - `workflow_modello_id`
 - `nome_passo`
@@ -58,6 +65,7 @@ Rappresenta casse, conti correnti, carte.
 - `responsabile_utente_id` / `responsabile_gruppo_id`
 
 ### `workflow_istanze`
+
 - `id` (PK)
 - `workflow_modello_id`
 - `entita_collegata_tipo` / `entita_collegata_id` (es. ordine, contratto)
@@ -66,6 +74,7 @@ Rappresenta casse, conti correnti, carte.
 - `avviato_il`, `completato_il`
 
 ### `workflow_task`
+
 - `id` (PK)
 - `workflow_istanza_id`
 - `workflow_passo_id`
@@ -78,7 +87,9 @@ Rappresenta casse, conti correnti, carte.
 - `note`
 
 ### `azioni_standard`
+
 Catalogo di azioni riutilizzabili nei workflow.
+
 - `id` (PK)
 - `codice`
 - `nome`
@@ -90,6 +101,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 ## Documenti contabili
 
 ### `documenti`
+
 - `id` (PK)
 - `tipo_documento` (`FATTURA`, `NOTA_CREDITO`, `DDT`, `ORDINE`, …)
 - `numero`
@@ -105,6 +117,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `creato_il`, `aggiornato_il`
 
 ### `documenti_righe`
+
 - `id` (PK)
 - `documento_id`
 - `articolo_id` (FK verso catalogo locale oppure riferimento hub)
@@ -117,6 +130,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `totale_riga`
 
 ### `documenti_aliquote`
+
 - `id` (PK)
 - `documento_id`
 - `aliquota`
@@ -124,6 +138,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `imposta`
 
 ### `documenti_allegati`
+
 - `id` (PK)
 - `documento_id`
 - `nome_file`
@@ -134,6 +149,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 ## Scadenze e pagamenti
 
 ### `scadenze`
+
 - `id` (PK)
 - `documento_id`
 - `numero_rata`
@@ -143,6 +159,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `note`
 
 ### `pagamenti`
+
 - `id` (PK)
 - `direzione` (`ENTRATA`, `USCITA`)
 - `cliente_id` / `fornitore_id`
@@ -157,12 +174,14 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `creato_il`, `aggiornato_il`
 
 ### `pagamenti_documenti`
+
 - `pagamento_id`
 - `documento_id`
 - `scadenza_id` (opzionale)
 - `importo_allocato`
 
 ### `metodi_pagamento`
+
 - `id` (PK)
 - `nome`
 - `tipologia` (`BONIFICO`, `CARTA`, `RID`, `CONTANTI`, `GATEWAY_DIGITALE`, …)
@@ -170,6 +189,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `attivo`
 
 ### `transazioni_gateway`
+
 - `id` (PK)
 - `pagamento_id`
 - `gateway`
@@ -180,6 +200,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `aggiornato_il`
 
 ### `prima_nota`
+
 - `id` (PK)
 - `conti_finanziari_id`
 - `data`
@@ -192,6 +213,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 ## Integrazione con l’hub centrale
 
 ### `sync_uscita`
+
 - `id` (PK)
 - `entita` (`ARTICOLO`, `SCORTA`, `PREZZO`, `DOCUMENTO`, …)
 - `entita_id`
@@ -203,6 +225,7 @@ Catalogo di azioni riutilizzabili nei workflow.
 - `errore`
 
 ### `log_sync`
+
 - `id` (PK)
 - `entita`
 - `entita_id`
@@ -214,11 +237,13 @@ Catalogo di azioni riutilizzabili nei workflow.
 ## Reportistica locale
 
 Per velocizzare le dashboard interne è utile mantenere viste/materializzate o tabelle di supporto:
+
 - `report_vendite` (aggregazioni per periodo, cliente, articolo).
 - `report_scadenze` (aging, importi per fascia).
 - `report_workflow` (tempi medi, passaggi più lenti).
 
 ## Note implementative
+
 - Introdurre `deleted_il` per le tabelle chiave (soft delete).
 - Utilizzare trigger o job per aggiornare `scadenze` quando un documento viene emesso con piano di pagamento.
 - Ogni pagamento in entrata/uscita deve aggiornare automaticamente la prima nota e lo stato delle scadenze collegate.
@@ -226,10 +251,12 @@ Per velocizzare le dashboard interne è utile mantenere viste/materializzate o t
 - Pianificare notifiche automatiche per scadenze imminenti/insolute (workflow o job schedulati).
 
 ## Collegamenti con altri documenti
+
 - Consultare `docs/schema-hub-catalogo.md` per la controparte centrale (catalogo condiviso).
 - Il documento `docs/progetto-gestionale.md` contiene la visione complessiva e la roadmap.
 
 ## Passi successivi
+
 - Modellare ER diagram tenant + hub (strumento UML/diagrammi).
 - Definire i contratti di sincronizzazione (payload JSON, regole di merge, error handling).
 - Pianificare gli adapter di pagamento e le relative azioni di workflow.

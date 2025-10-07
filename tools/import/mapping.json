@@ -1,50 +1,126 @@
 {
-  "entities": [
-    {
-      "name": "clienti",
-      "source": { 
-        "table": "anagrafiche",
-        "where": "(COALESCE(azienda,'') <> '' OR COALESCE(partitaiva,'') <> '') AND (COALESCE(email,'') <> '' OR COALESCE(telefono,'') <> '')"
-      },
-      "target": { "table": "clienti", "unique_key": null, "match_on": ["partita_iva", "email", "ragione_sociale"] },
-      "fields": [
-        { "target": "id",              "source": "anagrafiche.ID",            "transform": "int_or_null" },
-        { "target": "ragione_sociale", "source": "anagrafiche.azienda",        "transform": "string_trim" },
-        { "target": "partita_iva",     "source": "anagrafiche.partitaiva",     "transform": "vat_normalize" },
-        { "target": "email",           "source": "anagrafiche.email",          "transform": "email_normalize" },
-        { "target": "telefono",        "source": "anagrafiche.telefono",       "transform": "phone_normalize" },
-        { "target": "indirizzo",       "source": "anagrafiche.indirizzo",      "transform": "string_trim" },
-        { "target": "cap",             "source": "anagrafiche.cap",            "transform": "cap_normalize" },
-        { "target": "citta",           "source": "anagrafiche.comune",         "transform": "string_trim" },
-        { "target": "provincia",       "source": "anagrafiche.provincia",      "transform": "provincia_normalize" },
-        { "target": "tipo_cliente",     "source": "anagrafiche.formagiuridica",  "transform": "map_forma_to_tipo" }
-      ]
-    },
-    {
-      "name": "documenti",
-      "source": { "table": "documenti", "where": null },
-      "target": { "table": "documenti", "unique_key": null, "match_on": ["id_cliente", "tipologia_doc", "data_di_scadenza"] },
-      "fields": [
-        { "target": "cliente_id",        "source": "documenti.id_cliente",         "transform": "int_or_null" },
-        { "target": "tipo_documento",    "source": "documenti.tipologia_doc",      "transform": "string_trim" },
-        { "target": "data_scadenza",     "source": "documenti.data_di_scadenza",   "transform": "date_ymd" },
-        { "target": "stato",             "source": "documenti.approvato",          "transform": "map_doc_stato" },
-        { "target": "note",              "source": "documenti.note",               "transform": "string_trim" }
-      ]
-    },
-    {
-      "name": "pagamenti",
-      "source": { "table": "pagamenti", "where": null },
-      "target": { "table": "pagamenti", "unique_key": null, "match_on": ["cliente_id", "data", "importo"] },
-      "fields": [
-        { "target": "cliente_id",     "source": "pagamenti.id_cliente",  "transform": "int_or_null" },
-        { "target": "contratto_id",   "source": "pagamenti.id_contratto", "transform": "int_or_null" },
-        { "target": "data",           "source": "pagamenti.data",        "transform": "date_ymd" },
-        { "target": "data_incasso",   "source": "pagamenti.data_incasso", "transform": "date_ymd_or_null" },
-        { "target": "importo",        "source": "pagamenti.importo",     "transform": "float_or_zero" },
-        { "target": "stato",          "source": "pagamenti.effettuato",  "transform": "map_pag_stato" },
-        { "target": "note",           "source": "pagamenti.note",        "transform": "string_trim" }
-      ]
-    }
-  ]
+    "entities": [
+        {
+            "name": "clienti",
+            "source": {
+                "table": "anagrafiche",
+                "where": "(COALESCE(azienda,'') <> '' OR COALESCE(partitaiva,'') <> '') AND (COALESCE(email,'') <> '' OR COALESCE(telefono,'') <> '')"
+            },
+            "target": {
+                "table": "clienti",
+                "unique_key": null,
+                "match_on": ["partita_iva", "email", "ragione_sociale"]
+            },
+            "fields": [
+                { "target": "id", "source": "anagrafiche.ID", "transform": "int_or_null" },
+                {
+                    "target": "ragione_sociale",
+                    "source": "anagrafiche.azienda",
+                    "transform": "string_trim"
+                },
+                {
+                    "target": "partita_iva",
+                    "source": "anagrafiche.partitaiva",
+                    "transform": "vat_normalize"
+                },
+                {
+                    "target": "email",
+                    "source": "anagrafiche.email",
+                    "transform": "email_normalize"
+                },
+                {
+                    "target": "telefono",
+                    "source": "anagrafiche.telefono",
+                    "transform": "phone_normalize"
+                },
+                {
+                    "target": "indirizzo",
+                    "source": "anagrafiche.indirizzo",
+                    "transform": "string_trim"
+                },
+                { "target": "cap", "source": "anagrafiche.cap", "transform": "cap_normalize" },
+                { "target": "citta", "source": "anagrafiche.comune", "transform": "string_trim" },
+                {
+                    "target": "provincia",
+                    "source": "anagrafiche.provincia",
+                    "transform": "provincia_normalize"
+                },
+                {
+                    "target": "tipo_cliente",
+                    "source": "anagrafiche.formagiuridica",
+                    "transform": "map_forma_to_tipo"
+                }
+            ]
+        },
+        {
+            "name": "documenti",
+            "source": { "table": "documenti", "where": null },
+            "target": {
+                "table": "documenti",
+                "unique_key": null,
+                "match_on": ["id_cliente", "tipologia_doc", "data_di_scadenza"]
+            },
+            "fields": [
+                {
+                    "target": "cliente_id",
+                    "source": "documenti.id_cliente",
+                    "transform": "int_or_null"
+                },
+                {
+                    "target": "tipo_documento",
+                    "source": "documenti.tipologia_doc",
+                    "transform": "string_trim"
+                },
+                {
+                    "target": "data_scadenza",
+                    "source": "documenti.data_di_scadenza",
+                    "transform": "date_ymd"
+                },
+                {
+                    "target": "stato",
+                    "source": "documenti.approvato",
+                    "transform": "map_doc_stato"
+                },
+                { "target": "note", "source": "documenti.note", "transform": "string_trim" }
+            ]
+        },
+        {
+            "name": "pagamenti",
+            "source": { "table": "pagamenti", "where": null },
+            "target": {
+                "table": "pagamenti",
+                "unique_key": null,
+                "match_on": ["cliente_id", "data", "importo"]
+            },
+            "fields": [
+                {
+                    "target": "cliente_id",
+                    "source": "pagamenti.id_cliente",
+                    "transform": "int_or_null"
+                },
+                {
+                    "target": "contratto_id",
+                    "source": "pagamenti.id_contratto",
+                    "transform": "int_or_null"
+                },
+                { "target": "data", "source": "pagamenti.data", "transform": "date_ymd" },
+                {
+                    "target": "data_incasso",
+                    "source": "pagamenti.data_incasso",
+                    "transform": "date_ymd_or_null"
+                },
+                {
+                    "target": "importo",
+                    "source": "pagamenti.importo",
+                    "transform": "float_or_zero"
+                },
+                {
+                    "target": "stato",
+                    "source": "pagamenti.effettuato",
+                    "transform": "map_pag_stato"
+                },
+                { "target": "note", "source": "pagamenti.note", "transform": "string_trim" }
+            ]
+        }
+    ]
 }
