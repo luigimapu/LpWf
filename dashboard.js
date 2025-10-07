@@ -18,6 +18,8 @@
             doneCol: document.getElementById('tasks-done'),
             workflowsList: document.getElementById('workflows-list'),
             instancesList: document.getElementById('instances-list'),
+            clientsList: document.getElementById('clients-list'),
+            clientDetail: document.getElementById('client-detail'),
             groupsList: document.getElementById('gruppi-list'),
             usersList: document.getElementById('utenti-list'),
             filterUsers: document.getElementById('filter-users'),
@@ -75,6 +77,122 @@
             opsSectionAssigned: document.getElementById('ops-section-assigned'),
             opsSectionPending: document.getElementById('ops-section-pending'),
             logoutBtn: document.querySelector('[data-action="logout"]'),
+            clientsSearch: document.getElementById('filter-clients'),
+            btnClientsRefresh: document.getElementById('btn-clients-refresh'),
+            clientsProvSel: document.getElementById('filter-clients-province'),
+            clientsCitySel: document.getElementById('filter-clients-city'),
+            clientsCount: document.getElementById('clients-count'),
+            clientsPrev: document.getElementById('clients-prev'),
+            clientsNext: document.getElementById('clients-next'),
+            clientsPageInfo: document.getElementById('clients-page-info'),
+            clientsPageSizeSel: document.getElementById('clients-page-size'),
+            // Catalogo Prodotti & Servizi
+            productsList: document.getElementById('products-list'),
+            productsCount: document.getElementById('products-count'),
+            filterProducts: document.getElementById('filter-products'),
+            filterProductsType: document.getElementById('filter-products-type'),
+            btnProductsRefresh: document.getElementById('btn-products-refresh'),
+            btnProductNew: document.getElementById('btn-product-new'),
+            btnProductEdit: document.getElementById('btn-product-edit'),
+            filterProductsCategory: document.getElementById('filter-products-category'),
+            filterProductsTenant: document.getElementById('filter-products-tenant'),
+            filterProductsOwnTenant: document.getElementById('filter-products-own-tenant'),
+            filterProductsVisibility: document.getElementById('filter-products-visibility'),
+            productDetailTitle: document.getElementById('product-detail-title'),
+            productDetailSubtitle: document.getElementById('product-detail-subtitle'),
+            productDetailSku: document.getElementById('product-detail-sku'),
+            productDetailType: document.getElementById('product-detail-type'),
+            productDetailStatus: document.getElementById('product-detail-status'),
+            productDetailPrice: document.getElementById('product-detail-price'),
+            productDetailDescription: document.getElementById('product-detail-description'),
+            productDetailAvailability: document.getElementById('product-detail-availability'),
+            productDetailMedia: document.getElementById('product-detail-media'),
+            btnSuggestMedia: document.getElementById('btn-suggest-media'),
+            suggestMediaStatus: document.getElementById('suggest-media-status'),
+            suggestedMedia: document.getElementById('suggested-media'),
+            mediaSrcWiki: document.getElementById('media-src-wikimedia'),
+            mediaSrcUnsplash: document.getElementById('media-src-unsplash'),
+            mediaSrcPexels: document.getElementById('media-src-pexels'),
+            mediaSrcPrefer: document.getElementById('media-src-prefer'),
+            // Media upload controls
+            uploadMediaInput: document.getElementById('input-upload-media'),
+            uploadMediaAlt: document.getElementById('input-upload-alt'),
+            btnUploadMedia: document.getElementById('btn-upload-media'),
+            // Client map elements
+            clientMapEl: document.getElementById('client-map'),
+            clientMapLinks: document.getElementById('client-map-links'),
+            clientStreetView: document.getElementById('client-streetview'),
+            mapModeSelect: document.getElementById('map-mode-select'),
+            mapZoomRange: document.getElementById('map-zoom'),
+            svHeading: document.getElementById('sv-heading'),
+            svPitch: document.getElementById('sv-pitch'),
+            svFov: document.getElementById('sv-fov'),
+            svControlsWrap: document.getElementById('sv-controls'),
+            mapZoomWrap: document.getElementById('map-zoom-wrap'),
+            clientMapWarning: document.getElementById('client-map-warning'),
+            btnEditClientAddress: document.getElementById('btn-edit-client-address'),
+            formEditClientAddress: document.getElementById('form-edit-client-address'),
+            editClientFields: {
+                id: document.getElementById('edit-client-id'),
+                indirizzo: document.getElementById('edit-client-indirizzo'),
+                cap: document.getElementById('edit-client-cap'),
+                citta: document.getElementById('edit-client-citta'),
+                provincia: document.getElementById('edit-client-provincia'),
+                nazione: document.getElementById('edit-client-nazione'),
+            },
+            btnSaveGeo: document.getElementById('btn-save-geo'),
+            // Product edit modal
+            formEditProduct: document.getElementById('form-edit-product'),
+            suggestProductQuery: document.getElementById('suggest-product-query'),
+            suggestProductList: document.getElementById('suggest-product-list'),
+            editProductFields: {
+                id: document.getElementById('edit-product-id'),
+                sku: document.getElementById('edit-product-sku'),
+                codiceTenant: document.getElementById('edit-product-codice-tenant'),
+                marca: document.getElementById('edit-product-marca'),
+                modello: document.getElementById('edit-product-modello'),
+                versione: document.getElementById('edit-product-versione'),
+                tipologia: document.getElementById('edit-product-tipologia'),
+                titolo: document.getElementById('edit-product-titolo'),
+                sottotitolo: document.getElementById('edit-product-sottotitolo'),
+                descrizione: document.getElementById('edit-product-descrizione'),
+                stato: document.getElementById('edit-product-stato'),
+                visibilita: document.getElementById('edit-product-visibilita'),
+            },
+            // Pricelists modal
+            btnManagePricelists: document.getElementById('btn-manage-pricelists'),
+            modalPricelists: document.getElementById('modal-manage-pricelists'),
+            pricelistsList: document.getElementById('pricelists-list'),
+            formPricelist: document.getElementById('form-pricelist'),
+            pricelistFields: {
+                id: document.getElementById('pricelist-id'),
+                codice: document.getElementById('pricelist-codice'),
+                nome: document.getElementById('pricelist-nome'),
+                valuta: document.getElementById('pricelist-valuta'),
+                priorita: document.getElementById('pricelist-priorita'),
+                dal: document.getElementById('pricelist-dal'),
+                al: document.getElementById('pricelist-al'),
+                btnDelete: document.getElementById('btn-delete-pricelist'),
+            },
+            // Categories modal
+            btnManageCategories: document.getElementById('btn-manage-categories'),
+            modalCategories: document.getElementById('modal-manage-categories'),
+            categoriesList: document.getElementById('categories-list'),
+            categoriesSearch: document.getElementById('categories-search'),
+            formCategory: document.getElementById('form-category'),
+            categoryFields: {
+                id: document.getElementById('category-id'),
+                name: document.getElementById('category-name'),
+                slug: document.getElementById('category-slug'),
+                parent: document.getElementById('category-parent'),
+                btnDelete: document.getElementById('btn-delete-category'),
+            },
+            // Import media wizard
+            modalImportMedia: document.getElementById('modal-import-media'),
+            importMediaList: document.getElementById('import-media-list'),
+            importMediaSelectAll: document.getElementById('import-media-select-all'),
+            btnImportMediaConfirm: document.getElementById('btn-import-media-confirm'),
+            btnImportMediaCancel: document.getElementById('btn-import-media-cancel'),
         };
 
         const stepActionSelect = document.getElementById('select-step-action');
@@ -166,6 +284,11 @@
             search: '',
             users: [],
             groups: [],
+            clients: [],
+            selectedClientId: null,
+            clientFilters: { search: '', province: '', city: '' },
+            clientPage: 1,
+            clientPageSize: 50,
             auditAuth: [],
             config: {
                 auditRoleLimit: AUDIT_ROLE_LIMIT,
@@ -205,6 +328,29 @@
                 seenSubflows: {},
                 count: 0,
             },
+            // Catalogo
+            products: [],
+            selectedProductId: null,
+            productFilters: { q: '', type: '' },
+            productFilterCategory: '',
+            productFilterTenant: '',
+            productOwnTenantOnly: true,
+            pendingCategoriesForNew: null,
+            pendingMediaForNew: null,
+            // Relazioni: filtri/sort
+            relationFilterType: '',
+            relationSort: 'priority',
+            relationSortDir: 'asc',
+            // Map state
+            clientMap: null,
+            clientMapMarker: null,
+            clientGeo: null,
+            mapZoom: 15,
+            mapMode: 'map',
+            clientAddress: '',
+            selectedClientDetail: null,
+            // Pricing state
+            selectedPriceListCode: 'DEFAULT',
         };
 
         const NOTIF_STORAGE_KEY = 'lpwf_notif_seen_subflows';
@@ -462,6 +608,35 @@
             if (elTok) elTok.textContent = tokenOk ? 'OK' : 'MANCANTE';
         };
 
+        // Aggiorna badge health rapidi (API DB + Tenant DB)
+        const updateHealthBadges = async () => {
+            const api = (window.lpwfAuth?.getApiBase?.() || window.lpwfAuth?.ensureBaseForLocation?.() || '/api').replace(/\/$/, '');
+            const elApi = document.getElementById('status-health-api');
+            const elTen = document.getElementById('status-health-tenant');
+            const elMaps = document.getElementById('status-maps');
+            const setBadge = (el, ok) => {
+                if (!el) return;
+                el.textContent = ok ? 'OK' : 'KO';
+                el.classList.remove('badge-success', 'badge-error');
+                el.classList.add(ok ? 'badge-success' : 'badge-error');
+            };
+            try {
+                const r = await fetch(`${api}/health`);
+                const h = await r.json();
+                setBadge(elApi, !!h?.db_ok);
+            } catch (e) { setBadge(elApi, false); }
+            try {
+                const r2 = await fetch(`${api}/tenant_health`);
+                const h2 = await r2.json();
+                setBadge(elTen, !!h2?.db_ok);
+            } catch (e) { setBadge(elTen, false); }
+            try {
+                const cfg = await authFetch('config');
+                const hasKey = !!cfg?.gmaps_embed_key;
+                setBadge(elMaps, hasKey);
+            } catch (e) { setBadge(elMaps, false); }
+        };
+
         const renderSupervisorBadge = async () => {
             const role = (state.currentUserInfo?.ruolo || '').toUpperCase();
             const badge = document.getElementById('supervisor-users-badge');
@@ -561,6 +736,28 @@
         const renderMessage = (container, text) => {
             if (!container) return;
             container.innerHTML = `<p>${sanitize(text)}</p>`;
+        };
+
+        // Hub Catalogo fetch (read-only)
+        const siteRoot = apiBase.replace(/\/api$/, '');
+        // Preferisci chiamare direttamente index.php con ?path= per compatibilità hosting senza rewrite
+        const hubBase = (window.lpwfAuth?.getHubBase?.() || (siteRoot + '/hub_catalogo/index.php')).replace(/\/$/, '');
+        const hubFetch = async (endpoint) => {
+            const ep = String(endpoint||'');
+            const [pathOnly, qs] = ep.split('?');
+            let url = '';
+            if (hubBase.endsWith('index.php')) {
+                url = `${hubBase}?path=${encodeURIComponent(pathOnly)}` + (qs ? `&${qs}` : '');
+            } else {
+                url = `${hubBase}/${pathOnly.replace(/^\/+/, '')}` + (qs ? `?${qs}` : '');
+            }
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) {
+                let msg = `Errore HTTP ${res.status}`;
+                try { const j = await res.json(); msg = j?.errore?.messaggio || msg; } catch (e) { /* ignore */ }
+                throw new Error(msg);
+            }
+            return await res.json();
         };
 
         const renderTaskColumn = (container, tasks, emptyMsg) => {
@@ -2073,6 +2270,737 @@
             });
         };
 
+        const renderClientsList = () => {
+            const container = dom.clientsList;
+            if (!container) return;
+            const all = Array.isArray(state.clients) ? state.clients : [];
+            const search = (dom.clientsSearch?.value || '').trim().toLowerCase();
+            const prov = (state.clientFilters.province || '').toLowerCase();
+            const city = (state.clientFilters.city || '').toLowerCase();
+            let list = all.filter(c => {
+                const matchSearch = !search || [c.ragione_sociale, c.partita_iva, c.email].filter(Boolean).some(v => String(v).toLowerCase().includes(search));
+                const matchProv = !prov || String(c.provincia || '').toLowerCase() === prov;
+                const matchCity = !city || String(c.citta || '').toLowerCase() === city;
+                return matchSearch && matchProv && matchCity;
+            }).sort((a,b) => String(a.ragione_sociale||'').localeCompare(String(b.ragione_sociale||''), 'it'));
+            // Update count
+            if (dom.clientsCount) dom.clientsCount.textContent = String(list.length);
+            // Pagination
+            const total = list.length;
+            const pageSize = state.clientPageSize;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (state.clientPage > totalPages) state.clientPage = totalPages;
+            if (state.clientPage < 1) state.clientPage = 1;
+            const start = (state.clientPage - 1) * pageSize;
+            const pageItems = list.slice(start, start + pageSize);
+            if (dom.clientsPageInfo) dom.clientsPageInfo.textContent = `${state.clientPage}/${totalPages}`;
+            if (dom.clientsPrev) dom.clientsPrev.disabled = state.clientPage <= 1;
+            if (dom.clientsNext) dom.clientsNext.disabled = state.clientPage >= totalPages;
+            // Render
+            if (!pageItems.length) { container.innerHTML = '<p>Nessun cliente trovato.</p>'; return; }
+            container.innerHTML = '';
+            pageItems.forEach(cli => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'instance-card client-card' + (Number(cli.id) === Number(state.selectedClientId) ? ' is-active' : '');
+                btn.dataset.id = cli.id;
+                const title = document.createElement('h4');
+                title.textContent = `${cli.ragione_sociale || ('Cliente #' + cli.id)}`;
+                const meta = document.createElement('small');
+                const piva = cli.partita_iva || '--';
+                const mail = cli.email || '--';
+                meta.textContent = `P.IVA ${piva} • ${mail}`;
+                btn.appendChild(title);
+                btn.appendChild(meta);
+            container.appendChild(btn);
+            });
+        };
+
+        // Catalogo: render lista prodotti/servizi
+        const renderProductsList = () => {
+            const container = dom.productsList;
+            if (!container) return;
+            const list = Array.isArray(state.products) ? state.products : [];
+            if (dom.productsCount) dom.productsCount.textContent = String(list.length || 0);
+            if (!list.length) { container.innerHTML = '<p>Nessun elemento trovato.</p>'; return; }
+            container.innerHTML = '';
+            list.forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'instance-card product-card' + (Number(item.id) === Number(state.selectedProductId) ? ' is-active' : '');
+                btn.dataset.id = item.id;
+                const h = document.createElement('h4');
+                const name = item.titolo || ('Articolo #' + item.id);
+                const brandModel = [item.marca, item.modello].filter(Boolean).join(' ');
+                h.textContent = brandModel ? `${brandModel} — ${name}` : name;
+                const meta = document.createElement('small');
+                const t = String(item.tipologia || '').toUpperCase();
+                const vis = String(item.visibilita || '').toUpperCase();
+                const sku = item.sku || item.sku_globale || '—';
+                const code = item.codice_tenant || '';
+                const cats = item.categorie || '';
+                const price = (item.prezzo_min !== null && item.prezzo_min !== undefined) ? ` • da € ${Number(item.prezzo_min).toFixed(2)}` : '';
+                meta.textContent = `${t || '—'} • ${vis || ''} • SKU ${sku}${code ? (' • COD ' + code) : ''}${cats ? (' • ' + cats) : ''}${price}`;
+                btn.appendChild(h);
+                btn.appendChild(meta);
+                container.appendChild(btn);
+            });
+        };
+
+        const renderProductDetail = (detail) => {
+            if (!detail) {
+                if (dom.productDetailTitle) dom.productDetailTitle.textContent = 'Nessun elemento selezionato';
+                if (dom.productDetailSubtitle) dom.productDetailSubtitle.textContent = '';
+                if (dom.productDetailSku) dom.productDetailSku.textContent = '--';
+                if (dom.productDetailType) dom.productDetailType.textContent = '--';
+                if (dom.productDetailStatus) dom.productDetailStatus.textContent = '--';
+                if (dom.productDetailPrice) dom.productDetailPrice.textContent = '--';
+                if (dom.productDetailDescription) dom.productDetailDescription.textContent = '--';
+                if (dom.productDetailAvailability) dom.productDetailAvailability.textContent = '--';
+                if (dom.productDetailMedia) dom.productDetailMedia.innerHTML = '';
+                return;
+            }
+            if (dom.productDetailTitle) dom.productDetailTitle.textContent = detail.titolo || `Articolo #${detail.id}`;
+            if (dom.productDetailSubtitle) dom.productDetailSubtitle.textContent = detail.sottotitolo || '';
+            const catsAgg = Array.isArray(detail.categorie) && detail.categorie.length ? detail.categorie.map(c=>c.nome).join(', ') : '--';
+            const brandEl = document.getElementById('product-detail-brand'); if (brandEl) brandEl.textContent = detail.marca || '--';
+            const modelEl = document.getElementById('product-detail-model'); if (modelEl) modelEl.textContent = detail.modello || '--';
+            const verEl = document.getElementById('product-detail-version'); if (verEl) verEl.textContent = detail.versione || '--';
+            if (dom.productDetailSku) dom.productDetailSku.textContent = detail.sku || '--';
+            const codeEl = document.getElementById('product-detail-code'); if (codeEl) codeEl.textContent = detail.codice_tenant || '--';
+            if (dom.productDetailType) dom.productDetailType.textContent = String(detail.tipologia || '').toUpperCase() || '--';
+            if (dom.productDetailStatus) dom.productDetailStatus.textContent = humanizeStatus(detail.stato_pubblicazione || '');
+            let pmin = null; let pmax = null;
+            if (Array.isArray(detail.varianti)) {
+                detail.varianti.forEach(v => {
+                    if (v.prezzo_min !== null && v.prezzo_min !== undefined) {
+                        const pv = Number(v.prezzo_min);
+                        pmin = (pmin === null) ? pv : Math.min(pmin, pv);
+                    }
+                    if (v.prezzo_max !== null && v.prezzo_max !== undefined) {
+                        const pv = Number(v.prezzo_max);
+                        pmax = (pmax === null) ? pv : Math.max(pmax, pv);
+                    }
+                });
+            }
+            let priceText = '--';
+            if (pmin !== null && pmax !== null) {
+                priceText = (pmin === pmax) ? `€ ${pmin.toFixed(2)}` : `€ ${pmin.toFixed(2)} – € ${pmax.toFixed(2)}`;
+            } else if (pmin !== null) { priceText = `da € ${pmin.toFixed(2)}`; }
+            if (dom.productDetailPrice) dom.productDetailPrice.textContent = priceText;
+            if (dom.productDetailDescription) dom.productDetailDescription.textContent = detail.descrizione || '--';
+            const catEl = document.getElementById('product-detail-categories'); if (catEl) catEl.textContent = catsAgg;
+
+            // Disponibilita (solo per servizi, se presente in varianti)
+            try {
+                const box = dom.productDetailAvailability;
+                if (box) {
+                    if (String(detail.tipologia || '').toUpperCase() !== 'SERVIZIO') {
+                        box.innerHTML = '<small class="form-hint">Non applicabile</small>';
+                    } else {
+                        const items = [];
+                        (detail.varianti || []).forEach(v => {
+                            (v.disponibilita || []).forEach(s => {
+                                const start = formatDateTime(s.inizio);
+                                const end = formatDateTime(s.fine);
+                                const free = Number(s.capacita_disponibile ?? (Number(s.capacita_totale||0) - Number(s.capacita_prenotata||0)));
+                                items.push({ variant: v.nome || v.sku || `Var #${v.id}`, start, end, free });
+                            });
+                        });
+                        if (!items.length) {
+                            box.innerHTML = '<small class="form-hint">Nessuno slot nelle prossime 2 settimane.</small>';
+                        } else {
+                            const html = items.slice(0, 10).map(i => `<div class="list-item"><strong>${sanitize(i.variant)}</strong><br><small>${sanitize(i.start)} → ${sanitize(i.end)} • posti liberi: ${sanitize(i.free)}</small></div>`).join('');
+                            box.innerHTML = html;
+                        }
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
+            // Media gallery
+            try {
+                const g = dom.productDetailMedia;
+                if (g) {
+                    const media = Array.isArray(detail.media) ? detail.media : [];
+                    if (!media.length) { g.innerHTML = '<small class="form-hint">Nessun media associato.</small>'; }
+                    else {
+                        g.innerHTML = media.map(m => `
+                          <figure class="media-thumb" data-media-id="${m.id}" draggable="true" style="display:inline-block; margin:6px;">
+                            <img src="${sanitize(m.url)}" alt="${sanitize(m.testo_alternativo || '')}" style="max-width:140px; max-height:140px; object-fit:cover; display:block;">
+                            <figcaption>
+                              <small>${sanitize(m.tipologia||'')}</small>
+                              <div style="margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                <button type="button" class="btn" data-action="media-up" data-id="${m.id}">Su</button>
+                                <button type="button" class="btn" data-action="media-down" data-id="${m.id}">Giù</button>
+                                <button type="button" class="btn" data-action="media-cover" data-id="${m.id}">Copertina</button>
+                                <input type="text" class="media-alt-input" data-id="${m.id}" value="${sanitize(m.testo_alternativo || '')}" placeholder="Alt" style="max-width:160px;">
+                                <button type="button" class="btn" data-action="media-save-alt" data-id="${m.id}">Salva alt</button>
+                                <button type="button" class="btn btn-danger" data-action="media-delete" data-id="${m.id}">Rimuovi</button>
+                              </div>
+                            </figcaption>
+                          </figure>`).join(' ');
+                        try { attachMediaDnD(g); } catch (e) {}
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
+            // Relazioni: render elenco con modifica/elimina + applica filtro/ordinamento
+            renderRelationsBox(detail);
+
+            // Varianti & prezzi list
+            try {
+                const box = document.getElementById('product-variants-list');
+                if (box) {
+                    const vars = Array.isArray(detail.varianti) ? detail.varianti : [];
+                    if (!vars.length) { box.innerHTML = '<p class="form-hint">Nessuna variante.</p>'; }
+                    else {
+                        box.innerHTML = vars.map(v => {
+                            const pmin = (v.prezzo_min !== null && v.prezzo_min !== undefined) ? Number(v.prezzo_min).toFixed(2) : '--';
+                            const pmax = (v.prezzo_max !== null && v.prezzo_max !== undefined) ? Number(v.prezzo_max).toFixed(2) : '--';
+                            const price = (pmin !== '--' && pmax !== '--') ? (pmin === pmax ? `€ ${pmin}` : `€ ${pmin} – € ${pmax}`) : '--';
+                            const listBadge = state.selectedPriceListCode ? `<small class=\"badge\" data-price-for=\"${v.id}\">${sanitize(state.selectedPriceListCode)}: …</small>` : '';
+                            return `<div class="list-item" data-variant-id="${v.id}"><strong>${sanitize(v.nome||'Variante')}</strong> <small class="badge">SKU ${sanitize(v.sku||'')}</small> <small class="badge">${price}</small> ${listBadge}
+                                <div class="item-actions">
+                                  <button type="button" class="btn" data-action="variant-set-price" data-id="${v.id}">Imposta prezzo</button>
+                                  <button type="button" class="btn btn-danger" data-action="variant-delete" data-id="${v.id}">Elimina</button>
+                                </div>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
+            // Categorie: popolamento multi-select
+            try {
+                const sel = document.getElementById('edit-product-categories');
+                if (sel) {
+                    // Load categories if empty
+                    if (!sel.options.length) {
+                        hubFetch('categorie').then(list => {
+                            sel.innerHTML = (Array.isArray(list)?list:[]).map(c => `<option value="${sanitize(c.slug)}">${sanitize(c.nome)}</option>`).join('');
+                            preselectCategories(detail);
+                        });
+                    } else {
+                        preselectCategories(detail);
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        };
+
+        function preselectCategories(detail) {
+            try {
+                const sel = document.getElementById('edit-product-categories');
+                if (!sel) return;
+                const slugs = (detail.categorie||[]).map(c => c.slug);
+                const set = new Set(slugs);
+                [...sel.options].forEach(o => { o.selected = set.has(o.value); });
+            } catch (e) { /* ignore */ }
+        }
+
+        function applyRelationFilterSort(rels) {
+            let arr = Array.isArray(rels) ? [...rels] : [];
+            const f = (state.relationFilterType || '').toUpperCase();
+            if (f) arr = arr.filter(r => String(r.tipo_relazione||'').toUpperCase() === f);
+            const sort = state.relationSort || 'priority';
+            const dir = (state.relationSortDir || 'asc').toLowerCase() === 'desc' ? -1 : 1;
+            arr.sort((a,b) => {
+                if (sort === 'title') {
+                    const ta = String(a.titolo||'');
+                    const tb = String(b.titolo||'');
+                    return ta.localeCompare(tb, 'it') * dir;
+                }
+                if (sort === 'type') {
+                    const ta = String(a.tipo_relazione||'');
+                    const tb = String(b.tipo_relazione||'');
+                    return ta.localeCompare(tb, 'it') * dir;
+                }
+                // default priority
+                const pa = Number(a.priorita||0);
+                const pb = Number(b.priorita||0);
+                return (pa - pb) * dir;
+            });
+            return arr;
+        }
+
+        function renderRelationsBox(detail) {
+            try {
+                const box = document.getElementById('product-relations-list');
+                if (!box) return;
+                const rels = applyRelationFilterSort(detail.relazioni||[]);
+                if (!rels.length) { box.innerHTML = '<p class="form-hint">Nessuna relazione.</p>'; return; }
+                box.innerHTML = rels.map(r => {
+                    const label = `${sanitize(r.titolo || ('Articolo #' + r.articolo_id))}`;
+                    const tipo = sanitize(r.tipo_relazione || 'REL');
+                    const pr = Number(r.priorita || 0);
+                    return `<div class="list-item" data-relation-id="${Number(r.id)}">
+                        <div class="item-header"><strong>${label}</strong> <small class="badge">${tipo}</small> <button type="button" class="btn" data-action="rel-open" data-target-id="${Number(r.articolo_id)}">Apri</button></div>
+                        <div class="item-actions" style="display:flex; gap:8px; align-items:center;">
+                            <label class="form-control form-control--inline"><span>Priorità</span><input type="number" value="${pr}" data-field="prio" style="width:90px;"></label>
+                            <label class="form-control form-control--inline"><span>Tipo</span>
+                                <select data-field="tipo">
+                                    <option value="UPSELL" ${r.tipo_relazione==='UPSELL'?'selected':''}>UPSELL</option>
+                                    <option value="CROSS_SELL" ${r.tipo_relazione==='CROSS_SELL'?'selected':''}>CROSS_SELL</option>
+                                    <option value="SERVIZIO_AUSILIARIO" ${r.tipo_relazione==='SERVIZIO_AUSILIARIO'?'selected':''}>SERVIZIO_AUSILIARIO</option>
+                                    <option value="SOSTITUTIVO" ${r.tipo_relazione==='SOSTITUTIVO'?'selected':''}>SOSTITUTIVO</option>
+                                    <option value="ADD_ON" ${r.tipo_relazione==='ADD_ON'?'selected':''}>ADD_ON</option>
+                                </select>
+                            </label>
+                            <button type="button" class="btn" data-action="rel-update" data-id="${Number(r.id)}">Aggiorna</button>
+                            <button type="button" class="btn btn-danger" data-action="rel-delete" data-id="${Number(r.id)}">Elimina</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) { /* ignore */ }
+        }
+
+        async function loadPriceListsForArticle(detail) {
+            try {
+                const tenantId = Number(detail.tenant_id || 0);
+                const sel = document.getElementById('price-list-code');
+                const cur = state.selectedPriceListCode || 'DEFAULT';
+                if (!sel || !tenantId) return;
+                const lists = await authFetch(`catalogo_listini?tenant_id=${encodeURIComponent(tenantId)}`);
+                const arr = Array.isArray(lists)?lists:[];
+                const codes = new Set(arr.map(x => x.codice));
+                if (!codes.has('DEFAULT')) { arr.unshift({ codice:'DEFAULT', nome:'DEFAULT', valuta:'EUR' }); }
+                sel.innerHTML = arr.map(l => `<option value="${sanitize(l.codice)}">${sanitize(l.codice)} (${sanitize(l.valuta||'EUR')})</option>`).join('');
+                sel.value = cur && codes.has(cur) ? cur : 'DEFAULT';
+                state.selectedPriceListCode = sel.value;
+                const curList = arr.find(l => l.codice === state.selectedPriceListCode);
+                const curCurrency = document.getElementById('price-list-currency');
+                if (curCurrency) curCurrency.value = (curList && curList.valuta) ? curList.valuta : (curCurrency.value||'EUR');
+                await refreshPerVariantListinoPrices(detail);
+            } catch (e) { /* ignore */ }
+        }
+
+        async function refreshPerVariantListinoPrices(detail) {
+            try {
+                const code = state.selectedPriceListCode || 'DEFAULT';
+                const vars = Array.isArray(detail.varianti)?detail.varianti:[];
+                for (const v of vars) {
+                    try {
+                        const p = await authFetch(`catalogo_prezzi?variante_id=${encodeURIComponent(v.id)}&listino_codice=${encodeURIComponent(code)}`);
+                        const badge = document.querySelector(`[data-price-for="${v.id}"]`);
+                        if (badge) {
+                            const txt = (p && p.prezzo !== undefined && p.prezzo !== null) ? `${code}: ${Number(p.prezzo).toFixed(2)} ${p.valuta||''}` : `${code}: —`;
+                            badge.textContent = txt;
+                        }
+                    } catch (e) { /* ignore single */ }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        const loadProductById = async (id) => {
+            try {
+                const detail = await hubFetch(`articoli/${id}`);
+                state.selectedProductDetail = detail;
+                renderProductDetail(detail);
+                // Load listini and refresh per-variant prices for selected code
+                await loadPriceListsForArticle(detail);
+            } catch (e) {
+                state.selectedProductDetail = null;
+                renderProductDetail(null);
+            }
+        };
+
+        const loadProducts = async () => {
+            const term = (dom.filterProducts?.value || '').trim();
+            const typeSel = (dom.filterProductsType?.value || '').trim();
+            const catSel = (dom.filterProductsCategory?.value || '').trim();
+            const tenantSel = (dom.filterProductsTenant?.value || '').trim();
+            const params = new URLSearchParams();
+            if (term) params.set('q', term);
+            if (typeSel) params.set('tipologia', typeSel);
+            if (catSel) params.set('categoria', catSel);
+            if (tenantSel) params.set('tenant', tenantSel);
+            const visSel = (dom.filterProductsVisibility?.value || '').trim();
+            if (visSel) params.set('visibilita', visSel);
+            try {
+                const list = await hubFetch(`articoli${params.toString() ? ('?' + params.toString()) : ''}`);
+                state.products = Array.isArray(list) ? list : [];
+                renderProductsList();
+                if (!state.selectedProductId && state.products.length) {
+                    state.selectedProductId = state.products[0].id;
+                    await loadProductById(state.selectedProductId);
+                }
+            } catch (e) {
+                if (dom.productsList) dom.productsList.innerHTML = `<p>${sanitize(e.message || 'Errore caricamento catalogo')}</p>`;
+            }
+        };
+
+        // Catalogo: caricamento filtri (categorie/tenants)
+        const loadProductFilters = async () => {
+            try {
+                const cats = await hubFetch('categorie');
+                if (dom.filterProductsCategory) {
+                    const cur = dom.filterProductsCategory.value;
+                    dom.filterProductsCategory.innerHTML = '<option value="">Tutte</option>' + (Array.isArray(cats) ? cats : []).map(c => `<option value="${sanitize(c.slug)}">${sanitize(c.nome)}</option>`).join('');
+                    if (cur) dom.filterProductsCategory.value = cur;
+                }
+            } catch (e) { /* ignore */ }
+            try {
+                const tenants = await hubFetch('tenants');
+                if (dom.filterProductsTenant) {
+                    const curT = dom.filterProductsTenant.value;
+                    dom.filterProductsTenant.innerHTML = '<option value="">Tutti</option>' + (Array.isArray(tenants) ? tenants : []).map(t => `<option value="${sanitize(t.slug)}" data-id="${Number(t.id)}">${sanitize(t.ragione_sociale || t.slug)}</option>`).join('');
+                    if (curT) dom.filterProductsTenant.value = curT;
+                    // Se "Solo mio tenant" attivo, pre-seleziona il tenant corrente
+                    if (dom.filterProductsOwnTenant && dom.filterProductsOwnTenant.checked) {
+                        const curTid = Number(state.currentUserInfo?.tenant_id || 0);
+                        if (curTid) {
+                            const opt = [...dom.filterProductsTenant.options].find(o => Number(o.dataset.id) === curTid);
+                            if (opt) dom.filterProductsTenant.value = opt.value;
+                        }
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        };
+
+        const renderClientDetail = (cli) => {
+            const nameEl = document.getElementById('client-detail-name');
+            const descEl = document.getElementById('client-detail-description');
+            const pivaEl = document.getElementById('client-detail-piva');
+            const emailEl = document.getElementById('client-detail-email');
+            const phoneEl = document.getElementById('client-detail-phone');
+            const typeEl = document.getElementById('client-detail-type');
+            const addrEl = document.getElementById('client-detail-address');
+            const cfEl = document.getElementById('client-detail-cf');
+            const countryEl = document.getElementById('client-detail-country');
+            const latEl = document.getElementById('client-detail-lat');
+            const lonEl = document.getElementById('client-detail-lon');
+            const createdEl = document.getElementById('client-detail-created');
+            const updatedEl = document.getElementById('client-detail-updated');
+            const notesEl = document.getElementById('client-detail-notes');
+            if (!cli) {
+                if (nameEl) nameEl.textContent = 'Nessun cliente selezionato';
+                if (descEl) descEl.textContent = 'Seleziona un cliente per visualizzare informazioni e contatti.';
+                if (pivaEl) pivaEl.textContent = '--';
+                if (emailEl) emailEl.textContent = '--';
+                if (phoneEl) phoneEl.textContent = '--';
+                if (typeEl) typeEl.textContent = '--';
+                if (addrEl) addrEl.textContent = '--';
+                if (cfEl) cfEl.textContent = '--';
+                if (countryEl) countryEl.textContent = '--';
+                if (latEl) latEl.textContent = '--';
+                if (lonEl) lonEl.textContent = '--';
+                if (createdEl) createdEl.textContent = '--';
+                if (updatedEl) updatedEl.textContent = '--';
+                if (notesEl) notesEl.textContent = '--';
+                return;
+            }
+            if (nameEl) nameEl.textContent = cli.ragione_sociale || ('Cliente #' + cli.id);
+            if (descEl) descEl.textContent = `ID #${cli.id}`;
+            if (pivaEl) pivaEl.textContent = cli.partita_iva || '--';
+            if (emailEl) emailEl.innerHTML = cli.email ? `<a href="mailto:${sanitize(cli.email)}">${sanitize(cli.email)}</a>` : '--';
+            if (phoneEl) phoneEl.textContent = cli.telefono || '--';
+            if (typeEl) typeEl.textContent = cli.tipo_cliente || '--';
+            if (cfEl) cfEl.textContent = cli.codice_fiscale || '--';
+            if (countryEl) countryEl.textContent = cli.nazione || '--';
+            if (latEl) {
+                const v = (cli.latitudine !== undefined && cli.latitudine !== null && cli.latitudine !== '') ? Number(cli.latitudine) : null;
+                latEl.textContent = (v !== null && !Number.isNaN(v)) ? v.toFixed(6) : (cli.latitudine || '--');
+            }
+            if (lonEl) {
+                const v = (cli.longitudine !== undefined && cli.longitudine !== null && cli.longitudine !== '') ? Number(cli.longitudine) : null;
+                lonEl.textContent = (v !== null && !Number.isNaN(v)) ? v.toFixed(6) : (cli.longitudine || '--');
+            }
+            if (createdEl) createdEl.textContent = cli.creato_il ? formatDateTime(cli.creato_il) : '--';
+            if (updatedEl) updatedEl.textContent = cli.aggiornato_il ? formatDateTime(cli.aggiornato_il) : '--';
+            const parts = [];
+            if (cli.indirizzo) parts.push(cli.indirizzo);
+            const city = [cli.cap, cli.citta].filter(Boolean).join(' ');
+            const prov = cli.provincia ? (`(${cli.provincia})`) : '';
+            const line2 = [city, prov].filter(Boolean).join(' ');
+            const addr = [parts.join(' '), line2].filter(Boolean).join('\n');
+            if (addrEl) addrEl.textContent = addr || '--';
+            if (notesEl) notesEl.textContent = cli.note || '--';
+            // Aggiorna mappa indirizzo
+            try { updateClientMap(cli, addr); } catch (e) { /* ignore */ }
+        };
+
+        const loadClientById = async (id) => {
+            try {
+                const cli = await authFetch(`clienti/${id}`);
+                state.selectedClientDetail = cli;
+                renderClientDetail(cli);
+            } catch (e) {
+                const fallback = state.clients.find(c => Number(c.id) === Number(id)) || null;
+                state.selectedClientDetail = fallback;
+                renderClientDetail(fallback);
+            }
+        };
+
+        // Geocoding via Nominatim (OSM)
+        const geocodeAddress = async (address) => {
+            if (!address) return null;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`;
+            try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) {
+                    const { lat, lon, display_name } = data[0];
+                    return { lat: parseFloat(lat), lon: parseFloat(lon), label: display_name };
+                }
+            } catch (e) { /* ignore */ }
+            return null;
+        };
+
+        const ensureLeaflet = () => (typeof window.L !== 'undefined' ? window.L : null);
+
+        const updateClientMap = async (cli, addr) => {
+            const container = dom.clientMapEl;
+            if (!container) return;
+            const hasCity = !!(cli?.citta);
+            const hasCountry = !!(cli?.nazione);
+            if (dom.clientMapWarning) {
+                if (!hasCity || !hasCountry) {
+                    dom.clientMapWarning.innerHTML = '<span class="badge badge-warning">Dati incompleti: specifica almeno Città e Nazione per visualizzare la mappa.</span>';
+                    dom.clientMapWarning.hidden = false;
+                } else {
+                    dom.clientMapWarning.hidden = true;
+                    dom.clientMapWarning.innerHTML = '';
+                }
+            }
+            const partsFull = [cli?.indirizzo, cli?.cap, cli?.citta, cli?.provincia, cli?.nazione].filter(Boolean).map(String);
+            const addressFull = partsFull.join(', ');
+            if (!addressFull) { container.innerHTML = ''; return; }
+            state.clientAddress = addressFull;
+            // Applica preferenze salvate per questo cliente (zoom, sv params)
+            try {
+                const prefs = loadClientMapPrefs(cli?.id);
+                if (prefs) {
+                    if (typeof prefs.mapZoom === 'number') { state.mapZoom = prefs.mapZoom; if (dom.mapZoomRange) dom.mapZoomRange.value = String(prefs.mapZoom); }
+                    if (typeof prefs.mapMode === 'string') { state.mapMode = prefs.mapMode; if (dom.mapModeSelect) dom.mapModeSelect.value = prefs.mapMode; }
+                    if (typeof prefs.svHeading === 'number' && dom.svHeading) dom.svHeading.value = String(prefs.svHeading);
+                    if (typeof prefs.svPitch === 'number' && dom.svPitch) dom.svPitch.value = String(prefs.svPitch);
+                    if (typeof prefs.svFov === 'number' && dom.svFov) dom.svFov.value = String(prefs.svFov);
+                }
+            } catch (e) { /* ignore */ }
+            let geo = await geocodeAddress(addressFull);
+            if (!geo) {
+                const addrCityProv = [cli?.citta, cli?.provincia, cli?.nazione].filter(Boolean).join(', ');
+                if (addrCityProv) geo = await geocodeAddress(addrCityProv);
+            }
+            if (!geo) {
+                const addrCityOnly = [cli?.citta, cli?.nazione].filter(Boolean).join(', ');
+                if (addrCityOnly) geo = await geocodeAddress(addrCityOnly);
+            }
+            if (!geo) { container.innerHTML = '<small class="form-hint">Impossibile geocodificare l\'indirizzo.</small>'; return; }
+            state.clientGeo = geo;
+            const L = ensureLeaflet();
+            if (!L) { container.innerHTML = '<small class="form-hint">Libreria mappe non caricata.</small>'; return; }
+            try {
+                if (!state.clientMap) {
+                    state.clientMap = L.map(container, { scrollWheelZoom: false });
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(state.clientMap);
+                }
+                state.clientMap.setView([geo.lat, geo.lon], state.mapZoom || 15);
+                if (!state.clientMapMarker) {
+                    state.clientMapMarker = L.marker([geo.lat, geo.lon]).addTo(state.clientMap);
+                } else {
+                    state.clientMapMarker.setLatLng([geo.lat, geo.lon]);
+                }
+                state.clientMapMarker.bindPopup((cli?.ragione_sociale || 'Cliente') + '<br>' + sanitize(addressFull));
+            } catch (e) {
+                container.innerHTML = '<small class="form-hint">Errore nel rendering della mappa.</small>';
+            }
+            try {
+                updateExternalMapLinks();
+                applyMapMode();
+            } catch (e) { /* ignore */ }
+        };
+
+        const loadClientMapPrefs = (clientId) => {
+            if (!clientId) return null;
+            try {
+                const raw = window.localStorage.getItem(`lpwf_client_map_prefs_${clientId}`);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        };
+
+        const saveClientMapPrefs = (clientId, data) => {
+            if (!clientId) return;
+            try {
+                const key = `lpwf_client_map_prefs_${clientId}`;
+                const prev = loadClientMapPrefs(clientId) || {};
+                const val = { ...prev, ...data };
+                window.localStorage.setItem(key, JSON.stringify(val));
+            } catch (e) { /* ignore */ }
+        };
+
+        const buildStreetViewLink = () => {
+            if (!state.clientGeo) return '';
+            const h = Number(dom.svHeading?.value || 210) || 210;
+            const p = Number(dom.svPitch?.value || 10) || 10;
+            const f = Number(dom.svFov?.value || 80) || 80;
+            return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${state.clientGeo.lat},${state.clientGeo.lon}&heading=${h}&pitch=${p}&fov=${f}`;
+        };
+
+        const updateExternalMapLinks = () => {
+            const links = dom.clientMapLinks;
+            if (!links || !state.clientGeo) return;
+            const q = encodeURIComponent(state.clientAddress || '');
+            const glink = `https://www.google.com/maps/search/?api=1&query=${q}`;
+            const g3d = `https://www.google.com/maps/@${state.clientGeo.lat},${state.clientGeo.lon},17z/data=!3m1!1e3`;
+            const earth = `https://earth.google.com/web/search/${q}`;
+            const sv = buildStreetViewLink();
+            links.innerHTML = `
+              <a class="btn btn-secondary" href="${glink}" target="_blank" rel="noopener">Apri in Google Maps</a>
+              <a class="btn" href="${g3d}" target="_blank" rel="noopener">Vista 3D</a>
+              <a class="btn" href="${earth}" target="_blank" rel="noopener">Google Earth</a>
+              <a class="btn btn-primary" href="${sv}" target="_blank" rel="noopener">Street View (fullscreen)</a>
+            `;
+        };
+
+        const applyMapMode = () => {
+            const mode = (dom.mapModeSelect?.value || state.mapMode || 'map');
+            state.mapMode = mode;
+            const hasSV = !!(state.config?.gmaps_embed_key);
+            if (dom.svControlsWrap) dom.svControlsWrap.hidden = !(hasSV && mode === 'street');
+            if (dom.mapZoomWrap) dom.mapZoomWrap.hidden = !(mode === 'map');
+            // Toggle visibility
+            if (dom.clientMapEl) dom.clientMapEl.style.display = (mode === 'map') ? '' : 'none';
+            if (dom.clientStreetView) dom.clientStreetView.style.display = (mode === 'street') ? '' : 'none';
+            // Update content
+            if (mode === 'map' && state.clientMap && state.clientGeo) {
+                try { state.clientMap.setZoom(state.mapZoom || 15); } catch (e) { /* ignore */ }
+            }
+            if (mode === 'street' && hasSV && state.clientGeo) {
+                const key = state.config?.gmaps_embed_key;
+                const h = Number(dom.svHeading?.value || 210) || 210;
+                const p = Number(dom.svPitch?.value || 10) || 10;
+                const f = Number(dom.svFov?.value || 80) || 80;
+                dom.clientStreetView.innerHTML = `<iframe loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/streetview?key=${encodeURIComponent(key)}&location=${state.clientGeo.lat},${state.clientGeo.lon}&heading=${h}&pitch=${p}&fov=${f}"></iframe>`;
+            }
+            // Aggiorna link esterni (incluso Street View fullscreen)
+            updateExternalMapLinks();
+            // Salva preferenze per cliente corrente
+            if (state.selectedClientId) {
+                saveClientMapPrefs(state.selectedClientId, {
+                    mapMode: state.mapMode,
+                    mapZoom: state.mapZoom,
+                    svHeading: Number(dom.svHeading?.value || 210) || 210,
+                    svPitch: Number(dom.svPitch?.value || 10) || 10,
+                    svFov: Number(dom.svFov?.value || 80) || 80,
+                });
+            }
+        };
+
+        const setupMapControls = () => {
+            if (dom.mapModeSelect) {
+                // Disable street option if no key
+                try { if (!state.config?.gmaps_embed_key) dom.mapModeSelect.querySelector('option[value="street"]').disabled = true; } catch (e) { /* ignore */ }
+                dom.mapModeSelect.addEventListener('change', () => applyMapMode());
+            }
+            if (dom.mapZoomRange) {
+                dom.mapZoomRange.addEventListener('input', () => {
+                    state.mapZoom = Number(dom.mapZoomRange.value) || 15;
+                    applyMapMode();
+                });
+            }
+            if (dom.svHeading) dom.svHeading.addEventListener('input', applyMapMode);
+            if (dom.svPitch) dom.svPitch.addEventListener('input', applyMapMode);
+            if (dom.svFov) dom.svFov.addEventListener('input', applyMapMode);
+        };
+
+        // Edit client address modal handlers
+        if (dom.btnEditClientAddress) {
+            dom.btnEditClientAddress.addEventListener('click', () => {
+                const cli = state.selectedClientDetail;
+                if (!cli || !state.selectedClientId) { alert('Seleziona un cliente.'); return; }
+                const f = dom.formEditClientAddress;
+                if (!f) return;
+                dom.editClientFields.id.value = String(state.selectedClientId);
+                dom.editClientFields.indirizzo.value = cli.indirizzo || '';
+                dom.editClientFields.cap.value = cli.cap || '';
+                dom.editClientFields.citta.value = cli.citta || '';
+                dom.editClientFields.provincia.value = cli.provincia || '';
+                dom.editClientFields.nazione.value = cli.nazione || '';
+                openModal('modal-edit-client-address');
+            });
+        }
+
+        if (dom.formEditClientAddress) {
+            dom.formEditClientAddress.addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const id = Number(dom.editClientFields.id.value || state.selectedClientId);
+                if (!id) { alert('Cliente non valido.'); return; }
+                const payload = {
+                    indirizzo: dom.editClientFields.indirizzo.value.trim(),
+                    cap: dom.editClientFields.cap.value.trim(),
+                    citta: dom.editClientFields.citta.value.trim(),
+                    provincia: dom.editClientFields.provincia.value.trim(),
+                    nazione: dom.editClientFields.nazione.value.trim(),
+                };
+                if (!payload.citta || !payload.nazione) {
+                    alert('Compila almeno Città e Nazione.');
+                    return;
+                }
+                try {
+                    await authFetch(`clienti/${id}`, { method: 'PUT', json: true, body: payload });
+                    closeAllModals();
+                    await loadClients();
+                    await loadClientById(id);
+                } catch (e) {
+                    alert(e.message || 'Errore nel salvataggio indirizzo.');
+                }
+            });
+        }
+
+        // Save geocoded lat/lon to cliente
+        if (dom.btnSaveGeo) {
+            dom.btnSaveGeo.addEventListener('click', async () => {
+                if (!state.selectedClientId) { alert('Seleziona un cliente.'); return; }
+                if (!state.clientGeo) { alert('Nessuna coordinata calcolata. Correggi l\'indirizzo e riprova.'); return; }
+                try {
+                    await authFetch(`clienti/${state.selectedClientId}`, { method: 'PUT', json: true, body: {
+                        latitudine: state.clientGeo.lat,
+                        longitudine: state.clientGeo.lon,
+                    }});
+                    try { showToast('Coordinate salvate', { type: 'success' }); } catch (e) {}
+                } catch (e) {
+                    alert(e.message || 'Errore nel salvataggio coordinate.');
+                }
+            });
+        }
+
+        const loadClients = async () => {
+            const term = (dom.clientsSearch?.value || '').trim();
+            const qs = new URLSearchParams();
+            if (term) qs.set('search', term);
+            let url = 'clienti';
+            if ([...qs.keys()].length) url += `?${qs.toString()}`;
+            try {
+                const list = await authFetch(url);
+                state.clients = Array.isArray(list) ? list : [];
+                // Populate filters options
+                if (dom.clientsProvSel) {
+                    const uniqProv = Array.from(new Set(state.clients.map(c => c.provincia).filter(Boolean))).sort();
+                    const current = dom.clientsProvSel.value;
+                    dom.clientsProvSel.innerHTML = '<option value="">Tutte</option>' + uniqProv.map(p => `<option value="${sanitize(p)}">${sanitize(p)}</option>`).join('');
+                    dom.clientsProvSel.value = current || '';
+                }
+                if (dom.clientsCitySel) {
+                    const prov = dom.clientsProvSel?.value || '';
+                    const filteredForCity = prov ? state.clients.filter(c => String(c.provincia||'') === prov) : state.clients;
+                    const uniqCity = Array.from(new Set(filteredForCity.map(c => c.citta).filter(Boolean))).sort((a,b)=>String(a).localeCompare(String(b),'it'));
+                    const currentC = dom.clientsCitySel.value;
+                    dom.clientsCitySel.innerHTML = '<option value="">Tutte</option>' + uniqCity.map(ci => `<option value="${sanitize(ci)}">${sanitize(ci)}</option>`).join('');
+                    dom.clientsCitySel.value = currentC || '';
+                }
+                renderClientsList();
+                if (!state.selectedClientId && state.clients.length) {
+                    state.selectedClientId = state.clients[0].id;
+                }
+                await loadClientById(state.selectedClientId);
+            } catch (e) {
+                if (dom.clientsList) dom.clientsList.innerHTML = `<p>${sanitize(e.message || 'Errore caricamento clienti')}</p>`;
+            }
+        };
+
         const renderInstanceDetail = (detail) => {
             if (!instanceDetailEls.name) return;
 
@@ -3060,6 +3988,87 @@
                     loadGroups();
                 });
             }
+            // Ricerca clienti
+            if (dom.clientsSearch) {
+                dom.clientsSearch.addEventListener('input', debounce(() => { loadClients(); }, 300));
+            }
+            if (dom.btnClientsRefresh) {
+                dom.btnClientsRefresh.addEventListener('click', () => loadClients());
+            }
+            // Catalogo: filtri Prodotti & Servizi
+            if (dom.filterProducts) {
+                dom.filterProducts.addEventListener('input', debounce(() => { loadProducts(); }, 300));
+            }
+            if (dom.filterProductsType) {
+                dom.filterProductsType.addEventListener('change', () => { loadProducts(); });
+            }
+            if (dom.btnProductsRefresh) {
+                dom.btnProductsRefresh.addEventListener('click', () => loadProducts());
+            }
+            if (dom.filterProductsCategory) {
+                dom.filterProductsCategory.addEventListener('change', () => { loadProducts(); });
+            }
+            if (dom.filterProductsTenant) {
+                dom.filterProductsTenant.addEventListener('change', () => { loadProducts(); });
+            }
+            if (dom.filterProductsOwnTenant) {
+                dom.filterProductsOwnTenant.addEventListener('change', () => {
+                    const chk = !!dom.filterProductsOwnTenant.checked;
+                    state.productOwnTenantOnly = chk;
+                    if (chk) {
+                        // Imposta filtro tenant al tenant corrente
+                        const curTid = Number(state.currentUserInfo?.tenant_id || 0);
+                        if (curTid && dom.filterProductsTenant) {
+                            // se già popolato, seleziona la voce corrispondente
+                            const opt = [...dom.filterProductsTenant.options].find(o => o.dataset && Number(o.dataset.id) === curTid);
+                            if (opt) dom.filterProductsTenant.value = opt.value;
+                        }
+                    } else {
+                        if (dom.filterProductsTenant) dom.filterProductsTenant.value = '';
+                    }
+                    loadProducts();
+                });
+            }
+            if (dom.filterProductsVisibility) {
+                dom.filterProductsVisibility.addEventListener('change', () => { loadProducts(); });
+            }
+            if (dom.clientsPrev) {
+                dom.clientsPrev.addEventListener('click', () => { if (state.clientPage > 1) { state.clientPage -= 1; renderClientsList(); }});
+            }
+            if (dom.clientsNext) {
+                dom.clientsNext.addEventListener('click', () => { state.clientPage += 1; renderClientsList(); });
+            }
+            if (dom.clientsPageSizeSel) {
+                dom.clientsPageSizeSel.addEventListener('change', () => {
+                    const v = parseInt(dom.clientsPageSizeSel.value, 10) || 50;
+                    state.clientPageSize = Math.max(1, v);
+                    state.clientPage = 1;
+                    renderClientsList();
+                });
+            }
+            if (dom.clientsProvSel) {
+                dom.clientsProvSel.addEventListener('change', () => {
+                    state.clientFilters.province = dom.clientsProvSel.value || '';
+                    // When province changes, rebuild city options and reset city filter
+                    if (dom.clientsCitySel) {
+                        const prov = dom.clientsProvSel.value || '';
+                        const filteredForCity = prov ? state.clients.filter(c => String(c.provincia||'') === prov) : state.clients;
+                        const uniqCity = Array.from(new Set(filteredForCity.map(c => c.citta).filter(Boolean))).sort((a,b)=>String(a).localeCompare(String(b),'it'));
+                        dom.clientsCitySel.innerHTML = '<option value="">Tutte</option>' + uniqCity.map(ci => `<option value="${sanitize(ci)}">${sanitize(ci)}</option>`).join('');
+                        dom.clientsCitySel.value = '';
+                        state.clientFilters.city = '';
+                    }
+                    state.clientPage = 1;
+                    renderClientsList();
+                });
+            }
+            if (dom.clientsCitySel) {
+                dom.clientsCitySel.addEventListener('change', () => {
+                    state.clientFilters.city = dom.clientsCitySel.value || '';
+                    state.clientPage = 1;
+                    renderClientsList();
+                });
+            }
             if (dom.filterUsersSupervisor) {
                 dom.filterUsersSupervisor.addEventListener('change', () => {
                     state.filters.usersSupervisorId = dom.filterUsersSupervisor.value || 'all';
@@ -3772,17 +4781,724 @@
                 }
             });
 
-            if (dom.workflowsList) {
-                dom.workflowsList.addEventListener('click', (event) => {
-                    const card = event.target.closest('[data-action="select-workflow"]');
-                    if (card) {
-                        const id = Number(card.dataset.id);
-                        if (!Number.isNaN(id)) {
-                            loadWorkflowDetail(id);
-                        }
+        if (dom.workflowsList) {
+            dom.workflowsList.addEventListener('click', (event) => {
+                const card = event.target.closest('[data-action="select-workflow"]');
+                if (card) {
+                    const id = Number(card.dataset.id);
+                    if (!Number.isNaN(id)) {
+                        loadWorkflowDetail(id);
                     }
+                }
+            });
+        }
+
+        // Clienti: delega click per selezione cliente
+        if (dom.clientsList) {
+            dom.clientsList.addEventListener('click', (event) => {
+                const card = event.target.closest('.instance-card');
+                if (!card) return;
+                const id = Number(card.dataset.id);
+                if (Number.isNaN(id)) return;
+                state.selectedClientId = id;
+                renderClientsList();
+                loadClientById(id);
+            });
+        }
+
+        // Catalogo: delega click per selezione prodotto/servizio
+        if (dom.productsList) {
+            dom.productsList.addEventListener('click', (event) => {
+                const card = event.target.closest('.instance-card');
+                if (!card) return;
+                const id = Number(card.dataset.id);
+                if (Number.isNaN(id)) return;
+                state.selectedProductId = id;
+                renderProductsList();
+                loadProductById(id);
+            });
+        }
+
+        // Product edit: open new/edit modal
+        if (dom.btnProductNew) {
+            dom.btnProductNew.addEventListener('click', () => {
+                const f = dom.formEditProduct; if (!f) return;
+                f.reset();
+                dom.editProductFields.id.value = '';
+                document.getElementById('modal-edit-product-title').textContent = 'Nuovo articolo';
+                if (dom.editProductFields.sku) dom.editProductFields.sku.value = '';
+                if (dom.editProductFields.codiceTenant) dom.editProductFields.codiceTenant.value = '';
+                if (dom.editProductFields.marca) dom.editProductFields.marca.value = '';
+                if (dom.editProductFields.modello) dom.editProductFields.modello.value = '';
+                if (dom.editProductFields.versione) dom.editProductFields.versione.value = '';
+                // Pulisci suggerimenti
+                if (dom.suggestProductQuery) dom.suggestProductQuery.value = '';
+                if (dom.suggestProductList) dom.suggestProductList.innerHTML = '<p class="form-hint">Digita per cercare prodotti esistenti…</p>';
+                openModal('modal-edit-product');
+            });
+        }
+        if (dom.btnProductEdit) {
+            dom.btnProductEdit.addEventListener('click', () => {
+                if (!state.selectedProductId) { alert('Seleziona un articolo.'); return; }
+                const f = dom.formEditProduct; if (!f) return;
+                f.reset();
+                dom.editProductFields.id.value = String(state.selectedProductId);
+                // Pre-popola dai dettagli se disponibili
+                const d = state.selectedProductDetail || {};
+                dom.editProductFields.sku.value = d.sku || '';
+                dom.editProductFields.tipologia.value = (String(d.tipologia || 'FISICO').toUpperCase());
+                if (dom.editProductFields.codiceTenant) dom.editProductFields.codiceTenant.value = d.codice_tenant || '';
+                if (dom.editProductFields.marca) dom.editProductFields.marca.value = d.marca || '';
+                if (dom.editProductFields.modello) dom.editProductFields.modello.value = d.modello || '';
+                if (dom.editProductFields.versione) dom.editProductFields.versione.value = d.versione || '';
+                dom.editProductFields.titolo.value = d.titolo || '';
+                dom.editProductFields.sottotitolo.value = d.sottotitolo || '';
+                dom.editProductFields.descrizione.value = d.descrizione || '';
+                dom.editProductFields.stato.value = String(d.stato_pubblicazione || 'BOZZA').toUpperCase();
+                dom.editProductFields.visibilita.value = String(d.visibilita || 'PRIVATO').toUpperCase();
+                document.getElementById('modal-edit-product-title').textContent = 'Modifica articolo';
+                openModal('modal-edit-product');
+            });
+        }
+
+        if (dom.formEditProduct) {
+            dom.formEditProduct.addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const id = dom.editProductFields.id.value.trim();
+                const payload = {
+                    tipologia: dom.editProductFields.tipologia.value,
+                    titolo: dom.editProductFields.titolo.value.trim(),
+                    sottotitolo: dom.editProductFields.sottotitolo.value.trim(),
+                    descrizione: dom.editProductFields.descrizione.value.trim(),
+                    stato_pubblicazione: dom.editProductFields.stato.value,
+                    visibilita: dom.editProductFields.visibilita.value,
+                };
+                const codiceTenantVal = dom.editProductFields.codiceTenant?.value.trim();
+                if (codiceTenantVal) payload.codice_tenant = codiceTenantVal;
+                const marcaVal = dom.editProductFields.marca?.value.trim(); if (marcaVal) payload.marca = marcaVal;
+                const modelloVal = dom.editProductFields.modello?.value.trim(); if (modelloVal) payload.modello = modelloVal;
+                const versioneVal = dom.editProductFields.versione?.value.trim(); if (versioneVal) payload.versione = versioneVal;
+                if (!payload.titolo) { alert('Compila il Titolo.'); return; }
+                try {
+                    if (id) {
+                        await authFetch(`catalogo_articoli/${encodeURIComponent(id)}`, { method: 'PUT', json: true, body: payload });
+                        closeAllModals();
+                        await loadProducts();
+                    } else {
+                        const res = await authFetch('catalogo_articoli', { method: 'POST', json: true, body: payload });
+                        const newId = Number(res?.id || 0);
+                        closeAllModals();
+                        // Se presenti categorie suggerite, applicale al nuovo articolo
+                        if (newId && Array.isArray(state.pendingCategoriesForNew) && state.pendingCategoriesForNew.length) {
+                            try { await authFetch(`catalogo_articoli_categorie/${newId}`, { method: 'PUT', json: true, body: { categorie_slugs: state.pendingCategoriesForNew } }); } catch (e) { /* ignore */ }
+                        }
+                        // Se presenti media suggeriti, apri wizard di import
+                        if (newId && Array.isArray(state.pendingMediaForNew) && state.pendingMediaForNew.length) {
+                            openImportMediaWizard(newId);
+                        }
+                        // Seleziona il nuovo articolo e scorre alla sezione categorie
+                        await loadProducts();
+                        if (newId) {
+                            state.selectedProductId = newId;
+                            renderProductsList();
+                            await loadProductById(newId);
+                            try { document.getElementById('edit-product-categories')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+                        }
+                        state.pendingCategoriesForNew = null;
+                        state.pendingMediaForNew = null;
+                    }
+                } catch (e) {
+                    alert(e.message || 'Errore salvataggio articolo.');
+                }
+            });
+        }
+
+        // Suggerimenti prodotto nel modale (ricerca live su hub)
+        let suggestTimer = null;
+        async function renderProductSuggestions(q) {
+            const box = dom.suggestProductList; if (!box) return;
+            if (!q || q.trim().length < 2) { box.innerHTML = '<p class="form-hint">Digita almeno 2 caratteri…</p>'; return; }
+            box.innerHTML = '<p>Ricerca…</p>';
+            try {
+                const list = await hubFetch(`articoli?limite=8&q=${encodeURIComponent(q)}`);
+                const arr = Array.isArray(list) ? list : [];
+                if (!arr.length) { box.innerHTML = '<p class="form-hint">Nessun risultato.</p>'; return; }
+                box.innerHTML = arr.map(a => `
+                  <div class="list-item">
+                    <div class="item-header"><strong>${sanitize([a.marca,a.modello,a.titolo].filter(Boolean).join(' • ') || ('Articolo #'+a.id))}</strong></div>
+                    <small>${sanitize(String(a.tipologia||'').toUpperCase())} • SKU ${sanitize(a.sku||'')}</small>
+                    <div class="item-actions">
+                      <button type="button" class="btn" data-action="suggest-open" data-id="${a.id}">Apri</button>
+                      <button type="button" class="btn btn-primary" data-action="suggest-use" data-id="${a.id}">Usa come base</button>
+                    </div>
+                  </div>`).join('');
+            } catch (e) {
+                box.innerHTML = `<p>${sanitize(e.message||'Errore ricerca')}</p>`;
+            }
+        }
+        function refreshSuggestFromFields() {
+            const txt = [dom.editProductFields.marca?.value||'', dom.editProductFields.modello?.value||'', dom.editProductFields.titolo?.value||''].map(s=>String(s||'').trim()).filter(Boolean).join(' ');
+            const q = dom.suggestProductQuery?.value?.trim() || txt;
+            if (!q) { if (dom.suggestProductList) dom.suggestProductList.innerHTML = '<p class="form-hint">Digita per cercare prodotti esistenti…</p>'; return; }
+            renderProductSuggestions(q);
+        }
+        if (dom.suggestProductQuery) {
+            dom.suggestProductQuery.addEventListener('input', () => {
+                if (suggestTimer) clearTimeout(suggestTimer);
+                suggestTimer = setTimeout(refreshSuggestFromFields, 300);
+            });
+        }
+        // aggiorna suggerimenti quando si compila marca/modello/titolo
+        ['marca','modello','titolo'].forEach(key => {
+            const el = dom.editProductFields[key];
+            if (el) {
+                el.addEventListener('input', () => {
+                    if (suggestTimer) clearTimeout(suggestTimer);
+                    suggestTimer = setTimeout(refreshSuggestFromFields, 400);
                 });
             }
+        });
+        if (dom.suggestProductList) {
+            dom.suggestProductList.addEventListener('click', async (ev) => {
+                const openBtn = ev.target.closest('[data-action="suggest-open"]');
+                const useBtn = ev.target.closest('[data-action="suggest-use"]');
+                if (openBtn) {
+                    const id = Number(openBtn.dataset.id);
+                    if (id) { closeAllModals(); state.selectedProductId = id; renderProductsList(); await loadProductById(id); }
+                    return;
+                }
+                if (useBtn) {
+                    const id = Number(useBtn.dataset.id);
+                    if (!id) return;
+                    try {
+                        const det = await hubFetch(`articoli/${id}`);
+                        if (dom.editProductFields.marca) dom.editProductFields.marca.value = det.marca || '';
+                        if (dom.editProductFields.modello) dom.editProductFields.modello.value = det.modello || '';
+                        if (dom.editProductFields.versione) dom.editProductFields.versione.value = det.versione || '';
+                        if (dom.editProductFields.titolo) dom.editProductFields.titolo.value = det.titolo || '';
+                        if (dom.editProductFields.sottotitolo) dom.editProductFields.sottotitolo.value = det.sottotitolo || '';
+                        if (dom.editProductFields.descrizione) dom.editProductFields.descrizione.value = det.descrizione || '';
+                        // Prepara categorie suggerite per la nuova creazione
+                        const slugs = Array.isArray(det.categorie) ? det.categorie.map(c => c.slug).filter(Boolean) : [];
+                        state.pendingCategoriesForNew = slugs.length ? slugs : null;
+                        const note = document.getElementById('suggest-product-categories-note');
+                        if (note) note.textContent = slugs.length ? (`Categorie suggerite: ${slugs.join(', ')}`) : '';
+                        // Prepara media suggeriti
+                        const meds = Array.isArray(det.media) ? det.media.filter(m => m.url).map(m => ({ url: m.url, alt: m.testo_alternativo || '', tipologia: m.tipologia || 'IMMAGINE' })) : [];
+                        state.pendingMediaForNew = meds.length ? meds : null;
+                        if (note && meds && meds.length) note.textContent += (note.textContent ? ' • ' : '') + `Media suggeriti: ${meds.length}`;
+                        // Aggiorna suggerimenti per coerenza
+                        refreshSuggestFromFields();
+                    } catch (e) { alert(e.message||'Errore lettura prodotto'); }
+                    return;
+                }
+            });
+        }
+
+        // Varianti actions
+        const variantsContainer = document.getElementById('product-variants-list');
+        if (variantsContainer) {
+            variantsContainer.addEventListener('click', async (ev) => {
+                const setBtn = ev.target.closest('[data-action="variant-set-price"]');
+                const delBtn = ev.target.closest('[data-action="variant-delete"]');
+                if (setBtn) {
+                    const id = Number(setBtn.dataset.id);
+                    const listCode = (document.getElementById('price-list-code')?.value||'DEFAULT').trim();
+                    const listCurr = (document.getElementById('price-list-currency')?.value||'EUR').trim();
+                    const val = prompt(`Nuovo prezzo (listino ${listCode}):`);
+                    if (!val) return;
+                    const price = Number(val);
+                    if (Number.isNaN(price) || price < 0) { alert('Prezzo non valido'); return; }
+                    try { await authFetch('catalogo_prezzi', { method: 'PUT', json: true, body: { variante_id: id, prezzo: price, listino_codice: listCode, valuta: listCurr } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore salvataggio prezzo'); }
+                }
+                if (delBtn) {
+                    const id = Number(delBtn.dataset.id);
+                    if (!confirm('Eliminare la variante?')) return;
+                    try { await authFetch(`catalogo_varianti/${id}`, { method: 'DELETE' }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore eliminazione variante'); }
+                }
+            });
+        }
+        const addVarBtn = document.getElementById('btn-add-variant');
+        if (addVarBtn) {
+            addVarBtn.addEventListener('click', async () => {
+                if (!state.selectedProductId) { alert('Seleziona un articolo'); return; }
+                const sku = (document.getElementById('new-variant-sku')?.value||'').trim();
+                const nome = (document.getElementById('new-variant-nome')?.value||'').trim();
+                const priceStr = (document.getElementById('new-variant-price')?.value||'').trim();
+                const listCode = (document.getElementById('price-list-code')?.value||'DEFAULT').trim();
+                const listCurr = (document.getElementById('price-list-currency')?.value||'EUR').trim();
+                if (!sku || !nome) { alert('Compila SKU e Nome'); return; }
+                try {
+                    const res = await authFetch('catalogo_varianti', { method: 'POST', json: true, body: { articolo_id: state.selectedProductId, sku, nome } });
+                    const vid = res?.id ? Number(res.id) : null;
+                    if (vid && priceStr) {
+                        const price = Number(priceStr);
+                        if (!Number.isNaN(price)) {
+                            await authFetch('catalogo_prezzi', { method: 'PUT', json: true, body: { variante_id: vid, prezzo: price, listino_codice: listCode, valuta: listCurr } });
+                        }
+                    }
+                    document.getElementById('new-variant-sku').value = '';
+                    document.getElementById('new-variant-nome').value = '';
+                    document.getElementById('new-variant-price').value = '';
+                    await loadProductById(state.selectedProductId);
+                } catch (e) { alert(e.message||'Errore creazione variante'); }
+            });
+        }
+
+        // Pricelists: open/manage
+        if (dom.btnManagePricelists) {
+            dom.btnManagePricelists.addEventListener('click', async () => {
+                if (!state.selectedProductDetail || !state.selectedProductDetail.tenant_id) { alert('Seleziona un articolo.'); return; }
+                await renderPricelists(state.selectedProductDetail.tenant_id);
+                openModal('modal-manage-pricelists');
+            });
+        }
+
+        async function renderPricelists(tenantId) {
+            if (!dom.pricelistsList) return;
+            dom.pricelistsList.innerHTML = '<p>Caricamento listini...</p>';
+            try {
+                const lists = await authFetch(`catalogo_listini?tenant_id=${encodeURIComponent(tenantId)}`);
+                const arr = Array.isArray(lists)?lists:[];
+                if (!arr.length) { dom.pricelistsList.innerHTML = '<p class="form-hint">Nessun listino.</p>'; return; }
+                dom.pricelistsList.innerHTML = arr.map(l => `<div class="list-item" data-id="${l.id}"><strong>${sanitize(l.codice)}</strong> <small class="badge">${sanitize(l.valuta||'EUR')}</small> <small class="badge">priorità ${sanitize(l.priorita||0)}</small>
+                    <div class="item-actions"><button type="button" class="btn" data-action="plist-edit" data-id="${l.id}">Modifica</button> <button type="button" class="btn btn-danger" data-action="plist-delete" data-id="${l.id}">Elimina</button></div></div>`).join('');
+            } catch (e) {
+                dom.pricelistsList.innerHTML = `<p>${sanitize(e.message||'Errore caricamento listini')}</p>`;
+            }
+        }
+
+        if (dom.pricelistsList) {
+            dom.pricelistsList.addEventListener('click', async (ev) => {
+                const editBtn = ev.target.closest('[data-action="plist-edit"]');
+                const delBtn = ev.target.closest('[data-action="plist-delete"]');
+                if (editBtn) {
+                    const id = Number(editBtn.dataset.id);
+                    try {
+                        const data = await authFetch(`catalogo_listini/${id}`);
+                        const f = dom.formPricelist; if (!f) return;
+                        dom.pricelistFields.id.value = String(id);
+                        dom.pricelistFields.codice.value = data.codice || '';
+                        dom.pricelistFields.nome.value = data.nome || '';
+                        dom.pricelistFields.valuta.value = (data.valuta || 'EUR').toUpperCase();
+                        dom.pricelistFields.priorita.value = Number(data.priorita||0);
+                        dom.pricelistFields.dal.value = data.valido_dal || '';
+                        dom.pricelistFields.al.value = data.valido_al || '';
+                        if (dom.pricelistFields.btnDelete) dom.pricelistFields.btnDelete.hidden = false; 
+                    } catch (e) { alert(e.message||'Errore lettura listino'); }
+                }
+                if (delBtn) {
+                    const id = Number(delBtn.dataset.id);
+                    if (!confirm('Eliminare il listino?')) return;
+                    try { await authFetch(`catalogo_listini/${id}`, { method: 'DELETE' }); await renderPricelists(state.selectedProductDetail.tenant_id); await loadPriceListsForArticle(state.selectedProductDetail); } catch (e) { alert(e.message||'Errore eliminazione listino'); }
+                }
+            });
+        }
+
+        if (dom.formPricelist) {
+            dom.formPricelist.addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const tid = state.selectedProductDetail?.tenant_id;
+                if (!tid) { alert('Tenant non valido'); return; }
+                const id = dom.pricelistFields.id.value.trim();
+                const payload = {
+                    tenant_id: Number(tid),
+                    codice: dom.pricelistFields.codice.value.trim(),
+                    nome: dom.pricelistFields.nome.value.trim(),
+                    valuta: dom.pricelistFields.valuta.value.trim().toUpperCase() || 'EUR',
+                    priorita: Number(dom.pricelistFields.priorita.value||0),
+                    valido_dal: dom.pricelistFields.dal.value || null,
+                    valido_al: dom.pricelistFields.al.value || null,
+                };
+                if (!payload.codice) { alert('Codice obbligatorio'); return; }
+                try {
+                    if (id) {
+                        await authFetch(`catalogo_listini/${encodeURIComponent(id)}`, { method: 'PUT', json: true, body: payload });
+                    } else {
+                        await authFetch('catalogo_listini', { method: 'POST', json: true, body: payload });
+                    }
+                    dom.formPricelist.reset();
+                    if (dom.pricelistFields.btnDelete) dom.pricelistFields.btnDelete.hidden = true;
+                    await renderPricelists(tid);
+                    await loadPriceListsForArticle(state.selectedProductDetail);
+                } catch (e) { alert(e.message||'Errore salvataggio listino'); }
+            });
+        }
+
+        // Categorie save
+        const btnSaveCats = document.getElementById('btn-save-categories');
+        if (btnSaveCats) {
+            btnSaveCats.addEventListener('click', async () => {
+                if (!state.selectedProductId) { alert('Seleziona un articolo'); return; }
+                const sel = document.getElementById('edit-product-categories');
+                const slugs = [...(sel?.selectedOptions||[])].map(o => o.value);
+                try { await authFetch(`catalogo_articoli_categorie/${state.selectedProductId}`, { method: 'PUT', json: true, body: { categorie_slugs: slugs } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore salvataggio categorie'); }
+            });
+        }
+
+        // Categories CRUD modal handlers
+        async function renderCategoriesList() {
+            if (!dom.categoriesList) return;
+            const q = (dom.categoriesSearch?.value || '').trim();
+            dom.categoriesList.innerHTML = '<p>Caricamento categorie…</p>';
+            try {
+                const list = await authFetch(`catalogo_categorie${q ? ('?q='+encodeURIComponent(q)) : ''}`);
+                const arr = Array.isArray(list) ? list : [];
+                if (!arr.length) { dom.categoriesList.innerHTML = '<p class="form-hint">Nessuna categoria.</p>'; return; }
+                dom.categoriesList.innerHTML = arr.map(c => `<div class="list-item"><div class="item-header"><strong>${sanitize(c.nome)}</strong> <small class="badge">${sanitize(c.slug)}</small></div><div class="item-actions"><button type="button" class="btn" data-action="cat-edit" data-id="${c.id}">Modifica</button><button type="button" class="btn btn-danger" data-action="cat-delete" data-id="${c.id}">Elimina</button></div></div>`).join('');
+            } catch (e) {
+                dom.categoriesList.innerHTML = `<p>${sanitize(e.message || 'Errore caricamento categorie')}</p>`;
+            }
+        }
+
+        async function populateCategoryParent(selectedId) {
+            if (!dom.categoryFields?.parent) return;
+            try {
+                const list = await authFetch('catalogo_categorie');
+                const arr = Array.isArray(list)?list:[];
+                dom.categoryFields.parent.innerHTML = '<option value="">—</option>' + arr.map(c => `<option value="${c.id}">${sanitize(c.nome)}</option>`).join('');
+                if (selectedId) dom.categoryFields.parent.value = String(selectedId);
+            } catch (e) {
+                dom.categoryFields.parent.innerHTML = '<option value="">—</option>';
+            }
+        }
+
+        if (dom.categoriesSearch) {
+            dom.categoriesSearch.addEventListener('input', () => { renderCategoriesList(); });
+        }
+        if (dom.categoriesList) {
+            dom.categoriesList.addEventListener('click', async (ev) => {
+                const edit = ev.target.closest('[data-action="cat-edit"]');
+                const del = ev.target.closest('[data-action="cat-delete"]');
+                if (edit) {
+                    const id = Number(edit.dataset.id);
+                    try {
+                        const cat = await authFetch(`catalogo_categorie/${id}`);
+                        if (dom.categoryFields?.id) dom.categoryFields.id.value = String(cat.id);
+                        if (dom.categoryFields?.name) dom.categoryFields.name.value = cat.nome || '';
+                        if (dom.categoryFields?.slug) dom.categoryFields.slug.value = cat.slug || '';
+                        await populateCategoryParent(cat.categoria_padre_id || '');
+                        if (dom.categoryFields?.btnDelete) dom.categoryFields.btnDelete.hidden = false;
+                    } catch (e) { alert(e.message||'Errore lettura categoria'); }
+                    return;
+                }
+                if (del) {
+                    const id = Number(del.dataset.id);
+                    if (!confirm('Eliminare la categoria?')) return;
+                    try { await authFetch(`catalogo_categorie/${id}`, { method: 'DELETE' }); await renderCategoriesList(); await loadProductFilters(); } catch (e) { alert(e.message||'Errore eliminazione categoria'); }
+                    return;
+                }
+            });
+        }
+        if (dom.formCategory) {
+            dom.formCategory.addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const id = dom.categoryFields?.id?.value.trim();
+                const nome = dom.categoryFields?.name?.value.trim();
+                const slug = dom.categoryFields?.slug?.value.trim();
+                const parent = dom.categoryFields?.parent?.value || '';
+                const payload = { nome };
+                if (slug) payload.slug = slug;
+                payload.categoria_padre_id = parent ? Number(parent) : null;
+                if (!nome) { alert('Nome obbligatorio'); return; }
+                try {
+                    if (id) { await authFetch(`catalogo_categorie/${encodeURIComponent(id)}`, { method: 'PUT', json: true, body: payload }); }
+                    else { await authFetch('catalogo_categorie', { method: 'POST', json: true, body: payload }); }
+                    if (dom.formCategory) dom.formCategory.reset();
+                    if (dom.categoryFields?.btnDelete) dom.categoryFields.btnDelete.hidden = true;
+                    await renderCategoriesList();
+                    await loadProductFilters();
+                } catch (e) { alert(e.message||'Errore salvataggio categoria'); }
+            });
+        }
+        if (dom.categoryFields?.btnDelete) {
+            dom.categoryFields.btnDelete.addEventListener('click', async () => {
+                const id = dom.categoryFields?.id?.value.trim();
+                if (!id) return;
+                if (!confirm('Eliminare la categoria?')) return;
+                try { await authFetch(`catalogo_categorie/${encodeURIComponent(id)}`, { method: 'DELETE' }); if (dom.formCategory) dom.formCategory.reset(); dom.categoryFields.btnDelete.hidden = true; await renderCategoriesList(); await loadProductFilters(); } catch (e) { alert(e.message||'Errore eliminazione categoria'); }
+            });
+        }
+
+        // Relazioni add/remove
+        const btnAddRel = document.getElementById('btn-add-relation');
+        if (btnAddRel) {
+            btnAddRel.addEventListener('click', async () => {
+                const type = document.getElementById('relation-type')?.value || 'UPSELL';
+                const targetSel = document.getElementById('relation-target-select');
+                const target = Number(targetSel?.value || '');
+                const prio = Number(document.getElementById('relation-priority')?.value || '0');
+                if (!state.selectedProductId || !target) { alert('Seleziona articolo e inserisci ID correlato'); return; }
+                try { await authFetch('catalogo_relazioni', { method: 'POST', json: true, body: { articolo_sorgente_id: state.selectedProductId, articolo_correlato_id: target, tipo_relazione: type, priorita: prio } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore creazione relazione'); }
+            });
+        }
+        const relList = document.getElementById('product-relations-list');
+        if (relList) {
+            relList.addEventListener('click', async (ev) => {
+                const del = ev.target.closest('[data-action="rel-delete"]');
+                const upd = ev.target.closest('[data-action="rel-update"]');
+                const openBtn = ev.target.closest('[data-action="rel-open"]');
+                if (openBtn) {
+                    const targetId = Number(openBtn.dataset.targetId);
+                    if (targetId) { state.selectedProductId = targetId; renderProductsList(); await loadProductById(targetId); }
+                    return;
+                }
+                if (del) {
+                    const id = Number(del.dataset.id);
+                    if (!id) return;
+                    if (!confirm('Eliminare relazione?')) return;
+                    try { await authFetch(`catalogo_relazioni/${id}`, { method: 'DELETE' }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore eliminazione relazione'); }
+                    return;
+                }
+                if (upd) {
+                    const id = Number(upd.dataset.id);
+                    if (!id) return;
+                    const item = upd.closest('[data-relation-id]');
+                    if (!item) return;
+                    const prEl = item.querySelector('[data-field="prio"]');
+                    const tpEl = item.querySelector('[data-field="tipo"]');
+                    const prio = prEl ? Number(prEl.value || 0) : 0;
+                    const tipo = tpEl ? (tpEl.value || 'UPSELL') : 'UPSELL';
+                    try { await authFetch(`catalogo_relazioni/${id}`, { method: 'PUT', json: true, body: { priorita: prio, tipo_relazione: tipo } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore aggiornamento relazione'); }
+                    return;
+                }
+            });
+        }
+
+        // Relazioni: popolamento dinamico target per categoria
+        const relCat = document.getElementById('relation-category');
+        const relTarget = document.getElementById('relation-target-select');
+        async function refreshRelationCategories() {
+            try {
+                const cats = await hubFetch('categorie');
+                if (relCat) {
+                    relCat.innerHTML = '<option value="">—</option>' + (Array.isArray(cats)?cats:[]).map(c => `<option value="${sanitize(c.slug)}">${sanitize(c.nome)}</option>`).join('');
+                }
+            } catch (e) { /* ignore */ }
+        }
+        async function refreshRelationTargets() {
+            if (!relTarget) return;
+            const cat = relCat?.value || '';
+            const params = new URLSearchParams(); if (cat) params.set('categoria', cat);
+            try {
+                let list = await hubFetch(`articoli${params.toString()?('?'+params.toString()):''}`);
+                if (!Array.isArray(list) || list.length === 0) {
+                    // Fallback: senza filtro categoria
+                    list = await hubFetch('articoli');
+                }
+                relTarget.innerHTML = '<option value="">—</option>' + (Array.isArray(list)?list:[]).map(a => `<option value="${Number(a.id)}">${sanitize((a.marca? (a.marca+' '):'') + (a.modello||a.titolo||('Articolo #'+a.id)))} — ${sanitize(a.sku||'')}</option>`).join('');
+            } catch (e) { relTarget.innerHTML = '<option value="">—</option>'; }
+        }
+        if (relCat) {
+            relCat.addEventListener('change', refreshRelationTargets);
+            refreshRelationCategories().then(refreshRelationTargets).catch(()=>{});
+        }
+
+        // Relazioni: toolbar (filtro/sort) handlers
+        const relFilterType = document.getElementById('relation-filter-type');
+        const relSort = document.getElementById('relation-sort');
+        const relSortDir = document.getElementById('relation-sort-dir');
+        const applyRelToolbar = () => {
+            state.relationFilterType = (relFilterType?.value || '').toUpperCase();
+            state.relationSort = (relSort?.value || 'priority');
+            state.relationSortDir = (relSortDir?.value || 'asc');
+            if (state.selectedProductDetail) renderRelationsBox(state.selectedProductDetail);
+        };
+        if (relFilterType) relFilterType.addEventListener('change', applyRelToolbar);
+        if (relSort) relSort.addEventListener('change', applyRelToolbar);
+        if (relSortDir) relSortDir.addEventListener('change', applyRelToolbar);
+
+        // Delegazione per pulsanti copia URL nelle proposte media
+        if (dom.suggestedMedia) {
+            dom.suggestedMedia.addEventListener('click', (event) => {
+                const btn = event.target.closest('[data-action="copy-url"]');
+                if (btn) {
+                    const url = btn.getAttribute('data-url') || '';
+                    if (!url) return;
+                    try {
+                        navigator.clipboard.writeText(url);
+                        try { showToast('URL copiato', { type: 'success', duration: 2000 }); } catch (e) {}
+                    } catch (e) {
+                        alert('Impossibile copiare negli appunti. URL: ' + url);
+                    }
+                    return;
+                }
+                const attach = event.target.closest('[data-action="attach-media"]');
+                if (attach) {
+                    const url = attach.getAttribute('data-url') || '';
+                    const title = attach.getAttribute('data-title') || '';
+                    if (!state.selectedProductId || !url) return;
+                    (async () => {
+                        try {
+                            await authFetch('catalog_media/attach', { method: 'POST', json: true, body: {
+                                articolo_id: Number(state.selectedProductId),
+                                url,
+                                tipologia: 'IMMAGINE',
+                                testo_alternativo: title,
+                            }});
+                            try { showToast('Media associato', { type: 'success' }); } catch (e) {}
+                            await loadProductById(state.selectedProductId);
+                        } catch (e) {
+                            alert(e.message || 'Errore durante l\'associazione del media');
+                        }
+                    })();
+                }
+            });
+        }
+
+        // Suggerisci media (enrichment)
+        const suggestMedia = async () => {
+            if (!state.selectedProductId) return;
+            try {
+                if (dom.suggestMediaStatus) dom.suggestMediaStatus.textContent = 'Ricerca suggerimenti…';
+                // Costruisce query da titolo+SKU
+                const title = (dom.productDetailTitle?.textContent || '').trim();
+                const sku = (dom.productDetailSku?.textContent || '').trim();
+                const attrs = state.selectedProductDetail?.attributi || [];
+                const ean = (attrs.find(a => String(a.nome_tecnico||'').toLowerCase() === 'ean')?.valore_testo || '').trim();
+                const modello = (attrs.find(a => String(a.nome_tecnico||'').toLowerCase() === 'modello')?.valore_testo || '').trim();
+                const q = [title, sku, modello, ean].filter(Boolean).join(' ');
+                const providers = [];
+                if (dom.mediaSrcWiki?.checked) providers.push('wikimedia');
+                if (dom.mediaSrcUnsplash?.checked) providers.push('unsplash');
+                if (dom.mediaSrcPexels?.checked) providers.push('pexels');
+                const prefer = (dom.mediaSrcPrefer?.value || '').trim();
+                const params = new URLSearchParams({ q, limit: '12' });
+                if (providers.length) params.set('providers', providers.join(','));
+                if (prefer) params.set('prefer', prefer);
+                const items = await authFetch(`enrichment/media?${params.toString()}`);
+                const cont = dom.suggestedMedia;
+                if (cont) {
+                    if (!Array.isArray(items) || !items.length) {
+                        cont.innerHTML = '<p>Nessun suggerimento trovato.</p>';
+                    } else {
+                        cont.innerHTML = items.map(i => `
+                          <div class="list-item">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                              <img src="${sanitize(i.thumbnail || i.url)}" alt="" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+                              <div>
+                                <div><strong>${sanitize(i.title || '')}</strong> <small class="badge">${sanitize(i.source||'web')}</small> ${i.license ? `<small class="badge">${sanitize(i.license)}</small>` : ''}</div>
+                                <small>${sanitize(i.description || '')}</small>
+                                <div style="margin-top:4px; display:flex; gap:6px; flex-wrap:wrap;">
+                                  <a class="btn btn-secondary" href="${sanitize(i.url)}" target="_blank" rel="noopener">Apri</a>
+                                  <button type="button" class="btn btn-primary" data-action="copy-url" data-url="${sanitize(i.url)}">Copia URL</button>
+                                  <button type="button" class="btn btn-success" data-action="attach-media" data-url="${sanitize(i.url)}" data-title="${sanitize(i.title || '')}">Associa</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>`).join('');
+                    }
+                }
+            } catch (e) {
+                if (dom.suggestedMedia) dom.suggestedMedia.innerHTML = `<p>${sanitize(e.message || 'Errore ricerca suggerimenti')}</p>`;
+            } finally {
+                if (dom.suggestMediaStatus) dom.suggestMediaStatus.textContent = '';
+            }
+        };
+
+        if (dom.btnSuggestMedia) {
+            dom.btnSuggestMedia.addEventListener('click', () => suggestMedia());
+        }
+
+        // Media delete handler
+        const mediaBox = document.getElementById('product-detail-media');
+        if (mediaBox) {
+            mediaBox.addEventListener('click', async (ev) => {
+                const del = ev.target.closest('[data-action="media-delete"]');
+                const up = ev.target.closest('[data-action="media-up"]');
+                const down = ev.target.closest('[data-action="media-down"]');
+                const cover = ev.target.closest('[data-action="media-cover"]');
+                const saveAlt = ev.target.closest('[data-action="media-save-alt"]');
+                if (del) {
+                    const id = Number(del.dataset.id);
+                    if (!id) return;
+                    if (!confirm('Eliminare media?')) return;
+                    try { await authFetch(`catalog_media/${id}`, { method: 'DELETE' }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore eliminazione media'); }
+                    return;
+                }
+                if (up || down) {
+                    const btn = up || down;
+                    const id = Number(btn.dataset.id);
+                    if (!id) return;
+                    const direction = up ? 'up' : 'down';
+                    try { await authFetch(`catalog_media/${id}/move`, { method: 'POST', json: true, body: { direction } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore riordino media'); }
+                    return;
+                }
+                if (cover) {
+                    const id = Number(cover.dataset.id);
+                    if (!id) return;
+                    try { await authFetch(`catalog_media/${id}/cover`, { method: 'POST' }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore impostazione copertina'); }
+                    return;
+                }
+                if (saveAlt) {
+                    const id = Number(saveAlt.dataset.id);
+                    if (!id) return;
+                    const fig = saveAlt.closest('figure');
+                    const input = fig ? fig.querySelector('input.media-alt-input[data-id="'+id+'"]') : null;
+                    const nuovo = input ? input.value.trim() : '';
+                    try { await authFetch(`catalog_media/${id}`, { method: 'PUT', json: true, body: { testo_alternativo: nuovo } }); await loadProductById(state.selectedProductId); } catch (e) { alert(e.message||'Errore aggiornamento media'); }
+                    return;
+                }
+            });
+        }
+
+        // Upload media (file → hub media)
+        if (dom.btnUploadMedia) {
+            dom.btnUploadMedia.addEventListener('click', async () => {
+                if (!state.selectedProductId) { alert('Seleziona un articolo'); return; }
+                const input = dom.uploadMediaInput;
+                if (!input || !input.files || !input.files[0]) { alert('Seleziona un file'); return; }
+                const file = input.files[0];
+                const maxBytes = 10 * 1024 * 1024; // 10 MB
+                if (file.size > maxBytes) { alert('File troppo grande (max 10 MB)'); return; }
+                const fd = new FormData();
+                fd.append('articolo_id', String(state.selectedProductId));
+                fd.append('file', file);
+                const alt = (dom.uploadMediaAlt?.value || '').trim();
+                if (alt) fd.append('testo_alternativo', alt);
+                try {
+                    await authFetch('catalog_media/upload', { method: 'POST', body: fd });
+                    if (dom.uploadMediaInput) dom.uploadMediaInput.value = '';
+                    if (dom.uploadMediaAlt) dom.uploadMediaAlt.value = '';
+                    await loadProductById(state.selectedProductId);
+                } catch (e) {
+                    alert(e.message || 'Errore upload media');
+                }
+            });
+        }
+
+        // Drag & Drop per riordinare media
+        function attachMediaDnD(container) {
+            if (!container) return;
+            let dragEl = null;
+            container.querySelectorAll('figure.media-thumb').forEach(fig => {
+                fig.addEventListener('dragstart', (e) => {
+                    dragEl = fig;
+                    e.dataTransfer?.setData('text/plain', fig.dataset.mediaId || '');
+                    e.dataTransfer?.setDragImage(fig, 10, 10);
+                });
+                fig.addEventListener('dragover', (e) => { e.preventDefault(); fig.style.outline = '2px dashed #93c5fd'; });
+                fig.addEventListener('dragleave', () => { fig.style.outline = ''; });
+                fig.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    fig.style.outline = '';
+                    if (!dragEl || dragEl === fig) return;
+                    // Sposta nel DOM
+                    const all = [...container.querySelectorAll('figure.media-thumb')];
+                    const dropIndex = all.indexOf(fig);
+                    container.insertBefore(dragEl, dropIndex > -1 && dropIndex < all.length ? all[dropIndex] : null);
+                    // Costruisci ordine e invia al server
+                    const ids = [...container.querySelectorAll('figure.media-thumb')].map(n => Number(n.dataset.mediaId));
+                    try {
+                        await authFetch('catalog_media/reorder', { method: 'POST', json: true, body: { articolo_id: Number(state.selectedProductId), ordered_ids: ids } });
+                        await loadProductById(state.selectedProductId);
+                    } catch (err) {
+                        alert(err.message || 'Errore riordino media');
+                    }
+                });
+                fig.addEventListener('dragend', () => { dragEl = null; fig.style.outline = ''; });
+            });
+        }
 
             if (dom.instancesList) {
                 dom.instancesList.addEventListener('click', (event) => {
@@ -4766,6 +6482,38 @@
             } catch (e) {
                 lines.push('<em>Health API non raggiungibile</em>');
             }
+            // Tenant health (no auth required)
+            try {
+                const resT = await fetch(`${api}/tenant_health`);
+                const th = await resT.json();
+                const db2 = th?.db_ok ? 'OK' : 'KO';
+                lines.push(`<strong>Tenant DB:</strong> ${db2}`);
+                const tablesT = th?.tables || {};
+                const countsT = th?.counts || {};
+                const show = (name, label) => {
+                    const ok = !!tablesT[name];
+                    const c = countsT[name];
+                    lines.push(`<strong>${sanitize(label)}:</strong> ${ok ? `presente (${c ?? '?'})` : 'assente'}`);
+                };
+                show('utenti', 'utenti');
+                show('clienti', 'clienti');
+                show('gruppi', 'gruppi');
+                show('workflow_modelli', 'workflow_modelli');
+                show('workflow_passi', 'workflow_passi');
+                show('workflow_istanze', 'workflow_istanze');
+                show('workflow_task', 'workflow_task');
+                show('documenti', 'documenti');
+                // Migrazione geocoding (lat/long) su clienti
+                try {
+                    const cols = th?.clienti_columns || {};
+                    const latOk = !!cols.latitudine;
+                    const lonOk = !!cols.longitudine;
+                    const both = latOk && lonOk ? 'Sì' : 'No';
+                    lines.push(`<strong>Geocoding (lat/long) clienti:</strong> ${both} ${both==='Sì' ? '' : '(eseguire tools/setup_tenant_db.php)'}`);
+                } catch (e) { /* ignore */ }
+            } catch (e) {
+                lines.push('<em>Tenant health non raggiungibile</em>');
+            }
             dom.diagResults.innerHTML = `<ul class="diag-list">${lines.map(l => `<li>${l}</li>`).join('')}</ul>`;
         };
 
@@ -4846,7 +6594,13 @@
                     loadWorkflows(),
                     (async () => { await loadInstances(); await updateInstanceAssignees(); })(),
                     loadGroups(),
+                    loadClients(),
+                    loadProductFilters(),
+                    loadProducts(),
                 ]);
+                // Aggiorna i badge health in alto
+                updateHealthBadges();
+                setupMapControls();
                 const formEditWf = document.getElementById('form-edit-workflow');
                 if (formEditWf) formEditWf.addEventListener('submit', handleEditWorkflowSubmit);
                 setupTabsUI();

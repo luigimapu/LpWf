@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS clienti (
   citta VARCHAR(120) NULL,
   provincia VARCHAR(50) NULL,
   nazione VARCHAR(60) NULL,
+  latitudine DECIMAL(10,6) NULL,
+  longitudine DECIMAL(10,6) NULL,
   email VARCHAR(190) NULL,
   telefono VARCHAR(50) NULL,
   tipo_cliente ENUM('AZIENDA','PRIVATO','PA') NOT NULL DEFAULT 'AZIENDA',

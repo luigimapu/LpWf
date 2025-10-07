@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS articoli (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tenant_id BIGINT UNSIGNED NOT NULL,
   sku_globale VARCHAR(190) NOT NULL,
+  codice_tenant VARCHAR(190) NULL,
+  marca VARCHAR(150) NULL,
+  modello VARCHAR(150) NULL,
+  versione VARCHAR(150) NULL,
   tipologia ENUM('FISICO','SERVIZIO','DIGITALE','BUNDLE') NOT NULL,
   titolo VARCHAR(255) NOT NULL,
   sottotitolo VARCHAR(255) NULL,
@@ -64,7 +68,8 @@ CREATE TABLE IF NOT EXISTS articoli (
   deleted_il DATETIME NULL,
   CONSTRAINT fk_articoli_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   CONSTRAINT fk_articoli_setattr FOREIGN KEY (set_attributi_id) REFERENCES set_attributi(id) ON DELETE SET NULL,
-  UNIQUE KEY uq_articoli_sku (sku_globale)
+  UNIQUE KEY uq_articoli_sku (sku_globale),
+  UNIQUE KEY uq_articoli_codice_tenant (tenant_id, codice_tenant)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Varianti articolo
@@ -250,4 +255,20 @@ CREATE TABLE IF NOT EXISTS eventi_sync (
   CONSTRAINT fk_eventisync_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   INDEX idx_eventisync_stato (stato_elaborazione),
   INDEX idx_eventisync_entita (entita, entita_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Registro centrale dei codici SKU globali (sequenziali)
+CREATE TABLE IF NOT EXISTS sku_protocolli (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sku_code VARCHAR(64) NULL,
+  articolo_id BIGINT UNSIGNED NULL,
+  tenant_id BIGINT UNSIGNED NOT NULL,
+  created_by_user_id BIGINT UNSIGNED NULL,
+  created_ip VARCHAR(64) NULL,
+  created_user_agent VARCHAR(255) NULL,
+  note VARCHAR(255) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_sku_code (sku_code),
+  KEY idx_sku_articolo (articolo_id),
+  KEY idx_sku_tenant (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

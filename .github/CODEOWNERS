@@ -1,0 +1,16 @@
+# Update the GitHub handles below with your actual usernames or teams
+
+# Default owners (fallback)
+* @luigimapu @damato89
+
+# UI ownership (primario: @damato89)
+assets/** @damato89 @luigimapu
+mia_dashboard.html @damato89 @luigimapu
+dashboard.js @damato89 @luigimapu
+
+# Backend/API ownership (primario: @luigimapu)
+api/** @luigimapu
+hub_catalogo/** @luigimapu
+tools/** @luigimapu
+database/** @luigimapu
+config/** @luigimapu

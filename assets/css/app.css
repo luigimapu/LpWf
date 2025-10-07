@@ -71,6 +71,11 @@ body {
   display: flex;
   flex-direction: column;
   padding: var(--spacing-6);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .sidebar__brand {
@@ -164,6 +169,49 @@ body {
   gap: var(--spacing-6);
 }
 
+/* Variante card per sezioni: contenitore con sfondo, bordo e ombra */
+.section--card {
+  background: #fff;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Sezioni: separatori visivi eleganti tra una sezione e la successiva */
+.content-area .section + .section {
+  position: relative;
+  padding-top: var(--spacing-8);
+  margin-top: var(--spacing-4);
+}
+.content-area .section + .section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(30,42,74,0.25) 0%, rgba(37,99,235,0.35) 40%, rgba(246,166,9,0.25) 100%);
+  border-radius: 2px;
+}
+
+/* Header sezione: base line sottile e accento a sinistra */
+.section__header {
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-neutral-200);
+  position: relative;
+}
+.section__header::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--color-secondary) 0%, rgba(37,99,235,0.0) 100%);
+  border-radius: 999px;
+}
+
 .section--alt {
   background: var(--color-neutral-100);
   padding: var(--spacing-6);
@@ -204,6 +252,30 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--spacing-4);
 }
+
+/* Map & StreetView containers for client detail */
+.map-container {
+  margin-top: var(--spacing-3);
+  height: 260px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.map-links { margin-top: var(--spacing-2); display:flex; gap:8px; flex-wrap:wrap; }
+.map-links a { font-size: 0.85rem; }
+.streetview-container { margin-top: var(--spacing-3); }
+.streetview-container iframe { width: 100%; height: 260px; border: 0; border-radius: var(--radius-md); }
+.map-warning { margin-top: var(--spacing-2); }
+
+.map-control-bar {
+  margin-top: var(--spacing-3);
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.map-control-bar .form-control--inline { display: inline-flex; align-items: center; gap: 8px; }
+.map-control-bar input[type="range"] { width: 160px; }
 
 .metric-card {
   background: #fff;
@@ -476,6 +548,32 @@ body {
   gap: var(--spacing-3);
   max-width: 360px;
 }
+
+/* Clienti: lista compatta con scroll interno */
+#clients-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Clienti: dettaglio con scroll interno per evitare pagine troppo lunghe */
+#client-detail {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+/* Card compatta per clienti */
+.client-card {
+  padding: var(--spacing-3);
+  gap: var(--spacing-1);
+}
+.client-card h4 { font-size: 0.95rem; }
+.client-card small { font-size: 0.8rem; color: var(--color-neutral-500); }
+
+/* Meta in dettaglio cliente più fitto */
+#client-detail .instance-detail__meta {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+#client-detail .instance-detail__tasks h5 { margin-bottom: var(--spacing-2); }
 
 .instance-card {
   border: 1px solid var(--color-neutral-200);
@@ -787,6 +885,11 @@ p {
 .badge-success {
   background: rgba(22, 163, 74, 0.12);
   color: #166534;
+}
+
+.badge-warning {
+  background: rgba(234, 179, 8, 0.15);
+  color: #92400E;
 }
 
 /* Inactive rows visual hint */
@@ -1713,6 +1816,12 @@ textarea:focus {
 .modal__dialog--drawer { position: fixed; top: 0; right: 0; height: 100vh; width: min(620px, 90vw); margin: 0; border-radius: 0; transform: translateX(100%); transition: transform 180ms ease; }
 .modal.is-open .modal__dialog--drawer { transform: translateX(0); }
 .modal__body.task-modal { overflow: auto; max-height: calc(100vh - 120px); }
+
+/* Audit Autenticazione: blocca altezza e abilita scroll verticale del contenuto */
+article.panel[data-resource="audit-auth"] .panel__body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
 
 /* ------------------------------
    Limiti altezza + scroll card

@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/app.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
 </head>
 <body class="dashboard-app">
 <div class="app-shell">
@@ -16,6 +18,7 @@
         <div class="sidebar__brand">LpWF Gestionale</div>
         <nav class="sidebar__nav" aria-label="Sezioni principali">
             <a href="#overview" class="sidebar__link">Dashboard</a>
+            <a href="#clienti" class="sidebar__link">Clienti</a>
             <a href="#workflow-models" class="sidebar__link" hidden>Modelli</a>
             <a href="#operations" class="sidebar__link">Operatività</a>
             <a href="#catalogo" class="sidebar__link">Catalogo</a>
@@ -24,6 +27,7 @@
             <a href="#config" class="sidebar__link" hidden>Configurazione</a>
         </nav>
         <div class="sidebar__footer">
+            <button type="button" class="btn btn-secondary" data-action="logout" style="width:100%; margin-bottom:8px;">Log out</button>
             <small>&copy; LpWF Platform</small>
         </div>
     </aside>
@@ -63,9 +67,12 @@
                 <span>API: <strong id="status-api">—</strong></span>
                 <span>Token: <strong id="status-token">—</strong></span>
                 <span>Ultima API: <strong id="status-api-last">—</strong></span>
+                <span>API DB: <small id="status-health-api" class="badge">—</small></span>
+                <span>Tenant DB: <small id="status-health-tenant" class="badge">—</small></span>
+                <span>Maps: <small id="status-maps" class="badge">—</small></span>
             </div>
             
-            <section id="overview" class="section">
+            <section id="overview" class="section section--card">
                 <header class="section__header">
                     <h2>Panoramica</h2>
                     <p>Indicatori chiave sull'operatività del gestionale.</p>
@@ -94,7 +101,139 @@
                 </div>
             </section>
 
-            <section id="operations" class="section">
+            <section id="clienti" class="section section--card">
+                <header class="section__header">
+                    <div>
+                        <h2>Clienti</h2>
+                        <p>Elenco anagrafiche clienti con dettagli e contatti.</p>
+                    </div>
+                    <div class="section__actions" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+                        <label class="input-group" style="min-width:260px;">
+                            <span>Ricerca</span>
+                            <input type="search" id="filter-clients" placeholder="Cerca per nome, P.IVA, email…">
+                        </label>
+                        <label class="input-group" style="min-width:180px;">
+                            <span>Provincia</span>
+                            <select id="filter-clients-province">
+                                <option value="">Tutte</option>
+                            </select>
+                        </label>
+                        <label class="input-group" style="min-width:200px;">
+                            <span>Città</span>
+                            <select id="filter-clients-city">
+                                <option value="">Tutte</option>
+                            </select>
+                        </label>
+                        <small id="clients-count" class="badge" title="Totale risultati">0</small>
+                        <button type="button" class="btn" id="btn-clients-refresh">Aggiorna</button>
+                        <div class="input-group" style="min-width:220px;">
+                            <span>Navigazione</span>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button type="button" class="btn" id="clients-prev">Precedente</button>
+                                <small id="clients-page-info" class="badge">1/1</small>
+                                <button type="button" class="btn" id="clients-next">Successivo</button>
+                            </div>
+                        </div>
+                        <label class="input-group" style="min-width:140px;">
+                            <span>Per pagina</span>
+                            <select id="clients-page-size">
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                        </label>
+                    </div>
+                </header>
+                <div class="instance-grid">
+                    <div id="clients-list" class="instance-list"></div>
+                    <section class="instance-detail" id="client-detail" aria-live="polite">
+                        <header class="instance-detail__header">
+                            <h4 id="client-detail-name">Nessun cliente selezionato</h4>
+                            <p id="client-detail-description">Seleziona un cliente per visualizzare informazioni e contatti.</p>
+                        </header>
+                        <dl class="instance-detail__meta">
+                            <div>
+                                <dt>P. IVA</dt>
+                                <dd id="client-detail-piva">--</dd>
+                            </div>
+                            <div>
+                                <dt>Email</dt>
+                                <dd id="client-detail-email">--</dd>
+                            </div>
+                            <div>
+                                <dt>Telefono</dt>
+                                <dd id="client-detail-phone">--</dd>
+                            </div>
+                            <div>
+                                <dt>Tipo</dt>
+                                <dd id="client-detail-type">--</dd>
+                            </div>
+                            <div>
+                                <dt>Codice Fiscale</dt>
+                                <dd id="client-detail-cf">--</dd>
+                            </div>
+                            <div>
+                                <dt>Nazione</dt>
+                                <dd id="client-detail-country">--</dd>
+                            </div>
+                            <div>
+                                <dt>Latitudine</dt>
+                                <dd id="client-detail-lat">--</dd>
+                            </div>
+                            <div>
+                                <dt>Longitudine</dt>
+                                <dd id="client-detail-lon">--</dd>
+                            </div>
+                            <div>
+                                <dt>Creato il</dt>
+                                <dd id="client-detail-created">--</dd>
+                            </div>
+                            <div>
+                                <dt>Aggiornato il</dt>
+                                <dd id="client-detail-updated">--</dd>
+                            </div>
+                        </dl>
+                        <div class="instance-detail__tasks">
+                            <h5>Indirizzo</h5>
+                            <div id="client-detail-address">--</div>
+                            <div id="client-map-warning" class="map-warning" hidden></div>
+                            <div class="map-control-bar">
+                                <button type="button" class="btn btn-secondary" id="btn-edit-client-address">Correggi indirizzo</button>
+                                <button type="button" class="btn btn-primary" id="btn-save-geo" title="Geocodifica e salva coordinate nel profilo">Salva coordinate</button>
+                            </div>
+                            <div class="map-control-bar" id="client-map-controls">
+                                <label class="form-control form-control--inline">
+                                    <span>Vista</span>
+                                    <select id="map-mode-select">
+                                        <option value="map">Mappa</option>
+                                        <option value="street">Street View</option>
+                                    </select>
+                                </label>
+                                <div class="form-control form-control--inline" id="map-zoom-wrap">
+                                    <span>Zoom</span>
+                                    <input type="range" id="map-zoom" min="10" max="19" step="1" value="15">
+                                </div>
+                                <div class="form-control form-control--inline" id="sv-controls" hidden>
+                                    <span>Heading</span>
+                                    <input type="range" id="sv-heading" min="0" max="360" step="5" value="210">
+                                    <span>Pitch</span>
+                                    <input type="range" id="sv-pitch" min="-90" max="90" step="5" value="10">
+                                    <span>FOV</span>
+                                    <input type="range" id="sv-fov" min="10" max="120" step="5" value="80">
+                                </div>
+                            </div>
+                            <div id="client-map" class="map-container" aria-label="Mappa indirizzo cliente"></div>
+                            <div id="client-map-links" class="map-links"></div>
+                            <div id="client-streetview" class="streetview-container" hidden></div>
+                            <h5 style="margin-top:12px;">Note</h5>
+                            <div id="client-detail-notes">--</div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section id="operations" class="section section--card">
                 <header class="section__header">
                     <div>
                         <h2>Operatività</h2>
@@ -297,15 +436,376 @@
                 </div>
             </section>
 
-            <section id="catalogo" class="section section--alt">
+            <section id="catalogo" class="section section--card">
                 <header class="section__header">
-                    <h2>Catalogo Prodotti &amp; Servizi</h2>
-                    <p>Gestione centralizzata dell'offerta e dei pacchetti proposti ai tenant.</p>
+                    <div>
+                        <h2>Catalogo Prodotti &amp; Servizi</h2>
+                        <p>Consulta e cerca prodotti/servizi disponibili.</p>
+                    </div>
+                    <div class="section__actions" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+                        <label class="input-group" style="min-width:260px;">
+                            <span>Ricerca</span>
+                            <input type="search" id="filter-products" placeholder="Cerca per titolo, SKU…">
+                        </label>
+                        <label class="input-group" style="min-width:180px;">
+                            <span>Tipologia</span>
+                            <select id="filter-products-type">
+                                <option value="">Tutte</option>
+                                <option value="PRODOTTO">Prodotti</option>
+                                <option value="SERVIZIO">Servizi</option>
+                            </select>
+                        </label>
+                        <label class="input-group" style="min-width:180px;">
+                            <span>Visibilità</span>
+                            <select id="filter-products-visibility">
+                                <option value="">Tutte</option>
+                                <option value="MARKETPLACE">Marketplace</option>
+                                <option value="PRIVATO">Privato</option>
+                                <option value="RISERVATO">Riservato</option>
+                            </select>
+                        </label>
+                        <label class="input-group" style="min-width:220px;">
+                            <span>Categoria</span>
+                            <select id="filter-products-category">
+                                <option value="">Tutte</option>
+                            </select>
+                        </label>
+                        <label class="input-group" style="min-width:240px;">
+                            <span>Tenant</span>
+                            <select id="filter-products-tenant">
+                                <option value="">Tutti</option>
+                            </select>
+                        </label>
+                        <label class="form-control form-control--inline" title="Mostra solo prodotti del mio tenant">
+                            <input type="checkbox" id="filter-products-own-tenant" checked>
+                            <span>Solo mio tenant</span>
+                        </label>
+                        <small id="products-count" class="badge" title="Totale risultati">0</small>
+                        <button type="button" class="btn" id="btn-products-refresh">Aggiorna</button>
+                        <button type="button" class="btn btn-primary" id="btn-product-new">+ Nuovo</button>
+                        <button type="button" class="btn btn-secondary" id="btn-product-edit">Modifica</button>
+                    </div>
                 </header>
-                <div class="placeholder">
-                    <p>Qui saranno presenti le tabelle catalogo, il marketplace interno e i suggerimenti di bundle.</p>
+                <div class="instance-grid">
+                    <div id="products-list" class="instance-list" style="max-height:60vh; overflow:auto;"></div>
+                    <section class="instance-detail" id="product-detail" aria-live="polite" style="max-height:60vh; overflow:auto;">
+                        <header class="instance-detail__header">
+                            <h4 id="product-detail-title">Nessun elemento selezionato</h4>
+                            <p id="product-detail-subtitle">Seleziona un articolo per i dettagli.</p>
+                        </header>
+                        <dl class="instance-detail__meta">
+                            <div>
+                                <dt>Marca</dt>
+                                <dd id="product-detail-brand">--</dd>
+                            </div>
+                            <div>
+                                <dt>Modello</dt>
+                                <dd id="product-detail-model">--</dd>
+                            </div>
+                            <div>
+                                <dt>Versione</dt>
+                                <dd id="product-detail-version">--</dd>
+                            </div>
+                            <div>
+                                <dt>SKU</dt>
+                                <dd id="product-detail-sku">--</dd>
+                            </div>
+                            <div>
+                                <dt>Codice</dt>
+                                <dd id="product-detail-code">--</dd>
+                            </div>
+                            <div>
+                                <dt>Tipologia</dt>
+                                <dd id="product-detail-type">--</dd>
+                            </div>
+                            <div>
+                                <dt>Stato</dt>
+                                <dd id="product-detail-status">--</dd>
+                            </div>
+                            <div>
+                                <dt>Prezzo</dt>
+                                <dd id="product-detail-price">--</dd>
+                            </div>
+                            <div>
+                                <dt>Categoria</dt>
+                                <dd id="product-detail-categories">--</dd>
+                            </div>
+                        </dl>
+                        <div class="instance-detail__tasks">
+                            <h5>Descrizione</h5>
+                            <div id="product-detail-description">--</div>
+                            <h5 style="margin-top:12px;">Varianti &amp; Prezzi</h5>
+                            <div id="product-variants-list" class="instance-tasks"></div>
+                            <div class="form-grid" style="margin-top:8px;">
+                                <label class="form-control"><span>SKU variante</span><input type="text" id="new-variant-sku"></label>
+                                <label class="form-control"><span>Nome variante</span><input type="text" id="new-variant-nome"></label>
+                                <label class="form-control"><span>Listino</span><select id="price-list-code"></select></label>
+                                <label class="form-control"><span>Valuta</span><input type="text" id="price-list-currency" value="EUR" maxlength="3" style="text-transform:uppercase"></label>
+                                <label class="form-control"><span>Prezzo</span><input type="number" id="new-variant-price" step="0.01" min="0"></label>
+                                <div class="form-control"><span>&nbsp;</span><button type="button" class="btn" id="btn-add-variant">Aggiungi variante</button></div>
+                            </div>
+                            <div style="margin-top:6px;"><button type="button" class="btn btn-secondary" id="btn-manage-pricelists">Gestisci listini</button></div>
+                            <h5 style="margin-top:12px;">Categorie</h5>
+                            <div class="form-grid">
+                                <label class="form-control"><span>Seleziona categorie</span><select id="edit-product-categories" multiple size="6"></select></label>
+                                <div class="form-control"><span>&nbsp;</span>
+                                    <button type="button" class="btn" id="btn-save-categories">Salva categorie</button>
+                                    <button type="button" class="btn btn-secondary" id="btn-manage-categories">Gestisci categorie</button>
+                                </div>
+                            </div>
+                            <h5 style="margin-top:12px;">Relazioni</h5>
+                            <div class="form-grid" style="margin:6px 0;">
+                                <label class="input-group"><span>Tipo</span>
+                                    <select id="relation-filter-type">
+                                        <option value="">Tutti</option>
+                                        <option value="UPSELL">UPSELL</option>
+                                        <option value="CROSS_SELL">CROSS_SELL</option>
+                                        <option value="SERVIZIO_AUSILIARIO">SERVIZIO_AUSILIARIO</option>
+                                        <option value="SOSTITUTIVO">SOSTITUTIVO</option>
+                                        <option value="ADD_ON">ADD_ON</option>
+                                    </select>
+                                </label>
+                                <label class="input-group"><span>Ordina</span>
+                                    <select id="relation-sort">
+                                        <option value="priority">Priorità</option>
+                                        <option value="title">Titolo</option>
+                                        <option value="type">Tipo</option>
+                                    </select>
+                                </label>
+                                <label class="input-group"><span>Direzione</span>
+                                    <select id="relation-sort-dir">
+                                        <option value="asc">Asc</option>
+                                        <option value="desc">Desc</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div id="product-relations-list" class="instance-tasks"></div>
+                            <div class="form-grid" style="margin-top:8px;">
+                                <label class="form-control"><span>Tipo</span>
+                                    <select id="relation-type">
+                                        <option value="UPSELL">UPSELL</option>
+                                        <option value="CROSS_SELL">CROSS_SELL</option>
+                                        <option value="SERVIZIO_AUSILIARIO">SERVIZIO_AUSILIARIO</option>
+                                        <option value="SOSTITUTIVO">SOSTITUTIVO</option>
+                                        <option value="ADD_ON">ADD_ON</option>
+                                    </select>
+                                </label>
+                                <label class="form-control"><span>Categoria</span>
+                                    <select id="relation-category"></select>
+                                </label>
+                                <label class="form-control"><span>Prodotto/Servizio</span>
+                                    <select id="relation-target-select"></select>
+                                </label>
+                                <label class="form-control"><span>Priorità</span><input type="number" id="relation-priority" value="0"></label>
+                                <div class="form-control"><span>&nbsp;</span><button type="button" class="btn" id="btn-add-relation">Aggiungi relazione</button></div>
+                            </div>
+                            <h5 style="margin-top:12px;">Media</h5>
+                            <div id="product-detail-media"></div>
+                            <div class="form-grid" style="margin-top:8px; align-items:end;">
+                                <label class="form-control"><span>Carica file</span><input type="file" id="input-upload-media" accept="image/*"></label>
+                                <label class="form-control"><span>Testo alternativo</span><input type="text" id="input-upload-alt" placeholder="Descrizione immagine"></label>
+                                <div class="form-control"><span>&nbsp;</span><button type="button" class="btn" id="btn-upload-media">Carica</button></div>
+                            </div>
+                            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                <button type="button" class="btn btn-secondary" id="btn-suggest-media">Suggerisci media</button>
+                                <label class="form-control" style="min-width:220px;">
+                                    <span>Fonti</span>
+                                    <div style="display:flex; gap:8px;">
+                                        <label><input type="checkbox" id="media-src-wikimedia" checked> Wikimedia</label>
+                                        <label><input type="checkbox" id="media-src-unsplash" checked> Unsplash</label>
+                                        <label><input type="checkbox" id="media-src-pexels" checked> Pexels</label>
+                                    </div>
+                                </label>
+                                <label class="form-control" style="min-width:160px;">
+                                    <span>Preferisci</span>
+                                    <select id="media-src-prefer">
+                                        <option value="">Nessuna</option>
+                                        <option value="unsplash">Unsplash</option>
+                                        <option value="pexels">Pexels</option>
+                                        <option value="wikimedia">Wikimedia</option>
+                                    </select>
+                                </label>
+                                <small id="suggest-media-status" class="form-hint"></small>
+                            </div>
+                            <div id="suggested-media" class="instance-tasks" style="margin-top:8px;"></div>
+                            <h5 style="margin-top:12px;">Disponibilita (servizi)</h5>
+                            <div id="product-detail-availability">--</div>
+                        </div>
+                    </section>
                 </div>
             </section>
+
+            <!-- Modale: Crea/Modifica Articolo -->
+            <div class="modal" id="modal-edit-product" data-modal>
+                <div class="modal__backdrop" data-modal-close></div>
+                <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-edit-product-title">
+                    <header class="modal__header">
+                        <h3 id="modal-edit-product-title">Modifica articolo</h3>
+                        <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+                    </header>
+                    <form id="form-edit-product" class="modal__body">
+                        <input type="hidden" name="id" id="edit-product-id">
+                        <div class="placeholder" style="margin-bottom:12px;">
+                            <p><strong>Prima di creare un nuovo articolo</strong> cerca se esiste già centralmente:</p>
+                            <div class="form-grid">
+                                <label class="form-control" style="grid-column: 1 / -1;">
+                                    <span>Ricerca prodotti/servizi</span>
+                                    <input type="text" id="suggest-product-query" placeholder="Marca, modello o titolo">
+                                </label>
+                            </div>
+                            <div id="suggest-product-list" class="instance-tasks" style="max-height:200px; overflow:auto;"></div>
+                            <small id="suggest-product-categories-note" class="form-hint"></small>
+                        </div>
+                        <div class="form-grid">
+                            <label class="form-control">
+                                <span>SKU (globale)</span>
+                                <input type="text" name="sku" id="edit-product-sku" readonly placeholder="Assegnato alla creazione">
+                            </label>
+                            <label class="form-control">
+                                <span>Codice tenant (opzionale)</span>
+                                <input type="text" name="codice_tenant" id="edit-product-codice-tenant" placeholder="Codice interno/fornitore">
+                            </label>
+                            <label class="form-control">
+                                <span>Marca</span>
+                                <input type="text" name="marca" id="edit-product-marca" placeholder="Marca">
+                            </label>
+                            <label class="form-control">
+                                <span>Modello</span>
+                                <input type="text" name="modello" id="edit-product-modello" placeholder="Modello/Nome">
+                            </label>
+                            <label class="form-control">
+                                <span>Versione</span>
+                                <input type="text" name="versione" id="edit-product-versione" placeholder="Versione (opzionale)">
+                            </label>
+                            <label class="form-control">
+                                <span>Tipologia</span>
+                                <select name="tipologia" id="edit-product-tipologia">
+                                    <option value="FISICO">Prodotto (FISICO)</option>
+                                    <option value="SERVIZIO">Servizio</option>
+                                    <option value="DIGITALE">Digitale</option>
+                                    <option value="BUNDLE">Bundle</option>
+                                </select>
+                            </label>
+                        </div>
+                        <label class="form-control">
+                            <span>Titolo</span>
+                            <input type="text" name="titolo" id="edit-product-titolo" required>
+                        </label>
+                        <label class="form-control">
+                            <span>Sottotitolo</span>
+                            <input type="text" name="sottotitolo" id="edit-product-sottotitolo">
+                        </label>
+                        <label class="form-control">
+                            <span>Descrizione</span>
+                            <textarea name="descrizione" id="edit-product-descrizione" rows="4"></textarea>
+                        </label>
+                        <div class="form-grid">
+                            <label class="form-control">
+                                <span>Stato</span>
+                                <select name="stato_pubblicazione" id="edit-product-stato">
+                                    <option value="BOZZA">Bozza</option>
+                                    <option value="PUBBLICATO">Pubblicato</option>
+                                    <option value="ARCHIVIATO">Archiviato</option>
+                                </select>
+                            </label>
+                            <label class="form-control">
+                                <span>Visibilità</span>
+                                <select name="visibilita" id="edit-product-visibilita">
+                                    <option value="PRIVATO">Privato</option>
+                                    <option value="MARKETPLACE">Marketplace</option>
+                                    <option value="RISERVATO">Riservato</option>
+                                </select>
+                            </label>
+                        </div>
+                        <footer class="modal__footer">
+                            <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modale: Gestione listini -->
+            <div class="modal" id="modal-manage-pricelists" data-modal>
+                <div class="modal__backdrop" data-modal-close></div>
+                <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-manage-pricelists-title">
+                    <header class="modal__header">
+                        <h3 id="modal-manage-pricelists-title">Gestione listini</h3>
+                        <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+                    </header>
+                    <div class="modal__body">
+                        <div id="pricelists-list"></div>
+                        <hr>
+                        <form id="form-pricelist" class="form-grid">
+                            <input type="hidden" name="id" id="pricelist-id">
+                            <label class="form-control"><span>Codice</span><input type="text" name="codice" id="pricelist-codice" required></label>
+                            <label class="form-control"><span>Nome</span><input type="text" name="nome" id="pricelist-nome"></label>
+                            <label class="form-control"><span>Valuta</span><input type="text" name="valuta" id="pricelist-valuta" value="EUR" maxlength="3" style="text-transform:uppercase"></label>
+                            <label class="form-control"><span>Priorità</span><input type="number" name="priorita" id="pricelist-priorita" value="0"></label>
+                            <label class="form-control"><span>Valido dal</span><input type="date" name="valido_dal" id="pricelist-dal"></label>
+                            <label class="form-control"><span>Valido al</span><input type="date" name="valido_al" id="pricelist-al"></label>
+                            <div class="form-control"><span>&nbsp;</span>
+                                <button type="submit" class="btn btn-primary">Salva listino</button>
+                                <button type="button" class="btn btn-danger" id="btn-delete-pricelist" hidden>Elimina</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modale: Gestione categorie -->
+            <div class="modal" id="modal-manage-categories" data-modal>
+                <div class="modal__backdrop" data-modal-close></div>
+                <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-manage-categories-title">
+                    <header class="modal__header">
+                        <h3 id="modal-manage-categories-title">Gestione categorie</h3>
+                        <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+                    </header>
+                    <div class="modal__body">
+                        <div class="form-grid">
+                            <label class="form-control" style="grid-column: 1 / -1;"><span>Cerca</span><input type="text" id="categories-search" placeholder="Cerca per nome o slug"></label>
+                        </div>
+                        <div id="categories-list" class="instance-tasks" style="margin-top:8px; max-height:240px; overflow:auto;"></div>
+                        <hr>
+                        <form id="form-category" class="form-grid">
+                            <input type="hidden" id="category-id">
+                            <label class="form-control"><span>Nome</span><input type="text" id="category-name" required></label>
+                            <label class="form-control"><span>Slug</span><input type="text" id="category-slug" placeholder="auto se vuoto"></label>
+                            <label class="form-control"><span>Padre</span><select id="category-parent"></select></label>
+                            <div class="form-control"><span>&nbsp;</span>
+                                <button type="submit" class="btn btn-primary" id="btn-save-category">Salva categoria</button>
+                                <button type="button" class="btn btn-danger" id="btn-delete-category" hidden>Elimina</button>
+                                <button type="button" class="btn" data-modal-close>Annulla</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modale: Importa media suggeriti -->
+            <div class="modal" id="modal-import-media" data-modal>
+                <div class="modal__backdrop" data-modal-close></div>
+                <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-import-media-title">
+                    <header class="modal__header">
+                        <h3 id="modal-import-media-title">Importa media suggeriti</h3>
+                        <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+                    </header>
+                    <div class="modal__body">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                            <label class="form-control form-control--inline">
+                                <input type="checkbox" id="import-media-select-all">
+                                <span>Seleziona tutti</span>
+                            </label>
+                            <small class="form-hint">Spunta le immagini da associare al nuovo articolo.</small>
+                        </div>
+                        <div id="import-media-list" class="instance-tasks" style="max-height:260px; overflow:auto;"></div>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <button type="button" class="btn btn-primary" id="btn-import-media-confirm">Importa selezionati</button>
+                            <button type="button" class="btn" id="btn-import-media-cancel" data-modal-close>Annulla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <section id="sync" class="section">
                 <header class="section__header">
@@ -892,6 +1392,48 @@
         </form>
     </div>
     </div>
+
+<!-- Modale: Correggi indirizzo cliente -->
+<div class="modal" id="modal-edit-client-address" data-modal>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-edit-client-address-title">
+        <header class="modal__header">
+            <h3 id="modal-edit-client-address-title">Correggi indirizzo cliente</h3>
+            <button class="modal__close" data-modal-close aria-label="Chiudi">&times;</button>
+        </header>
+        <form id="form-edit-client-address" class="modal__body">
+            <input type="hidden" name="id" id="edit-client-id">
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Indirizzo</span>
+                    <input type="text" name="indirizzo" id="edit-client-indirizzo" placeholder="Via e numero civico">
+                </label>
+                <label class="form-control">
+                    <span>CAP</span>
+                    <input type="text" name="cap" id="edit-client-cap" placeholder="CAP">
+                </label>
+            </div>
+            <div class="form-grid">
+                <label class="form-control">
+                    <span>Città</span>
+                    <input type="text" name="citta" id="edit-client-citta" required>
+                </label>
+                <label class="form-control">
+                    <span>Provincia</span>
+                    <input type="text" name="provincia" id="edit-client-provincia">
+                </label>
+                <label class="form-control">
+                    <span>Nazione</span>
+                    <input type="text" name="nazione" id="edit-client-nazione" required>
+                </label>
+            </div>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
+                <button type="submit" class="btn btn-primary">Salva</button>
+            </footer>
+        </form>
+    </div>
+</div>
 
 <!-- Modale creazione passo -->
 <div class="modal" id="modal-create-step" data-modal>

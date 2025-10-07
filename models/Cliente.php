@@ -4,17 +4,56 @@ require_once __DIR__ . '/CrudBaseAbstract.php';
 class Cliente extends CrudBaseAbstract
 {
     protected $table_name = 'clienti';
-    protected $fillable_fields = ['ragione_sociale','partita_iva','email','tipo_cliente'];
+    protected $fillable_fields = [
+        'ragione_sociale','partita_iva','codice_fiscale','email','telefono',
+        'indirizzo','cap','citta','provincia','nazione','latitudine','longitudine',
+        'tipo_cliente','note','creato_il','aggiornato_il','deleted_il'
+    ];
 
     public $id;
     public $ragione_sociale;
     public $partita_iva;
+    public $codice_fiscale;
     public $email;
+    public $telefono;
+    public $indirizzo;
+    public $cap;
+    public $citta;
+    public $provincia;
+    public $nazione;
+    public $latitudine;
+    public $longitudine;
     public $tipo_cliente;
+    public $note;
+    public $creato_il;
+    public $aggiornato_il;
+    public $deleted_il;
+
+    private static $columnsCache = null;
+
+    private function columnExists(string $name): bool
+    {
+        if (self::$columnsCache === null) {
+            $rows = $this->db->select("SHOW COLUMNS FROM `{$this->table_name}`") ?: [];
+            $names = [];
+            foreach ($rows as $r) { if (!empty($r['Field'])) { $names[strtolower($r['Field'])] = true; } }
+            self::$columnsCache = $names;
+        }
+        return isset(self::$columnsCache[strtolower($name)]);
+    }
 
     public function findAll($conditions = [], string $orderBy = ''): array
     {
-        $sql = "SELECT id, ragione_sociale, partita_iva, email, tipo_cliente FROM {$this->table_name}";
+        $selectCols = [
+            'id', 'ragione_sociale', 'partita_iva', 'codice_fiscale', 'email', 'telefono',
+            'indirizzo', 'cap', 'citta', 'provincia', 'nazione',
+        ];
+        // Aggiungi lat/long solo se esistono nel DB
+        if ($this->columnExists('latitudine')) { $selectCols[] = 'latitudine'; }
+        if ($this->columnExists('longitudine')) { $selectCols[] = 'longitudine'; }
+        $selectCols = array_merge($selectCols, ['tipo_cliente', 'note', 'creato_il', 'aggiornato_il']);
+
+        $sql = 'SELECT ' . implode(', ', $selectCols) . " FROM {$this->table_name}";
         $params = [];
         $where = [];
         if (!empty($conditions['search'])) {
@@ -35,4 +74,3 @@ class Cliente extends CrudBaseAbstract
         return $this->db->select($sql, $params) ?: [];
     }
 }
-

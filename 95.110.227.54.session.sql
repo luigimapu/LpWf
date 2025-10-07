@@ -1,1 +1,3 @@
-update utenti SET password_hash='$2y$10$2gl/TPygUfLnDJoc.ZqIYuCQau/FZCo33wqRTFiKBbft8Bi788a6.' where email='damato@lprent.it';
+mysql -u legacy_user -p -e "SHOW COLUMNS FROM anagrafiche" legacy;
+mysql -u legacy_user -p -e "SHOW COLUMNS FROM documenti" legacy;
+mysql -u legacy_user -p -e "SHOW COLUMNS FROM pagamenti" legacy;

@@ -1,0 +1,4170 @@
+table,column,type
+0b,id,int(11
+0events,event_id,int(11
+0events_max,event_id,int(11
+0events_not_tr,cliente,text
+0max_events_cliente,cliente,text
+0trattative_pratiche,id,int(11
+0v_nodoc_flotta,id,int(11
+0v_nodoc_noflotta,id,int(11
+0v_nodoc_noordini,id,int(11
+0v_notr_flotta,id,int(11
+0v_notr_noordini,id,int(11
+0v_notr_nopr,ID,int(10
+0v_pla_nd,id,int(11
+0v_pla_val,id,int(11
+0v_p_n_app,id,int(11
+1_max_or,id,int(11
+1_max_tr,id,int(11
+1_max_tr0,id,int(11
+1_max_tr1,id,int(11
+1_max_tr_ap,id,int(11
+1_max_tr_ch,id,int(11
+1_max_tr_pr,id,int(11
+1_or,id_cliente,int(11
+1_or_comp,id,int(11
+1_or_ok,id_cliente,int(11
+1_or_ok_rag,id_cliente,int(11
+1_pr_tr,id,int(11
+1_pr_tr_ap,id,int(11
+1_pr_tr_ap_appr,id,int(11
+1_pr_tr_ap_doc,id,int(11
+1_pr_tr_ap_nodoc,id,int(11
+1_pr_tr_ch,id,int(11
+1_task,task.id,int(11
+01_task_completo,task.id,int(11
+01_task_distanze_completo_new,task.id,int(11
+1_tr_ap_appr,id,int(11
+1_tr_ap_doc,id,int(11
+1_tr_ap_doc_no_or,id,int(11
+1_tr_ap_doc_or,id,int(11
+1_tr_ap_nodoc,id,int(11
+1_tr_ap_no_or,id,int(11
+1_tr_ap_or,id,int(11
+1_tr_ch_or,id,int(11
+1_tr_pr,id,int(11
+2_budget,budget.id,int(11
+2_budget,budget.programmati,int(11
+2_budget,budget.effettuati,int(11
+2_budget,budget.trattative,int(11
+2_budget,budget.documentzione,int(11
+2_budget,budget.importo,int(11
+2_budget,budget.data_inizio,datetime NOT NULL
+2_budget,budget.data_fine,datetime NOT NULL
+2_budget,budget.attivo,int(11
+2_check,id,int(11
+2_check,data,date NOT NULL
+2_check,consulente,longtext NOT NULL
+2_check,id_consulente,int(11
+2_check,npratiche,int(11
+2_check,nclienti,int(11
+2_check,ntrattative,int(11
+2_check,pratiche,longtext NOT NULL
+2_check,clienti,longtext NOT NULL
+2_check,trattative,longtext NOT NULL
+2_check,note,int(11
+2_dettagli_istanze,dettagli_istanze.id,int(11
+2_dettagli_istanze,dettagli_istanze.istanze.id,int(11
+2_dettagli_istanze,dettagli_istanze.id_gruppo,int(11
+2_dettagli_istanze,dettagli_istanze.id_utente,int(11
+2_dettagli_istanze,dettagli_istanze.data_ultimo,datetime NOT NULL
+2_dettagli_istanze,dettagli_istanze.task_ultimo,int(11
+2_dettagli_istanze,dettagli_istanze.id_trattativa,bigint(15
+2_istanze,istanze.id,int(11
+2_istanze,istanze.flow.id,int(11
+2_istanze,istanze.attivo,int(11
+2_istanze,istanze.max_passo_assegnato,int(11
+2_istanze,istanze.data_max_passo,datetime DEFAULT NULL
+2_istanze,istanze.cliente.id,int(11
+2_istanze,istanze.id_trattativa,bigint(15
+2_istanze,istanze.istanza_master,int(11
+2_istanze,istanze.ultimo_aggiornamento,datetime DEFAULT NULL
+2_istanze,istanze.id_utente_ultimo_aggiornamento,bigint(15
+2_istanze,istanze.categoria,text NOT NULL COMMENT '
+2_istanze,istanze.pratica.id,bigint(15
+2_istanze,istanze.rent.id,bigint(15
+2_istanze,istanze.id_df_max_passo,int(11
+2_istanze,istanze.note,text NOT NULL COMMENT '
+2_istanze,istanze.data_inserimento,datetime DEFAULT NULL
+2_istanze,istanze.note_max_passo,text NOT NULL
+2_istanze,istanze.note_max_agg,text NOT NULL
+2_quo,id,int(11
+2_quo,id_pratica,int(11
+2_quo,id_vendor,int(11
+2_rik,id_richiesta,int(11
+2_rik,id_pratica,int(11
+2_rik,note,longtext NOT NULL
+2_rik,id_ordine,int(11
+2_target,target.id,int(11
+2_target,target.consulente.id,int(11
+2_target,target.data,datetime NOT NULL
+2_target,target.settimana,int(11
+2_target,target.programmati,int(11
+2_target,target.effettuati,int(11
+2_target,target.trattative,int(11
+2_target,target.documentazioni,int(11
+2_target,target.importo,float NOT NULL DEFAULT 0
+2_target,target.pr.check,int(11
+2_target,target.ef.check,int(11
+2_target,target.tr.check,int(11
+2_target,target.do.check,int(11
+2_task,task.id,int(11
+2_task,task.nome,text NOT NULL
+2_task,task.flow.id,int(11
+2_task,task.dettagli_flow.id,int(11
+2_task,task.cliente.id,int(11
+2_task,task.trattativa.id,int(11
+2_task,task.pratica.id,int(11
+2_task,task.data_inserimento,datetime NOT NULL
+2_task,task.data_scadenza,datetime NOT NULL
+2_task,task.assegnante,text NOT NULL
+2_task,task.assegnatario,text NOT NULL
+2_task,task.note,text NOT NULL
+2_task,task.priorita,int(11
+2_task,task.stato,int(11
+2_task,task.next,int(11
+2_task,task.previous,int(11
+2_task,task.durata,int(11
+2_task,task.data_scadenza_originale,datetime DEFAULT NULL
+2_task,task.data_presa_in_carico,datetime DEFAULT NULL
+2_task,task.data_completamento,datetime DEFAULT NULL
+2_task,task.id_utente_presa_in_carico,int(11
+2_task,task.esito_azione,text DEFAULT NULL
+2_task,task.istanze.id,int(11
+2_task,task.passo,int(11
+2_task,task.letto,int(11
+aaa,Stato,text DEFAULT NULL COMMENT '0=liberato
+aaa,Marca,text DEFAULT NULL
+aaa,Modello,text DEFAULT NULL
+aaa,Versione,text DEFAULT NULL
+aaa,Colore,text DEFAULT NULL
+aaa,Territory,text DEFAULT NULL
+aaa,costr,text DEFAULT NULL
+aaa,id_cliente,int(11
+aaa,note,longtext DEFAULT NULL
+aaa,import,int(1
+aaa,id_veicolo,int(11
+aaa,id_consulente,int(11
+aaa,id_utente,int(11
+aaa,data,datetime NOT NULL
+aaa,data_riserva,datetime DEFAULT NULL
+aaa,scadenza,datetime NOT NULL
+agg,id,int(11
+agg,id_veicoli_offerta,int(11
+agg,note,mediumtext NOT NULL
+agg,data,date NOT NULL
+agg,id_interno,int(11
+agglomerati,id,int(11
+agglomerati_,id,int(11
+agglomerati_,veicolo_id_jato,int(11
+agglomerati_,colore_esterno,text NOT NULL
+agglomerati_,colore_interno,text NOT NULL
+agglomerati_,optional,longtext NOT NULL
+agglomerati_,note,longtext NOT NULL
+agglomerati_,data,date NOT NULL
+agglomerati_,id_interno,int(11
+allegati,id,int(11
+allegati,nome,text NOT NULL
+allegati,data_caricamento,datetime NOT NULL
+allegati,id_utente,int(11
+allegati,ultima_modifica,datetime NOT NULL
+allegati,id_utente_ultima_modifica,int(11
+allegati,stato,int(11
+allegati,note,longtext NOT NULL
+allegati,tipologia,int(11
+allegati,percorso,text NOT NULL
+allegati,riferimento,int(11
+allegati,id_istanze,int(11
+alunni,id,int(11
+alunni,id_cliente,int(11
+alunni,id_classe,int(11
+alunni,note,longtext NOT NULL
+alunni,stato,int(11
+anagrafiche,ID,int(10
+anagrafiche,email,varchar(45
+anagrafiche,telefono,varchar(80
+anagrafiche,azienda,varchar(80
+anagrafiche,formagiuridica,varchar(17
+anagrafiche,partitaiva,varchar(30
+anagrafiche,comune,varchar(45
+anagrafiche,provincia,varchar(50
+anagrafiche,cap,varchar(8
+anagrafiche,indirizzo,varchar(45
+anagrafiche,fax,int(8
+anagrafiche,referente,varchar(45
+anagrafiche,telreferente,varchar(20
+anagrafiche,note,longtext DEFAULT NULL
+anagrafiche,codice,varchar(45
+anagrafiche,idblocco,int(11
+anagrafiche,telefonato,varchar(100
+anagrafiche,attivita,text DEFAULT NULL COMMENT 'id operatore ri
+anagrafiche,pos1,text NOT NULL
+anagrafiche,contatto2,text NOT NULL
+anagrafiche,pos2,text NOT NULL COMMENT 'PEC'
+anagrafiche,provenienza,text NOT NULL
+anagrafiche,coordinate,text NOT NULL
+anagrafiche,coordinate_rilevate,text NOT NULL
+anagrafiche2,ID,int(10
+anagrafiche2,email,varchar(45
+anagrafiche2,telefono,varchar(80
+anagrafiche2,azienda,varchar(45
+anagrafiche2,formagiuridica,varchar(8
+anagrafiche2,partitaiva,varchar(30
+anagrafiche2,comune,varchar(45
+anagrafiche2,provincia,varchar(50
+anagrafiche2,cap,varchar(8
+anagrafiche2,indirizzo,varchar(45
+anagrafiche2,fax,int(8
+anagrafiche2,referente,varchar(45
+anagrafiche2,telreferente,varchar(20
+anagrafiche2,note,longtext DEFAULT NULL
+anagrafiche2,codice,varchar(45
+anagrafiche2,idblocco,int(11
+anagrafiche2,telefonato,varchar(100
+anagrafiche2,attivita,text NOT NULL
+anagrafiche2,pos1,text NOT NULL
+anagrafiche2,contatto2,text NOT NULL
+anagrafiche2,pos2,text NOT NULL
+anagrafiche2,provenienza,text NOT NULL
+anagrafiche_da_vecchio,ID,int(20
+anagrafiche_da_vecchio,email,varchar(45
+anagrafiche_da_vecchio,telefono,varchar(80
+anagrafiche_da_vecchio,azienda,varchar(45
+anagrafiche_da_vecchio,formagiuridica,varchar(8
+anagrafiche_da_vecchio,partitaiva,varchar(30
+anagrafiche_da_vecchio,comune,varchar(45
+anagrafiche_da_vecchio,provincia,varchar(50
+anagrafiche_da_vecchio,cap,varchar(8
+anagrafiche_da_vecchio,indirizzo,varchar(45
+anagrafiche_da_vecchio,fax,int(8
+anagrafiche_da_vecchio,referente,varchar(45
+anagrafiche_da_vecchio,telreferente,varchar(20
+anagrafiche_da_vecchio,note,longtext DEFAULT NULL
+anagrafiche_da_vecchio,codice,varchar(45
+anagrafiche_da_vecchio,idblocco,int(11
+anagrafiche_da_vecchio,telefonato,varchar(100
+anagrafiche_da_vecchio,attivita,text DEFAULT NULL COMMENT 'id operatore ri
+anagrafiche_da_vecchio,pos1,text NOT NULL
+anagrafiche_da_vecchio,contatto2,text NOT NULL
+anagrafiche_da_vecchio,pos2,text NOT NULL COMMENT 'data di na
+anagrafiche_da_vecchio,provenienza,text NOT NULL
+anagrafiche_luigi,ID,int(20
+anagrafiche_luigi,email,varchar(45
+anagrafiche_luigi,telefono,varchar(80
+anagrafiche_luigi,azienda,varchar(45
+anagrafiche_luigi,formagiuridica,varchar(8
+anagrafiche_luigi,partitaiva,varchar(30
+anagrafiche_luigi,comune,varchar(45
+anagrafiche_luigi,provincia,varchar(50
+anagrafiche_luigi,cap,varchar(8
+anagrafiche_luigi,indirizzo,varchar(45
+anagrafiche_luigi,fax,int(8
+anagrafiche_luigi,referente,varchar(45
+anagrafiche_luigi,telreferente,varchar(20
+anagrafiche_luigi,note,longtext DEFAULT NULL
+anagrafiche_luigi,codice,varchar(45
+anagrafiche_luigi,idblocco,int(11
+anagrafiche_luigi,telefonato,varchar(100
+anagrafiche_luigi,attivita,text DEFAULT NULL COMMENT 'id operatore ri
+anagrafiche_luigi,pos1,text NOT NULL
+anagrafiche_luigi,contatto2,text NOT NULL
+anagrafiche_luigi,pos2,text NOT NULL COMMENT 'data di na
+anagrafiche_luigi,provenienza,text NOT NULL
+anagrafiche_o,ID,int(20
+anagrafiche_o,email,varchar(45
+anagrafiche_o,telefono,varchar(80
+anagrafiche_o,azienda,varchar(45
+anagrafiche_o,formagiuridica,varchar(8
+anagrafiche_o,partitaiva,varchar(30
+anagrafiche_o,comune,varchar(45
+anagrafiche_o,provincia,varchar(50
+anagrafiche_o,cap,varchar(8
+anagrafiche_o,indirizzo,varchar(45
+anagrafiche_o,fax,int(8
+anagrafiche_o,referente,varchar(45
+anagrafiche_o,telreferente,varchar(20
+anagrafiche_o,note,longtext DEFAULT NULL
+anagrafiche_o,codice,varchar(45
+anagrafiche_o,idblocco,int(11
+anagrafiche_o,telefonato,varchar(100
+anagrafiche_o,attivita,text DEFAULT NULL COMMENT 'id operatore ri
+anagrafiche_o,pos1,text NOT NULL
+anagrafiche_o,contatto2,text NOT NULL
+anagrafiche_o,pos2,text NOT NULL COMMENT 'data di na
+anagrafiche_o,provenienza,text NOT NULL
+anagrafiche_old,ID,int(10
+anagrafiche_old,email,varchar(45
+anagrafiche_old,telefono,varchar(80
+anagrafiche_old,azienda,varchar(45
+anagrafiche_old,formagiuridica,varchar(8
+anagrafiche_old,partitaiva,varchar(30
+anagrafiche_old,comune,varchar(45
+anagrafiche_old,provincia,varchar(50
+anagrafiche_old,cap,varchar(8
+anagrafiche_old,indirizzo,varchar(45
+anagrafiche_old,fax,varchar(30
+anagrafiche_old,referente,varchar(45
+anagrafiche_old,telreferente,varchar(20
+anagrafiche_old,note,longtext DEFAULT NULL
+anagrafiche_old,codice,varchar(45
+anagrafiche_old,idblocco,int(11
+anagrafiche_old,telefonato,varchar(100
+anagrafiche_old,attivita,text NOT NULL
+anagrafiche_old,pos1,text NOT NULL
+anagrafiche_old,contatto2,text NOT NULL
+anagrafiche_old,pos2,text NOT NULL
+anagrafiche_old,provenienza,text NOT NULL
+anagrafiche_old2,ID,int(10
+anagrafiche_old2,email,varchar(45
+anagrafiche_old2,telefono,varchar(80
+anagrafiche_old2,azienda,varchar(45
+anagrafiche_old2,formagiuridica,varchar(8
+anagrafiche_old2,partitaiva,varchar(30
+anagrafiche_old2,comune,varchar(45
+anagrafiche_old2,provincia,varchar(50
+anagrafiche_old2,cap,varchar(8
+anagrafiche_old2,indirizzo,varchar(45
+anagrafiche_old2,fax,varchar(30
+anagrafiche_old2,referente,varchar(45
+anagrafiche_old2,telreferente,varchar(20
+anagrafiche_old2,note,longtext DEFAULT NULL
+anagrafiche_old2,codice,varchar(45
+anagrafiche_old2,idblocco,int(11
+anagrafiche_old2,telefonato,varchar(100
+anagrafiche_old2,attivita,text NOT NULL
+anagrafiche_old2,pos1,text NOT NULL
+anagrafiche_old2,contatto2,text NOT NULL
+anagrafiche_old2,pos2,text NOT NULL
+anagrafiche_old2,provenienza,text NOT NULL
+anagrafiche_old24062016,ID,int(10
+anagrafiche_old24062016,email,varchar(45
+anagrafiche_old24062016,telefono,varchar(80
+anagrafiche_old24062016,azienda,varchar(45
+anagrafiche_old24062016,formagiuridica,varchar(8
+anagrafiche_old24062016,partitaiva,varchar(30
+anagrafiche_old24062016,comune,varchar(45
+anagrafiche_old24062016,provincia,varchar(50
+anagrafiche_old24062016,cap,varchar(8
+anagrafiche_old24062016,indirizzo,varchar(45
+anagrafiche_old24062016,fax,int(8
+anagrafiche_old24062016,referente,varchar(45
+anagrafiche_old24062016,telreferente,varchar(20
+anagrafiche_old24062016,note,longtext DEFAULT NULL
+anagrafiche_old24062016,codice,varchar(45
+anagrafiche_old24062016,idblocco,int(11
+anagrafiche_old24062016,telefonato,varchar(100
+anagrafiche_old24062016,attivita,text DEFAULT NULL COMMENT 'id operatore ri
+anagrafiche_old24062016,pos1,text NOT NULL
+anagrafiche_old24062016,contatto2,text NOT NULL
+anagrafiche_old24062016,pos2,text NOT NULL COMMENT 'data di na
+anagrafiche_old24062016,provenienza,text NOT NULL
+anagrafiche_progetti,id,int(11
+anagrafiche_progetti,anagrafica,int(20
+anagrafiche_progetti,progetto,int(11
+anagrafiche_progetti,fase,int(11
+anagrafiche_progetti,stato,int(11
+anagrafiche_progetti,id_consulente,int(11
+anagrafiche_progetti,note,longtext NOT NULL
+anagrafiche_progetti,prossima_lavorazione,datetime NOT NULL
+anagrafiche_progetti_luigi,id,int(11
+anagrafiche_progetti_luigi,anagrafica,int(20
+anagrafiche_progetti_luigi,progetto,int(11
+anagrafiche_progetti_luigi,fase,int(11
+anagrafiche_progetti_luigi,stato,int(11
+anagrafiche_progetti_luigi,id_consulente,int(11
+anagrafiche_progetti_luigi,note,longtext NOT NULL
+anagrafiche_progetti_luigi,prossima_lavorazione,datetime NOT NULL
+anagrafiche_progetti_o,id,int(11
+anagrafiche_progetti_o,anagrafica,int(20
+anagrafiche_progetti_o,progetto,int(11
+anagrafiche_progetti_o,fase,int(11
+anagrafiche_progetti_o,stato,int(11
+anagrafiche_progetti_o,id_consulente,int(11
+anagrafiche_progetti_o,note,longtext NOT NULL
+anagrafiche_progetti_o,prossima_lavorazione,datetime NOT NULL
+annunci_ap,id,int(11
+annunci_ap,id_contratto,int(11
+annunci_ap,sito,text NOT NULL
+annunci_ap,nannunci,int(11
+annunci_ap,orario,text NOT NULL
+annunci_ap,email,text NOT NULL
+annunci_ap,password,text NOT NULL
+appunt,event_id,int(11
+APPUNTAMENTI,event_id,int(11
+appuntamenti_flow,conteggio,bigint(21
+appuntamenti_flow_confermati,conteggio,bigint(21
+appuntamenti_flow_da_confermare,conteggio,bigint(21
+appunt_check,id,int(11
+appunt_check,event_id,int(11
+appunt_check,responsabile,int(11
+appunt_check,effettuato,int(11
+appunt_check,esito,int(11
+appunt_check,note_resp,int(11
+appunt_check,note_dir,int(11
+appunt_check,tipologia,int(11
+appunt_check,note,int(11
+appunt_check-vista,event_id,int(11
+app_realizzati,event_id,int(11
+area_download,id,int(11
+area_download,vendor,text CHARACTER 
+area_download,tipologia,text CHARACTER 
+area_download,data_caricamento,date NOT NULL
+area_download,nome_file,text CHARACTER 
+assegnazioni,Operatore,int(11
+assegnazioni,Previsti,int(11
+assegnazioni,Assegnati,int(11
+assegnazioni,Prima,text DEFAULT NULL
+assegnazioni,Seconda,text DEFAULT NULL
+assegnazioni,Terza,text DEFAULT NULL
+assegnazioni,Quarta,text DEFAULT NULL
+assegnazioni,Quinta,text DEFAULT NULL
+assegnazioni_mail,id,int(11
+assegnazioni_mail,mittente,text DEFAULT NULL
+assegnazioni_mail,oggetto,longtext DEFAULT NULL
+assegnazioni_mail,testo,longtext DEFAULT NULL
+assegnazioni_mail,assegnatario,int(11
+assegnazioni_mail,derivate,text NOT NULL
+assegnazioni_mail,peso,int(11
+auto,id,int(11
+auto,jato_code,text NOT NULL
+auto,marca,text NOT NULL
+auto,modello,text NOT NULL
+auto,versione,text NOT NULL
+auto,codice_costruttore,text NOT NULL
+auto,omologazione,text NOT NULL
+auto,cavalli,text NOT NULL
+auto,kw,text NOT NULL
+auto,cilindrata,text NOT NULL
+auto,pneumatici_anteriori,text NOT NULL
+auto,pneumatici_posteriori,text NOT NULL
+auto,trasmissione,text NOT NULL
+auto,alimentazione,text NOT NULL
+auto,tipologia,text NOT NULL
+auto,listino,text NOT NULL
+auto,attivo,int(11
+auto_bk,id,int(11
+auto_bk,jato_code,text NOT NULL
+auto_bk,marca,text NOT NULL
+auto_bk,modello,text NOT NULL
+auto_bk,versione,text NOT NULL
+auto_bk,codice_costruttore,text NOT NULL
+auto_bk,omologazione,text NOT NULL
+auto_bk,cavalli,text NOT NULL
+auto_bk,kw,text NOT NULL
+auto_bk,cilindrata,text NOT NULL
+auto_bk,pneumatici_anteriori,text NOT NULL
+auto_bk,pneumatici_posteriori,text NOT NULL
+auto_bk,trasmissione,text NOT NULL
+auto_bk,alimentazione,text NOT NULL
+auto_bk,tipologia,text NOT NULL
+auto_bk,listino,text NOT NULL
+auto_bk,attivo,int(11
+auto_desiderate,id,int(11
+auto_desiderate,id_trattativa,int(11
+auto_desiderate,numero_vetture,int(11
+auto_desiderate,marca,varchar(60
+auto_desiderate,modello,varchar(60
+auto_desiderate,versione,varchar(60
+auto_desiderate,priorita,int(11
+auto_desiderate,km_annui,int(11
+auto_desiderate,mesi,int(11
+auto_desiderate,tipo_noleggio,int(11
+auto_desiderate,anticipo,float NOT NULL
+auto_desiderate,sw,int(11
+auto_desiderate,note,text NOT NULL
+auto_desiderate2,id,int(11
+auto_desiderate2,id_trattativa,int(11
+auto_desiderate2,numero_vetture,int(11
+auto_desiderate2,marca,varchar(60
+auto_desiderate2,modello,varchar(60
+auto_desiderate2,versione,varchar(60
+auto_desiderate2,priorita,int(11
+auto_desiderate2,km_annui,int(11
+auto_desiderate2,mesi,int(11
+auto_desiderate2,tipo_noleggio,int(11
+auto_desiderate2,anticipo,float NOT NULL
+auto_desiderate2,sw,int(11
+auto_desiderate2,note,text NOT NULL
+auto_desiderate2,a,text NOT NULL
+auto_desiderate2,b,int(11
+auto_foto,marca,text
+auto_foto0,marca,text
+auto_foto1,id,int(11
+auto_foto1,marca,text NOT NULL
+auto_foto1,modello,text NOT NULL
+auto_foto1,nome,text NOT NULL
+auto_foto1,link,text NOT NULL
+auto_foto1,link_json,text DEFAULT NULL
+auto_marmodver,id,int(11
+auto_offerte,id,int(11
+auto_offerte,vehicleid,int(11
+auto_offerte,stocktype,text CHARACTER 
+auto_offerte,licenseplate,text CHARACTER 
+auto_offerte,chassisnumber,text CHARACTER 
+auto_offerte,registrationdate,text CHARACTER 
+auto_offerte,makename,text CHARACTER 
+auto_offerte,modelname,text CHARACTER 
+auto_offerte,description,text CHARACTER 
+auto_offerte,segment,text CHARACTER 
+auto_offerte,segment_description,text CHARACTER 
+auto_offerte,fuel,text CHARACTER 
+auto_offerte,external_color,text CHARACTER 
+auto_offerte,internal_color,text CHARACTER 
+auto_offerte,optional,text CHARACTER 
+auto_offerte,location,text CHARACTER 
+auto_offerte,estimateddeliverydate,text CHARACTER 
+auto_offerte,arrivaldate,text CHARACTER 
+auto_offerte,comments,text CHARACTER 
+auto_offerte,rating,text CHARACTER 
+auto_offerte,showcasecode,text CHARACTER 
+auto_offerte,showcase,text CHARACTER 
+auto_offerte,vendor,int(11
+auto_offerte,selezionato,int(11
+auto_offerte,sub_selezione,int(11
+auto_offerte,valore,double NOT NULL DEFAULT 0
+auto_offerte,disponibile,int(11
+auto_offerte,data_caricamento,datetime NOT NULL
+auto_offerte,km,int(11
+auto_offerte2,vehicleid,int(11
+auto_offerte2,stocktype,text CHARACTER 
+auto_offerte2,licenseplate,text CHARACTER 
+auto_offerte2,chassisnumber,text CHARACTER 
+auto_offerte2,registrationdate,text CHARACTER 
+auto_offerte2,makename,text CHARACTER 
+auto_offerte2,modelname,text CHARACTER 
+auto_offerte2,description,text CHARACTER 
+auto_offerte2,segment,text CHARACTER 
+auto_offerte2,segment_description,text CHARACTER 
+auto_offerte2,fuel,text CHARACTER 
+auto_offerte2,external_color,text CHARACTER 
+auto_offerte2,internal_color,text CHARACTER 
+auto_offerte2,optional,text CHARACTER 
+auto_offerte2,location,text CHARACTER 
+auto_offerte2,estimateddeliverydate,text CHARACTER 
+auto_offerte2,arrivaldate,text CHARACTER 
+auto_offerte2,comments,text CHARACTER 
+auto_offerte2,rating,text CHARACTER 
+auto_offerte2,showcasecode,text CHARACTER 
+auto_offerte2,showcase,text CHARACTER 
+auto_offerte2,vendor,int(11
+auto_offerte2,selezionato,int(11
+auto_offerte2,sub_selezione,int(11
+auto_offerte2,valore,double NOT NULL DEFAULT 0
+auto_offerte3,id,int(11
+auto_offerte3,vehicleid,int(11
+auto_offerte3,stocktype,text CHARACTER 
+auto_offerte3,licenseplate,text CHARACTER 
+auto_offerte3,chassisnumber,text CHARACTER 
+auto_offerte3,registrationdate,text CHARACTER 
+auto_offerte3,makename,text CHARACTER 
+auto_offerte3,modelname,text CHARACTER 
+auto_offerte3,description,text CHARACTER 
+auto_offerte3,segment,text CHARACTER 
+auto_offerte3,segment_description,text CHARACTER 
+auto_offerte3,fuel,text CHARACTER 
+auto_offerte3,external_color,text CHARACTER 
+auto_offerte3,internal_color,text CHARACTER 
+auto_offerte3,optional,text CHARACTER 
+auto_offerte3,location,text CHARACTER 
+auto_offerte3,estimateddeliverydate,text CHARACTER 
+auto_offerte3,arrivaldate,text CHARACTER 
+auto_offerte3,comments,text CHARACTER 
+auto_offerte3,rating,text CHARACTER 
+auto_offerte3,showcasecode,text CHARACTER 
+auto_offerte3,showcase,text CHARACTER 
+auto_offerte3,vendor,int(11
+auto_offerte3,selezionato,int(11
+auto_offerte3,sub_selezione,int(11
+auto_offerte3,valore,double NOT NULL DEFAULT 0
+auto_offerte3,disponibile,int(11
+auto_offerte3,data_caricamento,datetime NOT NULL
+auto_offerte3,km,int(11
+auto_offerte_bk,id,int(11
+auto_offerte_bk,vehicleid,int(11
+auto_offerte_bk,stocktype,text CHARACTER 
+auto_offerte_bk,licenseplate,text CHARACTER 
+auto_offerte_bk,chassisnumber,text CHARACTER 
+auto_offerte_bk,registrationdate,text CHARACTER 
+auto_offerte_bk,makename,text CHARACTER 
+auto_offerte_bk,modelname,text CHARACTER 
+auto_offerte_bk,description,text CHARACTER 
+auto_offerte_bk,segment,text CHARACTER 
+auto_offerte_bk,segment_description,text CHARACTER 
+auto_offerte_bk,fuel,text CHARACTER 
+auto_offerte_bk,external_color,text CHARACTER 
+auto_offerte_bk,internal_color,text CHARACTER 
+auto_offerte_bk,optional,text CHARACTER 
+auto_offerte_bk,location,text CHARACTER 
+auto_offerte_bk,estimateddeliverydate,text CHARACTER 
+auto_offerte_bk,arrivaldate,text CHARACTER 
+auto_offerte_bk,comments,text CHARACTER 
+auto_offerte_bk,rating,text CHARACTER 
+auto_offerte_bk,showcasecode,text CHARACTER 
+auto_offerte_bk,showcase,text CHARACTER 
+auto_offerte_bk,vendor,int(11
+auto_offerte_bk,selezionato,int(11
+auto_offerte_bk,sub_selezione,int(11
+auto_offerte_bk,valore,double NOT NULL DEFAULT 0
+auto_offerte_bk,disponibile,int(11
+auto_offerte_bk,data_caricamento,datetime NOT NULL
+auto_offerte_bk,km,int(11
+auto_versione,id,int(11
+avanzamenti,avanzamenti.id,int(11
+avanzamenti,avanzamenti.clienti.id,int(11
+avanzamenti,avanzamenti.stato,int(11
+avanzamenti,avanzamenti.ultimo_contatto,int(11
+avanzamenti,avanzamenti.note,longtext NOT NULL
+a_vo,id,int(11
+banche,id,int(11
+banche,nominativo,text NOT NULL
+banche,note,longtext NOT NULL
+banche,iban,text NOT NULL
+bilanciamento,id,int(11
+bilanciamento,gruppo,int(11
+bilanciamento,progetto,int(11
+bilanciamento,valore,int(11
+bilanciamento,note,text NOT NULL
+bloccati,provincia,text
+bollettini,ID,int(11
+bollettini,DATA_OPERAZIONE,date NOT NULL
+bollettini,PROVINCIA,int(11
+bollettini,UFFICIO,int(11
+bollettini,IMPORTO,double NOT NULL
+bollettini,QUARTO_CAMPO,text NOT NULL
+bollettini,FLAG_INSANABILI,text NOT NULL
+bollettini,IMMAGINE,text NOT NULL
+bollettini,lavorato,int(11
+bollettini,nominativo,text NOT NULL
+bollettini,causale,longtext NOT NULL
+bollettini,azienda,int(11
+campagne,id,text NOT NULL
+campagne,nome,text NOT NULL
+canali,id,int(11
+canali,numero_canale,text NOT NULL
+canali,username,text NOT NULL
+canali,password,text NOT NULL
+canali,data,date NOT NULL
+canali,attivo,int(11
+canali,note,text NOT NULL
+carico,custcode,longtext NOT NULL
+carico,holding_id,longtext DEFAULT NULL
+carico,tipo_rapporto,longtext DEFAULT NULL
+carico,Holding,longtext DEFAULT NULL
+carico,score_class,longtext DEFAULT NULL
+carico,ragione_sociale,longtext DEFAULT NULL
+carico,codice_agenzia,longtext DEFAULT NULL
+carico,nome_dealer_gest,longtext DEFAULT NULL
+carico,canale,longtext DEFAULT NULL
+carico,Partita_Iva,longtext DEFAULT NULL
+carico,Cluster_Cliente,longtext DEFAULT NULL
+carico,Tipologia_cliente,longtext DEFAULT NULL
+carico,Billato,int(11
+carico,di_cui_Prodotti_Innovativi,int(11
+carico,Eop_Voce,int(11
+carico,Eop_Dati,int(11
+carico,ToT_Eop,int(11
+carico,Eop_Vik_Dsl,int(11
+carico,Eop_Link_DSL,int(11
+carico,Interni_Sa_Su,int(11
+carico,Eop_Link_SA_Express,int(11
+carico,Eop_Link_SA_Hotel,int(11
+carico,Eop_Link_SA_no_express,int(11
+carico,Eop_Link_ASU,int(11
+carico,Eop_Tel_Fisso,int(11
+carico,Eop_M2M,int(11
+carico,via_sede_legale,longtext DEFAULT NULL
+carico,cap,longtext DEFAULT NULL
+carico,citta_sede_legale,longtext DEFAULT NULL
+carico,provincia_sede_legale,longtext DEFAULT NULL
+carico,fatt_cap,longtext DEFAULT NULL
+carico,citta_(sede fatturazione),longtext DEFAULT NULL
+carico,provincia ((sede_fatturazione),longtext DEFAULT NULL
+carico,numtel_fissa,longtext DEFAULT NULL
+carico,referente_aziendale,longtext DEFAULT NULL
+carico,mese,int(11
+carico_utenti,id_utente,int(11
+car_export,id,int(11
+car_export,n_telaio,text NOT NULL
+car_export,marca,text NOT NULL
+car_export,modello,text NOT NULL
+car_export,prezzo,text NOT NULL
+car_export,data_listino,text NOT NULL
+car_export,in_produzione,text NOT NULL
+car_export,descrizione,text NOT NULL
+car_export,codice_colore_esterni,text NOT NULL
+car_export,colore_esterni,text NOT NULL
+car_export,codice_colore_interni,text NOT NULL
+car_export,colore_interni,text NOT NULL
+car_export,codice_optional,text NOT NULL
+car_export,prezzo_optional,text NOT NULL
+car_export,descrizione_optional,text NOT NULL
+car_export,extra_sconto,text NOT NULL
+car_export,dettaglio_sp,text NOT NULL
+car_export,data_ordine,text NOT NULL
+car_export,data_immatricolazione,text NOT NULL
+car_export,data_arrivo_sp,text NOT NULL
+car_export,prevista_disponibilita,text NOT NULL
+car_export,in_stock,text NOT NULL
+car_export,cambio_automatico,text NOT NULL
+car_export,note,text NOT NULL
+car_export,tutti,text NOT NULL
+car_export,contest_audi,text NOT NULL
+car_export,partner,text NOT NULL
+car_export,partner_ricaricar,text NOT NULL
+car_export,top_agent,text NOT NULL
+car_export,stato,text NOT NULL
+car_export,nome_commerciale,text NOT NULL
+car_export,email_commerciale,text NOT NULL
+catalogo_generale,id,int(11
+catalogo_generale,codice,int(11
+catalogo_generale,descrizione,text NOT NULL
+catalogo_generale,categoria,int(11
+categorie,id,int(11
+categorie,nome,text NOT NULL
+categorie,id_tipologia,int(11
+categorie_ap,id,int(11
+categorie_ap,nome,text NOT NULL
+categorie_ap,note,text NOT NULL
+Check_spostamenti,consulente,int(11
+classi,id,int(11
+classi,nome,text NOT NULL
+classi,id_prodotto,int(11
+classi,id_responsabile,int(11
+classi,id_insegnante,int(11
+classi,giorno,int(11
+classi,orario,text NOT NULL
+classi,incontro_preliminare,date NOT NULL
+classi,prima_lezione,date NOT NULL
+classi,id_canale,int(11
+classi,terminata,int(11
+classi,note,longtext NOT NULL
+cliente,id_persona,int(11
+cliente,codice,int(11
+clienti_assegnati,contatti.utente.id,int(11
+clienti_assegnati_all,contatti.utente.id,int(11
+clienti_assegnati_ordini,contatti.utente.id,int(11
+clienti_assegnati_ordini_completo,contatti.utente.id,int(11
+clienti_assegnati_parziali,contatti.utente.id,int(11
+clienti_num_ordini,id,int(11
+clienti_num_ordini_cons,id_cliente,int(11
+codifica-vista,id,int(11
+codifica_vendor,id,int(11
+codifica_vendor,id_cliente,int(11
+codifica_vendor,id_documento,int(11
+codifica_vendor,id_codifica,text NOT NULL
+codifica_vendor,data,date NOT NULL
+codifica_vendor,vendor,int(11
+codifica_vendor,esito,int(11
+codifica_vendor,note,text NOT NULL
+codifica_vendor,id_utente,int(11
+comuni,ID,int(10
+comuni,comune,varchar(45
+comuni,popolazione,int(8
+comuni,provincia,varchar(50
+comuni,cap,varchar(10
+comuni,consulente,varchar(45
+comunicazioni_clienti,id,int(11
+comunicazioni_clienti,id_cliente,int(11
+comunicazioni_clienti,esito,int(11
+comunicazioni_clienti,data,datetime NOT NULL
+comunicazioni_clienti,note,text NOT NULL
+comunicazioni_clienti,stato,int(11
+comunicazioni_clienti,id_utente,int(11
+comunicazioni_clienti,vendor,int(1
+comunicazioni_clienti,id_ordine,int(11
+comunicazioni_vodafone,id,int(11
+comunicazioni_vodafone,id_cliente,int(11
+comunicazioni_vodafone,tipo_chiamata,int(11
+comunicazioni_vodafone,id_operatore,int(11
+comunicazioni_vodafone,data_chiamata,int(11
+comunicazioni_vodafone,referente,text NOT NULL
+comunicazioni_vodafone,note,text NOT NULL
+comunicazioni_vodafone,esito,int(11
+comuni_completo,id,int(11
+comuni_new,id,int(11
+comuni_new,nome,text NOT NULL
+comuni_new,provincia,text NOT NULL
+comuni_new,cap,text NOT NULL
+comuni_new,sigla,text NOT NULL
+comuni_new,regione,text NOT NULL
+comuni_new,superficie,text NOT NULL
+comuni_new,popolazione,float NOT NULL
+comuni_new_mod,id,int(11
+comuni_new_mod,nome,text NOT NULL
+comuni_new_mod,provincia,text NOT NULL
+comuni_new_mod,cap,text NOT NULL
+comuni_new_mod,sigla,text NOT NULL
+comuni_new_mod,regione,text NOT NULL
+comuni_new_mod,superficie,text NOT NULL
+comuni_new_mod,popolazione,float NOT NULL
+comuni_new_mod,provincia2,text NOT NULL
+comuni_new_orig,id,int(11
+comuni_new_orig,nome,text NOT NULL
+comuni_new_orig,provincia,text NOT NULL
+comuni_new_orig,cap,text NOT NULL
+comuni_new_orig,sigla,text NOT NULL
+comuni_new_orig,regione,text NOT NULL
+comuni_new_orig,superficie,float NOT NULL
+comuni_new_orig,popolazione,float NOT NULL
+cons89,contatti.id,int(11
+cons187,contatti.id,int(11
+cons359,contatti.id,int(11
+consulenti,id,int(11
+consulenti,consulente,text CHARACTER 
+consulenti,regione,text CHARACTER 
+consulenti,provincia,text CHARACTER 
+consulenti,data_livello,date NOT NULL
+consulenti,livello,text CHARACTER 
+consulenti,pm,int(11
+consulenti,bm,int(11
+consulenti,am,int(11
+consulenti,ragione_sociale,text CHARACTER 
+consulenti,indirizzo,text CHARACTER 
+consulenti,residenza,text CHARACTER 
+consulenti,pi,text CHARACTER 
+consulenti,cf,varchar(16
+consulenti,email,text CHARACTER 
+consulenti,data_di_nascita,date NOT NULL
+consulenti,luogo_di_nascita,text CHARACTER 
+consulenti,sigla_provincia_di_nascita,varchar(3
+consulenti,tipo_documento,varchar(20
+consulenti,n_documento,varchar(20
+consulenti,data_emissione_documento,date NOT NULL
+consulenti_OLD,id,int(11
+consulenti_OLD,consulente,text NOT NULL
+consulenti_OLD,regione,text NOT NULL
+consulenti_OLD,provincia,text NOT NULL
+consulenti_OLD,livello,text NOT NULL
+consulenti_OLD,bm,int(11
+consulenti_OLD,am,int(11
+consulenti_province,id,int(11
+consulenti_province,consulente,int(11
+consulenti_province,provincia,text NOT NULL
+consulenti_province,branch,int(11
+consulenti_province,area,int(11
+consulenti_zona,id,int(11
+consulenti_zona,id_consulente,int(11
+consulenti_zona,zona,text NOT NULL
+consulenti_zona,comune,text NOT NULL
+consulenti_zona,cap,text NOT NULL
+consulenti_zona,data_inizio,date NOT NULL
+consulenti_zona,attivo,int(11
+consulenti_zona,note,text NOT NULL
+contattati,contatti.id,int(11
+contatti,contatti.id,int(11
+contatti,contatti.clienti.id,int(11
+contatti,contatti.data,datetime NOT NULL
+contatti,contatti.tipo,int(11
+contatti,contatti.esito,int(11
+contatti,contatti.utente.id,int(11
+contatti,contatti.note,longtext NOT NULL
+contatti,contatti.prossimo,int(11
+contatti,contatti.priorita,int(11
+contatti,contatti.stato,int(11
+contatti,contatti.data_completamento,datetime NOT NULL
+contatti,contatti.import_da,text DEFAULT NULL
+contatti,contatti.import_id,int(11
+contatti2,contatti.id,int(11
+contatti2,contatti.clienti.id,int(11
+contatti2,contatti.data,datetime NOT NULL
+contatti2,contatti.tipo,int(11
+contatti2,contatti.esito,int(11
+contatti2,contatti.utente.id,int(11
+contatti2,contatti.note,longtext NOT NULL
+contatti2,contatti.prossimo,int(11
+contatti2,contatti.priorita,int(11
+contatti2,contatti.stato,int(11
+contatti2,contatti.data_completamento,datetime NOT NULL
+contatti2,contatti.import_da,mediumtext DEFAULT NULL
+contatti2,contatti.import_id,int(11
+contatti_,contatti.id,int(11
+contatti_,contatti.clienti.id,int(11
+contatti_,contatti.data,datetime NOT NULL
+contatti_,contatti.tipo,int(11
+contatti_,contatti.esito,int(11
+contatti_,contatti.utente.id,int(11
+contatti_,contatti.note,longtext NOT NULL
+contatti_,contatti.prossimo,int(11
+contatti_,contatti.priorita,int(11
+contatti_,contatti.stato,int(11
+contatti_,contatti.data_completamento,datetime NOT NULL
+contatti_210725,contatti.id,int(11
+contatti_210725,contatti.clienti.id,int(11
+contatti_210725,contatti.data,datetime NOT NULL
+contatti_210725,contatti.tipo,int(11
+contatti_210725,contatti.esito,int(11
+contatti_210725,contatti.utente.id,int(11
+contatti_210725,contatti.note,longtext NOT NULL
+contatti_210725,contatti.prossimo,int(11
+contatti_210725,contatti.priorita,int(11
+contatti_210725,contatti.stato,int(11
+contatti_210725,contatti.data_completamento,datetime NOT NULL
+contatti_210725,contatti.import_da,text DEFAULT NULL
+contatti_210725,contatti.import_id,int(11
+contatti_bck2407,contatti.id,int(11
+contatti_bck2407,contatti.clienti.id,int(11
+contatti_bck2407,contatti.data,datetime NOT NULL
+contatti_bck2407,contatti.tipo,int(11
+contatti_bck2407,contatti.esito,int(11
+contatti_bck2407,contatti.utente.id,int(11
+contatti_bck2407,contatti.note,longtext NOT NULL
+contatti_bck2407,contatti.prossimo,int(11
+contatti_bck2407,contatti.priorita,int(11
+contatti_bck2407,contatti.stato,int(11
+contatti_bck2407,contatti.data_completamento,datetime NOT NULL
+contatti_bck2407,contatti.import_da,text DEFAULT NULL
+contatti_bck2407,contatti.import_id,int(11
+contatti_bck 160725ok,contatti.id,int(11
+contatti_bck 160725ok,contatti.clienti.id,int(11
+contatti_bck 160725ok,contatti.data,datetime NOT NULL
+contatti_bck 160725ok,contatti.tipo,int(11
+contatti_bck 160725ok,contatti.esito,int(11
+contatti_bck 160725ok,contatti.utente.id,int(11
+contatti_bck 160725ok,contatti.note,longtext NOT NULL
+contatti_bck 160725ok,contatti.prossimo,int(11
+contatti_bck 160725ok,contatti.priorita,int(11
+contatti_bck 160725ok,contatti.stato,int(11
+contatti_bck 160725ok,contatti.data_completamento,datetime NOT NULL
+contatti_bck200725,contatti.id,int(11
+contatti_bck200725,contatti.clienti.id,int(11
+contatti_bck200725,contatti.data,datetime NOT NULL
+contatti_bck200725,contatti.tipo,int(11
+contatti_bck200725,contatti.esito,int(11
+contatti_bck200725,contatti.utente.id,int(11
+contatti_bck200725,contatti.note,longtext NOT NULL
+contatti_bck200725,contatti.prossimo,int(11
+contatti_bck200725,contatti.priorita,int(11
+contatti_bck200725,contatti.stato,int(11
+contatti_bck200725,contatti.data_completamento,datetime NOT NULL
+contatti_bck200725,contatti.import_da,text DEFAULT NULL
+contatti_bck200725,contatti.import_id,int(11
+contatti_old160725,contatti.id,int(11
+contatti_old160725,contatti.clienti.id,int(11
+contatti_old160725,contatti.data,datetime NOT NULL
+contatti_old160725,contatti.tipo,int(11
+contatti_old160725,contatti.esito,int(11
+contatti_old160725,contatti.utente.id,int(11
+contatti_old160725,contatti.note,longtext NOT NULL
+contatti_old160725,contatti.prossimo,int(11
+contatti_old160725,contatti.priorita,int(11
+contatti_old160725,contatti.stato,int(11
+contatti_old160725,contatti.data_completamento,datetime NOT NULL
+contatti_prec,contatti.id,int(11
+contatti_pros,contatti.id,int(11
+contatti_tutti,contatti.id,decimal(11
+contatti_ultima_data,contatti.clienti.id,bigint(21
+contatti_ultimo,contatti.id,decimal(11
+contatti_unico_operatore,contatti.id,int(11
+contatti__,contatti.id,int(11
+contatti__,contatti.clienti.id,int(11
+contatti__,contatti.data,datetime NOT NULL
+contatti__,contatti.tipo,int(11
+contatti__,contatti.esito,int(11
+contatti__,contatti.utente.id,int(11
+contatti__,contatti.note,longtext NOT NULL
+contatti__,contatti.prossimo,int(11
+contatti__,contatti.priorita,int(11
+contatti__,contatti.stato,int(11
+contatti__,contatti.data_completamento,datetime NOT NULL
+conta_task,conteggio,bigint(21
+conta_task_old,conteggio,bigint(21
+conti,id,int(11
+conti,codice,text NOT NULL
+conti,descrizione,text NOT NULL
+conti,tipo,text NOT NULL
+conti,categoria,text NOT NULL
+conti,modo,int(11
+contigui,COD_REG,int(11
+contigui,COD_PRO COMUNE,int(11
+contigui,COD_PRO COMUNE ADIACENTE,int(11
+contigui,PRO_COM COMUNE,int(11
+contigui,PRO_COM COMUNE ADIACENTE,int(11
+contigui,COMUNE,text NOT NULL
+contigui,COMUNE ADIACENTE,text NOT NULL
+contigui,LUNGHEZZA CONFINE,float NOT NULL
+contigui-vista,COD_REG,int(11
+contigui-vista2,COD_REG,int(11
+contigui_iniziale,COD_REG,int(11
+contigui_iniziale,COD_PRO COMUNE,int(11
+contigui_iniziale,COD_PRO COMUNE ADIACENTE,int(11
+contigui_iniziale,PRO_COM COMUNE,int(11
+contigui_iniziale,PRO_COM COMUNE ADIACENTE,int(11
+contigui_iniziale,COMUNE,text NOT NULL
+contigui_iniziale,COMUNE ADIACENTE,text NOT NULL
+contigui_iniziale,LUNGHEZZA CONFINE,float NOT NULL
+contigui__,COD_REG,int(11
+contigui__,COD_PRO COMUNE,int(11
+contigui__,COD_PRO COMUNE ADIACENTE,int(11
+contigui__,PRO_COM COMUNE,int(11
+contigui__,PRO_COM COMUNE ADIACENTE,int(11
+contigui__,COMUNE,text NOT NULL
+contigui__,COMUNE ADIACENTE,text NOT NULL
+contigui__,LUNGHEZZA CONFINE,float NOT NULL
+conti_old,id,int(11
+conti_old,conto,text NOT NULL
+conti_old,tipologia,tinyint(4
+conti_old,note,text NOT NULL
+contratti,id,int(11
+contratti,id_cliente,int(11
+contratti,id_consulente,int(6
+contratti,id_vendor,tinyint(2
+contratti,esito,tinyint(2
+contratti,data_generazione,datetime NOT NULL
+contratti,data_invio,datetime NOT NULL
+contratti,data_firma,datetime NOT NULL
+contratti,stato,tinyint(2
+contratti,note,text CHARACTER 
+contratti,tipo,int(11
+contratti,contratto_originale,int(11
+contratti_new,id,int(11
+contratti_new,id_rent,int(11
+contratti_new,data,date NOT NULL
+contratti_new,stato_contratto,int(11
+contratti_new,note_contratto,longtext NOT NULL
+credito,id_cliente,int(11
+dati_contratto,id,int(11
+dati_contratto,id_cliente,int(11
+dati_contratto,codice_cliente_leasys,text NOT NULL
+dati_contratto,tipo_azienda,text NOT NULL
+dati_contratto,azienda,text NOT NULL
+dati_contratto,comune,text NOT NULL
+dati_contratto,provincia,text NOT NULL
+dati_contratto,sigla_provincia,text NOT NULL
+dati_contratto,cap,text NOT NULL
+dati_contratto,indirizzo,text NOT NULL
+dati_contratto,civico,text NOT NULL
+dati_contratto,nazione,text NOT NULL
+dati_contratto,telefono,text NOT NULL
+dati_contratto,cellulare,text NOT NULL
+dati_contratto,fax,text NOT NULL
+dati_contratto,pec,text NOT NULL
+dati_contratto,email,text NOT NULL
+dati_contratto,email_contabilita,text NOT NULL
+dati_contratto,partita_iva,text NOT NULL
+dati_contratto,codice_fiscale,text NOT NULL
+dati_contratto,numero_rea,text NOT NULL
+dati_contratto,capitale_sociale,text NOT NULL
+dati_contratto,cciaa,text NOT NULL
+dati_contratto,lr_codice_fiscale,text NOT NULL
+dati_contratto,lr_titolo,varchar(15
+dati_contratto,lr_nome,text NOT NULL
+dati_contratto,lr_cognome,text NOT NULL
+dati_contratto,lr_comune,text NOT NULL
+dati_contratto,lr_provincia,text NOT NULL
+dati_contratto,lr_sigla_provincia,text NOT NULL
+dati_contratto,lr_cap,text NOT NULL
+dati_contratto,lr_indirizzo,text NOT NULL
+dati_contratto,lr_civico,text NOT NULL
+dati_contratto,lr_telefono,text NOT NULL
+dati_contratto,lr_cellulare,text NOT NULL
+dati_contratto,lr_data_di_nascita,date NOT NULL
+dati_contratto,lr_comune_di_nascita,text NOT NULL
+dati_contratto,lr_provincia_di_nascita,text NOT NULL
+dati_contratto,intestazione_conto,text NOT NULL
+dati_contratto,iban,text NOT NULL
+dati_contratto,swift_bic,text NOT NULL
+dati_contratto,banca,text NOT NULL
+dati_contratto,n_agenzia,text NOT NULL
+dati_contratto,banca_comune,text NOT NULL
+dati_contratto,banca_provincia,text NOT NULL
+dati_contratto,banca_sigla_provincia,text NOT NULL
+dati_contratto,banca_cap,text NOT NULL
+dati_contratto,banca_indirizzo,text NOT NULL
+dati_contratto,banca_civico,text NOT NULL
+dati_contratto,tipo_documento,text NOT NULL
+dati_contratto,num_documento,text NOT NULL
+dati_contratto,rilasciato_da,text NOT NULL
+dati_contratto,data_rilascio,date NOT NULL
+dati_contratto,valido_fino_al,date NOT NULL
+dati_contratto,termini_di_pagamento,text NOT NULL
+dati_contratto,mesi_appr_cond,int(2
+dettaglio_quotazioni,id,int(11
+dettaglio_quotazioni,id_quotazione,int(11
+dettaglio_quotazioni,showcase,text DEFAULT NULL
+dettaglio_quotazioni,data,datetime NOT NULL
+dettaglio_quotazioni,attivo,tinyint(4
+dettaglio_quotazioni,vendor,int(11
+dettaglio_quotazioni,tipologia,int(11
+dettaglio_quotazioni,km_anno,int(11
+dettaglio_quotazioni,canone,int(11
+dettaglio_quotazioni,anticipo,float NOT NULL
+dettaglio_quotazioni,deposito,float NOT NULL
+dettaglio_quotazioni,mesi,int(11
+dettaglio_quotazioni,plafond,float NOT NULL
+dettaglio_quotazioni,p_invernali,int(11
+dettaglio_quotazioni,p_estivi,int(11
+dettaglio_quotazioni,manutenzione,int(11
+dettaglio_quotazioni,rca,text NOT NULL
+dettaglio_quotazioni,kasko,float NOT NULL
+dettaglio_quotazioni,furto,text NOT NULL
+dettaglio_quotazioni,sostitutiva,int(11
+dettaglio_quotazioni,preassegnazione,int(11
+dettaglio_quotazioni,provvigione,float NOT NULL
+dettaglio_quotazioni,provvigione_perc,float NOT NULL
+dettaglio_quotazioni,simulazione,int(11
+dettaglio_quotazioni,n_preventivo,int(11
+dettaglio_quotazioni,note,longtext NOT NULL
+dettaglio_quotazioni,colore_esterno,text DEFAULT NULL
+dettaglio_quotazioni,optional,text DEFAULT NULL
+dettaglio_quotazioni,colore_interno,text DEFAULT NULL
+dettaglio_quotazioni,id_agglomerato,int(11
+dettaglio_quotazioni,id_interno,int(11
+dettaglio_quotazioni_old,id,int(11
+dettaglio_quotazioni_old,id_quotazione,int(11
+dettaglio_quotazioni_old,showcase,text DEFAULT NULL
+dettaglio_quotazioni_old,data,datetime NOT NULL
+dettaglio_quotazioni_old,attivo,tinyint(4
+dettaglio_quotazioni_old,vendor,int(11
+dettaglio_quotazioni_old,tipologia,int(11
+dettaglio_quotazioni_old,km_anno,int(11
+dettaglio_quotazioni_old,canone,int(11
+dettaglio_quotazioni_old,anticipo,float NOT NULL
+dettaglio_quotazioni_old,deposito,float NOT NULL
+dettaglio_quotazioni_old,mesi,int(11
+dettaglio_quotazioni_old,plafond,float NOT NULL
+dettaglio_quotazioni_old,p_invernali,int(11
+dettaglio_quotazioni_old,p_estivi,int(11
+dettaglio_quotazioni_old,manutenzione,int(11
+dettaglio_quotazioni_old,rca,text NOT NULL
+dettaglio_quotazioni_old,kasko,float NOT NULL
+dettaglio_quotazioni_old,furto,text NOT NULL
+dettaglio_quotazioni_old,sostitutiva,int(11
+dettaglio_quotazioni_old,preassegnazione,int(11
+dettaglio_quotazioni_old,provvigione,float NOT NULL
+dettaglio_quotazioni_old,provvigione_perc,float NOT NULL
+dettaglio_quotazioni_old,simulazione,int(11
+dettaglio_quotazioni_old,n_preventivo,int(11
+dettaglio_quotazioni_old,note,longtext NOT NULL
+dettaglio_quotazioni_old,colore_esterno,text DEFAULT NULL
+dettaglio_quotazioni_old,optional,text DEFAULT NULL
+dettaglio_quotazioni_old,colore_interno,text NOT NULL
+dettaglio_quotazioni_old,id_agglomerato,int(11
+dettagli_check,id,int(11
+dettagli_check,id_check,int(11
+dettagli_check,id_cliente,int(12
+dettagli_check,tipologia_check,tinyint(5
+dettagli_check,tipo_id,int(11
+dettagli_check,id_riga,int(11
+dettagli_check,esito_dettaglio_check,int(11
+dettagli_check,data_esito,date NOT NULL
+dettagli_check,note_dettaglio_check,text CHARACTER 
+dettagli_check,note_operatore,text CHARACTER 
+dettagli_check,note_esito,text CHARACTER 
+dettagli_check,esito_veloce,int(11
+dettagli_check,data_esito_veloce,date NOT NULL
+dettagli_email_abbinamenti,id,int(11
+dettagli_email_abbinamenti,id_email_abbinamenti,int(11
+dettagli_email_abbinamenti,id_codifica_vendor,int(11
+dettagli_email_abbinamenti,id_cliente,int(11
+dettagli_email_abbinamenti,id_codifica,text NOT NULL
+dettagli_email_abbinamenti,vendor,int(11
+dettagli_email_abbinamenti,note,text NOT NULL
+dettagli_fatt_pag,id,int(11
+dettagli_fatt_pag,id_movimento,int(11
+dettagli_fatt_pag,id_pagamento,int(11
+dettagli_flow,id,int(11
+dettagli_flow,nome,text NOT NULL
+dettagli_flow,id_flow,int(11
+dettagli_flow,passo,int(11
+dettagli_flow,azione,longtext DEFAULT NULL
+dettagli_flow,assegnatario,text CHARACTER 
+dettagli_flow,scadenza,int(11
+dettagli_flow,parametri,longtext NOT NULL COMMENT 'parametri 
+dettagli_flow,note,longtext NOT NULL
+dettagli_flow,priorita,int(11
+dettagli_istanze,id,int(11
+dettagli_istanze,id_istanza,int(11
+dettagli_istanze,id_trattativa,int(11
+dettagli_istanze,id_cliente,int(11
+dettagli_istanze,marketing,int(11
+dettagli_istanze,commerciale,int(11
+dettagli_istanze,dataentry,int(11
+dettagli_istanze,backoffice,int(11
+dettagli_istanze,tecnico,int(11
+dettagli_istanze2,id,int(11
+dettagli_istanze2,id_istanza,int(11
+dettagli_istanze2,id_gruppo,int(11
+dettagli_istanze2,id_utente,int(11
+dettagli_istanze2,data_ultimo,datetime NOT NULL
+dettagli_istanze2,task_ultimo,int(11
+dettagli_istanze2,id_trattativa,int(11
+dettagli_istanze2_backup28921,id,int(11
+dettagli_istanze2_backup28921,id_istanza,int(11
+dettagli_istanze2_backup28921,id_gruppo,int(11
+dettagli_istanze2_backup28921,id_utente,int(11
+dettagli_istanze2_backup28921,data_ultimo,datetime NOT NULL
+dettagli_istanze2_backup28921,task_ultimo,int(11
+dettagli_istanze2_backup28921,id_trattativa,int(11
+dettagli_istanze2_bck,id,int(11
+dettagli_istanze2_bck,id_istanza,int(11
+dettagli_istanze2_bck,id_gruppo,int(11
+dettagli_istanze2_bck,id_utente,int(11
+dettagli_istanze2_bck,data_ultimo,datetime NOT NULL
+dettagli_istanze2_bck,task_ultimo,int(11
+dettagli_istanze2_bck,id_trattativa,int(11
+dettagli_istanze2_con_specifiche,id,int(11
+dettagli_istanze2_con_specifiche2,id,int(11
+dettagli_istanze2_con_specifiche_gruppo,id,int(11
+dettagli_movimenti,id,int(11
+dettagli_movimenti,id_movimento,int(11
+dettagli_movimenti,id_pagamento,int(11
+dettagli_movimenti,descrizione,text CHARACTER 
+dettagli_movimenti,id_contratto,int(11
+dettagli_movimenti,anagrafica,text CHARACTER 
+dettagli_movimenti,id_consulente,int(11
+dettagli_movimenti,tipologia,int(11
+dettagli_movimenti,importo,double DEFAULT NULL
+dettagli_movimenti,iva,double DEFAULT NULL
+dettagli_movimenti,enasarco,double NOT NULL
+dettagli_movimenti,quantita,int(11
+dettagli_movimenti,sconto,int(11
+dettagli_movimenti,note,text CHARACTER 
+disponibili,id,int(11
+disponibilita_banche,id,int(11
+disponibilita_banche,banca,int(11
+disponibilita_banche,data,date NOT NULL
+disponibilita_banche,importo,float NOT NULL
+disponibilita_banche,note,text NOT NULL
+disponibilita_insegnanti,id,int(11
+disponibilita_insegnanti,id_insegnante,int(11
+disponibilita_insegnanti,giorno,int(11
+disponibilita_insegnanti,orario,int(11
+disponibilita_insegnanti,disponibile,int(11
+disponibilita_insegnanti,note,text NOT NULL
+disp_orario,id,int(11
+disp_orario,id_cliente,int(11
+disp_orario,tipo,int(11
+disp_orario,id_prodotto,int(11
+disp_orario,giorno,int(11
+disp_orario,orario,int(11
+disp_orario,note,text NOT NULL
+distanze,da,text NOT NULL
+distanze,a,text NOT NULL
+distanze,km,int(11
+distanze,provincia,text NOT NULL
+documentale,id,int(11
+documentale,nome,text NOT NULL
+documentale,tipo,int(11
+documentale,note,longtext NOT NULL
+documentale,data,date NOT NULL
+documentale,autorizzazione,int(11
+documenti,id,int(11
+documenti,id_cliente,int(11
+documenti,tipologia_doc,text NOT NULL
+documenti,ricevuto,int(11
+documenti,scannerizzato,int(11
+documenti,approvato,int(11
+documenti,data_caricamento,datetime NOT NULL
+documenti,data_di_scadenza,date NOT NULL
+documenti,note,text CHARACTER 
+documenti_mancanti,id_cliente,int(11
+documenti_mancanti_anagrafiche,id_cliente,int(11
+documenti_obbligatori,id_doc_ven,int(11
+elenco_auto,id,int(11
+elenco_auto,id_prodotto,int(11
+elenco_auto,marca,text NOT NULL
+elenco_auto,modello,text NOT NULL
+elenco_auto,versione,text NOT NULL
+elenco_auto,codice_costruttore,text NOT NULL
+elenco_auto,cavalli,text NOT NULL
+elenco_auto,kw,text NOT NULL
+elenco_auto,cilindrata,text NOT NULL
+elenco_auto,pneumatici_anteriori,text NOT NULL
+elenco_auto,pneumatici_posteriori,text NOT NULL
+elenco_auto,alimentazione,text NOT NULL
+elenco_auto,listino,text NOT NULL
+elenco_auto,tipo_carrozzeria,text NOT NULL
+elenco_auto,codice_manutenzione,text NOT NULL
+elenco_auto,codice_eurotax,text NOT NULL
+elenco_auto,homologation,text NOT NULL
+elenco_auto,trasmissione,text NOT NULL
+elenco_auto,body_type,text NOT NULL
+elenco_auto,date,date NOT NULL
+elenco_auto,attivo,int(11
+email,id,int(11
+email,titolo,text NOT NULL
+email,nome_file,text NOT NULL
+email,oggetto,text NOT NULL
+email,testoemail,longtext NOT NULL
+email,allegati,text NOT NULL
+email,destinatario,text NOT NULL
+email_abbinamenti,id,int(11
+email_abbinamenti,vendor,int(11
+email_abbinamenti,tipo,int(11
+email_abbinamenti,data_invio,datetime NOT NULL
+email_abbinamenti,data_lavorata,datetime NOT NULL
+email_abbinamenti,stato,int(11
+email_abbinamenti,note,text NOT NULL
+errori_operazioni_albania,id,int(11
+errori_operazioni_albania,data,time
+errori_operazioni_albania,comando,longtext NOT NULL
+errori_operazioni_albania,id_anagrafica,int(11
+errori_operazioni_albania,utente,int(11
+errori_operazioni_italia,id,int(11
+errori_operazioni_italia,data,time
+errori_operazioni_italia,comando,longtext NOT NULL
+errori_operazioni_italia,id_anagrafica,int(11
+errori_operazioni_italia,utente,int(11
+esami_sessione,id,int(11
+esami_sessione,id_sessione,int(11
+esami_sessione,tipo_esame,int(11
+esami_sessione,attivo,int(11
+esami_sessione,note,text NOT NULL
+esiti,id,int(11
+esiti,nome,text NOT NULL
+esiti,avanza,int(11
+esiti,tipo,int(11
+esitimyweb,id,int(11
+esitimyweb,nome,text NOT NULL
+esitimyweb,stato,int(11
+esitimyweb,tipo,int(11
+esiti_appuntamenti,id,int(11
+esiti_appuntamenti,id_cliente,int(11
+esiti_appuntamenti,id_progetto,int(11
+esiti_appuntamenti,esito,int(11
+esiti_appuntamenti,note,longtext NOT NULL
+esiti_appuntamenti,data,date NOT NULL
+esiti_flow,id,int(11
+esiti_flow,esito,text NOT NULL
+estratto_conto,id,int(11
+estratto_conto,banca,int(11
+estratto_conto,data,datetime NOT NULL
+estratto_conto,valuta,datetime NOT NULL
+estratto_conto,descrizione,text NOT NULL
+estratto_conto,addebiti,float NOT NULL
+estratto_conto,accrediti,float NOT NULL
+estratto_conto,descrizione_estesa,text NOT NULL
+events,event_id,int(11
+events,user_id,int(10
+events,start,int(10
+events,end,int(10
+events,title,varchar(255
+events,description,text NOT NULL
+events,location,varchar(255
+events,categories,varchar(255
+events,access,varchar(255
+events,all_day,tinyint(1
+events-vista,event_id,int(11
+events_c,event_id,int(11
+events_c,user_id,int(10
+events_c,start,int(10
+events_c,end,int(10
+events_c,title,varchar(255
+events_c,description,text NOT NULL
+events_c,location,varchar(255
+events_c,categories,varchar(255
+events_c,access,varchar(255
+events_c,all_day,tinyint(1
+events_c,data1,datetime DEFAULT NULL
+events_c,cliente,text DEFAULT NULL
+events_c,nome,text DEFAULT NULL
+events_c,cap,tinytext DEFAULT NULL
+events_c,comune,text DEFAULT NULL
+events_con_note,event_id,int(11
+fasi,id,int(11
+fasi,id_progetto,int(11
+fasi,nome,text NOT NULL
+fasi,tipologia,text NOT NULL
+fasi,successiva,int(11
+fasi,descrizione,longtext NOT NULL
+fattibilita,id,int(11
+fattibilita,id_cliente,int(11
+fattibilita,forma_giuridica,tinyint(4
+fattibilita,data_apertura_attivita,date NOT NULL
+fattibilita,attivita_prevalente,text NOT NULL
+fattibilita,indirizzo_sede_operativa,varchar(150
+fattibilita,comune_sede_operativa,varchar(40
+fattibilita,provincia_sede_operativa,varchar(40
+fattibilita,cap_sede_operativa,varchar(8
+fattibilita,indirizzo_sede_legale,varchar(80
+fattibilita,comune_sede_legale,varchar(40
+fattibilita,provincia_sede_legale,varchar(40
+fattibilita,cap_sede_legale,varchar(8
+fattibilita,eta_lr,date NOT NULL
+fattibilita,comune_residenza,varchar(40
+fattibilita,provincia_residenza,varchar(40
+fattibilita,valore_prdouzione_rn1,int(11
+fattibilita,utile_perdita,tinyint(1
+fattibilita,tipo_noleggio,int(1
+fattibilita,n_soci,int(11
+fattibilita,punteggio_creditsafe,int(11
+fattibilita,rischio,int(11
+fattibilita,credito_creditsafe,int(11
+fattibilita,stato_attivita,tinyint(1
+fattibilita,data_stampa_visura,date DEFAULT NULL
+fattibilita,bilanci_presentati,varchar(150
+fattibilita,cap_soc_deliberato,float DEFAULT NULL
+fattibilita,cap_soc_versato,float DEFAULT NULL
+fattibilita,n_dipendenti,int(11
+fattibilita,noleggio,tinyint(1
+fattibilita,riparatore,tinyint(1
+fattibilita,commercio,tinyint(1
+fattibilita,noleggio_ateco,tinyint(1
+fattibilita,riparatore_ateco,tinyint(1
+fattibilita,commercio_ateco,tinyint(1
+fattibilita,note,text NOT NULL
+fattibilita_redditi,id,int(11
+fattibilita_redditi,id_fattibilita,int(11
+fattibilita_redditi,id_cliente,int(11
+fattibilita_redditi,tipo,int(11
+fattibilita_redditi,tipo_reddito,int(11
+fattibilita_redditi,data_reddito,date NOT NULL
+fattibilita_redditi,utile,float NOT NULL
+fattibilita_redditi,valore_di_produzione,float NOT NULL
+fattibilita_redditi,totale_patrimonio_netto,float NOT NULL
+flow,id,int(11
+flow,anagrafica,int(11
+flow,progetto,int(11
+flow,marketing,int(11
+flow,data_marketing,datetime NOT NULL
+flow,stato_marketing,int(11
+flow,fix,int(11
+flow,data_fix,datetime DEFAULT NULL
+flow,stato_fix,int(11
+flow,consulente,int(11
+flow,data_consulente,datetime DEFAULT NULL
+flow,stato_consulente,int(11
+flow,esito,int(11
+flow,note,text NOT NULL
+flows,id,bigint(15
+flows,id_flow,bigint(15
+flows,id_trattativa,bigint(15
+flows,id_cliente,bigint(15
+flows,attivo,int(1
+flows,max_passo_assegnato,int(11
+flows,data_max_passo,datetime DEFAULT NULL
+flows,administrator,int(11
+flows,marketing,bigint(15
+flows,commerciale,bigint(15
+flows,dataentry,bigint(15
+flows,backoffice,bigint(15
+flows,tecnico,bigint(15
+flow_new,id,int(11
+flow_new,nome,text NOT NULL
+flow_new,responsabile,int(11
+flow_new,note,text NOT NULL
+flow_new,attivo,int(11
+foto_ap,id,int(11
+foto_ap,id_cliente,int(11
+foto_ap,nome,text NOT NULL
+foto_ap,attivo,int(11
+gestione_over,id,int(11
+gestione_over,cliente_id,int(11
+gestione_over,trattativa_id,int(11
+gestione_over,ordine_id,int(11
+gestione_over,data,date NOT NULL
+gestione_over,tipo,int(11
+gestione_over,esito,int(11
+gestione_over,utente_id,int(11
+gestione_over,cg_id,int(11
+gestione_over,prov_azienda,float NOT NULL
+gestione_over,bonus,float NOT NULL
+gestione_over,prov_percentuale,float NOT NULL
+gestione_over,prov_importo,float NOT NULL
+gestione_over,stato,int(11
+gestione_over,importo_pagato,float NOT NULL
+gestione_over,note,text NOT NULL
+giornalieri,giornalieri.utente.id,int(11
+giornalieri,giornalieri.data,date NOT NULL
+giornalieri,giornalieri.previsti,int(11
+giornalieri,giornalieri.residui,int(11
+giornalieri,giornalieri.inseriti,int(11
+giornalieri,giornalieri.completati,int(11
+giornalieri,giornalieri.assegnati,int(11
+giornalieri,giornalieri.note,longtext NOT NULL
+giornalieri-vista,giornalieri.utente.id,int(11
+gruppi,id,int(11
+gruppi,nome,text NOT NULL
+gruppi,descrizione,longtext NOT NULL
+gruppi,attivo,int(11
+gruppi_fasi,id,int(11
+gruppi_fasi,id_gruppo,int(11
+gruppi_fasi,id_progetto,int(11
+gruppi_fasi,id_fase,int(11
+importa_anagrafiche,id,int(11
+importa_anagrafiche,idblocco,int(11
+importa_anagrafiche,progetto,int(11
+importa_anagrafiche,fase,int(11
+importa_anagrafiche,provenienza,text NOT NULL
+importa_file,id,int(11
+importa_file,data,datetime NOT NULL
+importa_file,tipo,int(11
+importa_file,numero_righe,int(11
+incompleti,data,datetime
+info_account,id,int(11
+info_account,id_cliente,int(11
+info_account,username,varchar(50
+info_account,password,varchar(50
+info_account,ragione_sociale,text NOT NULL
+info_account,indirizzo,text NOT NULL
+info_account,codice_fiscale,text NOT NULL
+info_kit,id,int(11
+info_kit,id_cliente,int(11
+info_kit,data,date NOT NULL
+info_kit,tipo,int(11
+info_kit,informazioni,text NOT NULL
+info_kit,esito,int(11
+info_kit,note,text NOT NULL
+insegnanti,id,int(11
+insegnanti,id_anagrafica,int(11
+insegnanti,attivo,int(11
+insegnanti,tipologia_corso,int(11
+interessati,provincia,varchar(50
+ip,ip,text NOT NULL
+ip,attivo,tinyint(4
+istanze,id,int(11
+istanze,id_flow,int(11
+istanze,attivo,int(11
+istanze,max_passo_assegnato,int(11
+istanze,data_max_passo,datetime DEFAULT NULL
+istanze2,id,int(11
+istanze2,id_flow,int(11
+istanze2,attivo,int(11
+istanze2,max_passo_assegnato,int(11
+istanze2,data_max_passo,datetime DEFAULT NULL
+istanze2,id_cliente,int(11
+istanze2,id_trattativa,int(11
+istanze2,istanza_master,int(11
+istanze2,ultimo_aggiornamento,datetime DEFAULT NULL
+istanze2,id_utente_ultimo_aggiornamento,int(11
+istanze2,categoria,text NOT NULL
+istanze2,id_pratica,int(11
+istanze2,id_rent,int(11
+istanze2,id_df_max_passo,int(11
+istanze2_backup28921,id,int(11
+istanze2_backup28921,id_flow,int(11
+istanze2_backup28921,attivo,int(11
+istanze2_backup28921,max_passo_assegnato,int(11
+istanze2_backup28921,data_max_passo,datetime DEFAULT NULL
+istanze2_backup28921,id_cliente,int(11
+istanze2_backup28921,id_trattativa,int(11
+istanze2_backup28921,istanza_master,int(11
+istanze2_backup28921,ultimo_aggiornamento,datetime DEFAULT NULL
+istanze2_backup28921,id_utente_ultimo_aggiornamento,int(11
+istanze2_backup28921,categoria,text NOT NULL
+istanze2_backup28921,id_pratica,int(11
+istanze2_bck,id,int(11
+istanze2_bck,id_flow,int(11
+istanze2_bck,attivo,int(11
+istanze2_bck,max_passo_assegnato,int(11
+istanze2_bck,data_max_passo,datetime DEFAULT NULL
+istanze2_bck,id_cliente,int(11
+istanze2_bck,id_trattativa,int(11
+istanze2_bck,istanza_master,int(11
+istanze2_bck,ultimo_aggiornamento,datetime DEFAULT NULL
+istanze2_bck,id_utente_ultimo_aggiornamento,int(11
+istanze2_bck,categoria,text NOT NULL
+istanze2_bck,id_pratica,int(11
+jato,ID,bigint(20
+jato,Codice_Jato,text DEFAULT NULL
+jato,Descrizione_Prodotto_Jato,text DEFAULT NULL
+jato,Marca,text DEFAULT NULL
+jato,Gamma,text DEFAULT NULL
+jato,Tipo_Carrozzeria_Jato,text DEFAULT NULL
+jato,Modello_Jato,text DEFAULT NULL
+jato,Generazione_Jato,text DEFAULT NULL
+jato,JATO_TRIM_LEVEL,text DEFAULT NULL
+jato,Codice_Costruttore,text DEFAULT NULL
+jato,Codice_Manutenzione,text DEFAULT NULL
+jato,Codice_Valore_Residuo,text DEFAULT NULL
+jato,Codice_Eurotax,text DEFAULT NULL
+jato,Indice_di_Carico,text DEFAULT NULL
+jato,Homologation,text DEFAULT NULL
+jato,Cavalli,int(11
+jato,KW,int(11
+jato,Cilindrata,text DEFAULT NULL
+jato,Misura_Pneumatici_principali_anteriori,text DEFAULT NULL
+jato,Misura_Pneumatici_principali_posteriori,text DEFAULT NULL
+jato,Indice_di_Velocità_Pneumatici_principali,text DEFAULT NULL
+jato,Indice_di_Carico_Pneumatici_principali_a,text DEFAULT NULL
+jato,descrizione_trasmissione,text DEFAULT NULL
+jato,TYPE,text DEFAULT NULL
+jato,tipo_di_ibrido,text DEFAULT NULL
+jato,tassa_nazionale_4_nome,text DEFAULT NULL
+jato,Consumo_Misto,text DEFAULT NULL
+jato,Normativa_anti-inqui,text DEFAULT NULL
+jato,Portata,float DEFAULT NULL
+jato,Mass,float DEFAULT NULL
+jato,Movable_Mass,text DEFAULT NULL
+jato,Fiscal_Horsepower,float DEFAULT NULL
+jato,CO2_Emission_Principal,text DEFAULT NULL
+jato,HSN-TSN_Code,text DEFAULT NULL
+jato,DATA_STATUS,text DEFAULT NULL
+jato,Status_versione,text DEFAULT NULL
+jato,Disponibilità_versione,text DEFAULT NULL
+jato,stato_voci_chiave_leasing,text DEFAULT NULL
+jato,VALIDITY_PRICELIST,text DEFAULT NULL
+jato,Attivo,text DEFAULT NULL
+jato,Jato_Mod_Year,int(11
+jato,Door_Number,int(11
+jato,Alimentazione,text DEFAULT NULL
+jato,Descrizione_Normativa,text DEFAULT NULL
+jato,Segmento,text DEFAULT NULL
+jato,List_Price_1,float DEFAULT NULL
+jato_old,ID,bigint(20
+jato_old,Codice_Jato,text DEFAULT NULL
+jato_old,Descrizione_Prodotto_Jato,text DEFAULT NULL
+jato_old,Marca,text DEFAULT NULL
+jato_old,Gamma,text DEFAULT NULL
+jato_old,Tipo_Carrozzeria_Jato,text DEFAULT NULL
+jato_old,Modello_Jato,text DEFAULT NULL
+jato_old,Generazione_Jato,text DEFAULT NULL
+jato_old,JATO_TRIM_LEVEL,text DEFAULT NULL
+jato_old,Codice_Costruttore,text DEFAULT NULL
+jato_old,Codice_Manutenzione,text DEFAULT NULL
+jato_old,Codice_Valore_Residuo,text DEFAULT NULL
+jato_old,Codice_Eurotax,text DEFAULT NULL
+jato_old,Indice_di_Carico,text DEFAULT NULL
+jato_old,Homologation,text DEFAULT NULL
+jato_old,Cavalli,int(11
+jato_old,KW,int(11
+jato_old,Cilindrata,text DEFAULT NULL
+jato_old,Misura_Pneumatici_principali_anteriori,text DEFAULT NULL
+jato_old,Misura_Pneumatici_principali_posteriori,text DEFAULT NULL
+jato_old,Indice_di_Velocità_Pneumatici_principali,text DEFAULT NULL
+jato_old,Indice_di_Carico_Pneumatici_principali_a,text DEFAULT NULL
+jato_old,descrizione_trasmissione,text DEFAULT NULL
+jato_old,TYPE,text DEFAULT NULL
+jato_old,tipo_di_ibrido,text DEFAULT NULL
+jato_old,tassa_nazionale_4_nome,text DEFAULT NULL
+jato_old,Consumo_Misto,text DEFAULT NULL
+jato_old,Normativa_anti-inqui,text DEFAULT NULL
+jato_old,Portata,float DEFAULT NULL
+jato_old,Mass,float DEFAULT NULL
+jato_old,Movable_Mass,text DEFAULT NULL
+jato_old,Fiscal_Horsepower,float DEFAULT NULL
+jato_old,CO2_Emission_Principal,text DEFAULT NULL
+jato_old,HSN-TSN_Code,text DEFAULT NULL
+jato_old,DATA_STATUS,text DEFAULT NULL
+jato_old,Status_versione,text DEFAULT NULL
+jato_old,Disponibilità_versione,text DEFAULT NULL
+jato_old,stato_voci_chiave_leasing,text DEFAULT NULL
+jato_old,VALIDITY_PRICELIST,text DEFAULT NULL
+jato_old,Attivo,text DEFAULT NULL
+jato_old,Jato_Mod_Year,int(11
+jato_old,Door_Number,int(11
+jato_old,Alimentazione,text DEFAULT NULL
+jato_old,Descrizione_Normativa,text DEFAULT NULL
+jato_old,Segmento,text DEFAULT NULL
+jato_old,List_Price_1,float DEFAULT NULL
+lavorabili,trattative.id,int(11
+lavorabili_complete_luigi,id,int(11
+lavorazioni_backoffice,id,int(11
+lavorazioni_backoffice,categoria,int(11
+lavorazioni_backoffice,tipo_operazione,int(11
+lavorazioni_backoffice,data_ora,datetime NOT NULL
+lavorazioni_backoffice,id_riga,int(11
+lavorazioni_backoffice,id_utente,int(11
+lavorazioni_backoffice,note,text NOT NULL
+lavorazioni_backoffice2,id,int(11
+lavorazioni_backoffice2,categoria,int(11
+lavorazioni_backoffice2,tipo_operazione,int(11
+lavorazioni_backoffice2,data_ora,datetime NOT NULL
+lavorazioni_backoffice2,id_riga,int(11
+lavorazioni_backoffice2,id_utente,int(11
+lavorazioni_backoffice2,note,text NOT NULL
+lavorazioni_bollettini,id,int(11
+lavorazioni_bollettini,luigi,int(11
+lavorazioni_bollettini,roberta,int(11
+lezioni,id,int(11
+lezioni,id_classe,int(11
+lezioni,data,date NOT NULL
+lezioni,erogata,int(11
+lezioni,note,longtext NOT NULL
+licenze,id,int(11
+licenze,id_cliente,int(11
+licenze,applicativo,int(11
+licenze,versione,int(11
+licenze,data_acquisto,date NOT NULL
+licenze,data_scadenza,date NOT NULL
+licenze,attivo,int(11
+licenze,docente,int(11
+licenze,note_necessario,text NOT NULL
+licenze,note_rimborso,text NOT NULL
+licenze,iban,text NOT NULL
+licenze,intestatario,text NOT NULL
+licenze,esito_rimborso,text NOT NULL
+linea_diretta,id,int(11
+linea_diretta,id_utente,int(11
+linea_diretta,competenza,int(11
+linea_diretta,provincia,text NOT NULL
+linea_diretta,sigla,text NOT NULL
+linea_diretta,attivo,int(11
+lista_provvigionale,id,int(11
+lista_provvigionale,n_iscrizioni_min,int(11
+lista_provvigionale,n_iscrizioni_max,int(11
+lista_provvigionale,provvigione_perc,float NOT NULL
+lista_provvigionale,provvigione,float NOT NULL
+lista_provvigionale,livello,int(11
+lista_provvigionale_over,id,int(11
+lista_provvigionale_over,livello,varchar(20
+lista_provvigionale_over,fatturato_min,float NOT NULL
+lista_provvigionale_over,fatturato_max,float NOT NULL
+lista_provvigionale_over,provvigione,text NOT NULL
+lista_provvigionale_over,over,float NOT NULL
+log_login,id,int(11
+log_login,ip,text NOT NULL
+log_login,data,datetime NOT NULL
+log_login,utente,text NOT NULL
+log_login,password,text NOT NULL
+log_login,coordinate,text NOT NULL
+log_luigi,id,int(11
+log_luigi,data,datetime NOT NULL
+log_luigi,operazione,text NOT NULL
+log_luigi,tabella,text NOT NULL
+log_luigi,p_set,text NOT NULL
+log_luigi,p_where,text NOT NULL
+log_luigi,query,text NOT NULL
+log_luigi,stato,int(11
+log_luigi,note,text DEFAULT NULL
+log_prova,id,int(11
+lotti,id,int(11
+lotti,Marca,text DEFAULT NULL
+lotti,Modello,text DEFAULT NULL
+lotti,Versione,text DEFAULT NULL
+lotti,Territory,text DEFAULT NULL
+lotti,Colore,varchar(15
+lotti,data,varchar(18
+lotti,MIN,bigint(9
+lotti,MAX,bigint(9
+lotti,quattro,int(11
+lotti,quattro_ricerca,int(11
+lotti,qta,decimal(42
+lotti,diff,float DEFAULT NULL
+lotti,stato,int(2
+lotti2,id,int(11
+lotti2,Marca,text DEFAULT NULL
+lotti2,Modello,text DEFAULT NULL
+lotti2,Versione,text DEFAULT NULL
+lotti2,Territory,text DEFAULT NULL
+lotti2,Colore,varchar(15
+lotti2,data,varchar(18
+lotti2,MIN,bigint(9
+lotti2,MAX,bigint(9
+lotti2,quattro,int(11
+lotti2,quattro_ricerca,int(11
+lotti2,qta,decimal(42
+lotti2,diff,float DEFAULT NULL
+lotti2,stato,int(2
+lotti_disp,Marca,text
+lotti_storico,id,int(11
+lotti_storico,Marca,text DEFAULT NULL
+lotti_storico,Modello,text DEFAULT NULL
+lotti_storico,Versione,text DEFAULT NULL
+lotti_storico,Territory,text DEFAULT NULL
+lotti_storico,Colore,varchar(15
+lotti_storico,data,varchar(18
+lotti_storico,MIN,bigint(9
+lotti_storico,MAX,bigint(9
+lotti_storico,quattro,int(11
+lotti_storico,quattro_ricerca,int(11
+lotti_storico,qta,decimal(42
+lotti_storico,diff,float DEFAULT NULL
+lotti_storico,stato,int(2
+lotti_storico0,id,int(11
+lotti_storico0,Marca,text DEFAULT NULL
+lotti_storico0,Modello,text DEFAULT NULL
+lotti_storico0,Versione,text DEFAULT NULL
+lotti_storico0,Territory,text DEFAULT NULL
+lotti_storico0,Colore,varchar(15
+lotti_storico0,data,varchar(18
+lotti_storico0,MIN,bigint(9
+lotti_storico0,MAX,bigint(9
+lotti_storico0,quattro,int(11
+lotti_storico0,quattro_ricerca,int(11
+lotti_storico0,qta,decimal(42
+lotti_storico0,diff,float DEFAULT NULL
+lotti_storico0,stato,int(2
+lotti_storico0_bck,id,int(11
+lotti_storico0_bck,Marca,text DEFAULT NULL
+lotti_storico0_bck,Modello,text DEFAULT NULL
+lotti_storico0_bck,Versione,text DEFAULT NULL
+lotti_storico0_bck,Territory,text DEFAULT NULL
+lotti_storico0_bck,Colore,varchar(15
+lotti_storico0_bck,data,varchar(18
+lotti_storico0_bck,MIN,bigint(9
+lotti_storico0_bck,MAX,bigint(9
+lotti_storico0_bck,quattro,int(11
+lotti_storico0_bck,quattro_ricerca,int(11
+lotti_storico0_bck,qta,decimal(42
+lotti_storico0_bck,diff,float DEFAULT NULL
+lotti_storico0_bck,stato,int(2
+lotti_storico__,id,int(11
+lotti_storico__,Marca,text DEFAULT NULL
+lotti_storico__,Modello,text DEFAULT NULL
+lotti_storico__,Versione,text DEFAULT NULL
+lotti_storico__,Territory,text DEFAULT NULL
+lotti_storico__,Colore,varchar(15
+lotti_storico__,data,varchar(18
+lotti_storico__,MIN,bigint(9
+lotti_storico__,MAX,bigint(9
+lotti_storico__,quattro,int(11
+lotti_storico__,quattro_ricerca,int(11
+lotti_storico__,qta,decimal(42
+lotti_storico__,diff,float DEFAULT NULL
+lotti_storico__,stato,int(2
+lotti_temp,id,int(11
+lotti_temp,Marca,text DEFAULT NULL
+lotti_temp,Modello,text DEFAULT NULL
+lotti_temp,Versione,text DEFAULT NULL
+lotti_temp,Territory,text DEFAULT NULL
+lotti_temp,Colore,varchar(15
+lotti_temp,data,varchar(18
+lotti_temp,MIN,bigint(9
+lotti_temp,MAX,bigint(9
+lotti_temp,quattro,int(11
+lotti_temp,quattro_ricerca,int(11
+lotti_temp,qta,decimal(42
+lotti_temp,diff,float DEFAULT NULL
+lotti_temp,stato,int(2
+lotti_temp__,id,int(11
+lotti_temp__,Marca,text DEFAULT NULL
+lotti_temp__,Modello,text DEFAULT NULL
+lotti_temp__,Versione,text DEFAULT NULL
+lotti_temp__,Territory,text DEFAULT NULL
+lotti_temp__,Colore,varchar(15
+lotti_temp__,data,varchar(18
+lotti_temp__,MIN,bigint(9
+lotti_temp__,MAX,bigint(9
+lotti_temp__,quattro,int(11
+lotti_temp__,quattro_ricerca,int(11
+lotti_temp__,qta,decimal(42
+lotti_temp__,diff,float DEFAULT NULL
+lotti_temp__,stato,int(2
+lotti__,id,int(11
+lotti__,Marca,text DEFAULT NULL
+lotti__,Modello,text DEFAULT NULL
+lotti__,Versione,text DEFAULT NULL
+lotti__,Territory,text DEFAULT NULL
+lotti__,Colore,varchar(15
+lotti__,data,varchar(18
+lotti__,MIN,bigint(9
+lotti__,MAX,bigint(9
+lotti__,quattro,int(11
+lotti__,quattro_ricerca,int(11
+lotti__,qta,decimal(42
+lotti__,diff,float DEFAULT NULL
+lotti__,stato,int(2
+lotto_attuale,id,int(11
+mailbox_setting,id,int(11
+mailbox_setting,mailbox_username,text NOT NULL
+mailbox_setting,mailbox_password,text NOT NULL
+mailbox_setting,imap_server,text NOT NULL
+mailbox_setting,imap_server_port,int(11
+mailbox_setting,pop3_server,text NOT NULL
+mailbox_setting,pop3_server_port,int(11
+mailbox_setting,codec_ssl,text NOT NULL
+mail_news,id,int(11
+mail_news,oggetto,varchar(120
+mail_news,messaggio,text CHARACTER 
+mail_news,mittente,varchar(70
+mail_news,destinatari,text CHARACTER 
+mail_news,nome_file,varchar(200
+mail_news,data_invio,datetime NOT NULL
+mail_news,tipologia,int(11
+mail_sollecito,id,int(11
+mail_sollecito,data_invio,datetime NOT NULL
+mail_sollecito,destinatari,varchar(200
+mail_sollecito,vendor,text NOT NULL
+mail_sollecito,tipo_noleggio,text NOT NULL
+mail_sollecito,clienti,varchar(200
+mail_sollecito,tipo_mail,int(2
+mai_contattati,contatti.id,int(11
+migra_comunicazioni,contatti.id,int(11
+migra_events_contatti,contatti.id,int(11
+migra_events_contatti1,contatti.id,int(11
+modalita_pagamento,id,int(11
+modalita_pagamento,tipo_corso,int(11
+modalita_pagamento,nome,text NOT NULL
+modalita_pagamento,tipologia,text NOT NULL
+modalita_pagamento,sconto,float NOT NULL
+modalita_pagamento,premio_consulente,float NOT NULL
+modalita_pagamento,iscrizione,float NOT NULL
+modalita_pagamento,materiale_didattico,float NOT NULL
+modalita_pagamento,numero_rate,int(11
+modalita_pagamento,rata,float NOT NULL
+modello_plafond,modello_jato,int(11
+modello_plafond,marca,text NOT NULL
+modello_plafond,modello,text NOT NULL
+modello_plafond,versione,text NOT NULL
+modello_plafond,prezzo,float NOT NULL
+modello_plafond,alimentazione,text NOT NULL
+modello_plafond,plafond,int(11
+modello_plafond,plafond_min,float NOT NULL DEFAULT 0
+modello_plafond,plafond_max,float NOT NULL DEFAULT 0
+modello_plafond,canone,float NOT NULL DEFAULT 0
+modello_plafond,canone_min,float NOT NULL DEFAULT 0
+modello_plafond,canone_max,float NOT NULL DEFAULT 0
+modello_plafond,vendor,int(11
+modello_plafond,segmento,text NOT NULL
+movimenti,id,int(11
+movimenti,numero,text NOT NULL
+movimenti,data_operazione,date NOT NULL
+movimenti,data_documento,date NOT NULL
+movimenti,descrizione,longtext NOT NULL
+movimenti,tipologia,int(11
+movimenti,conti,int(11
+movimenti,destinatario,int(11
+movimenti,mittente,int(11
+movimenti,imponibile,double NOT NULL
+movimenti,iva,double NOT NULL
+movimenti,ritenuta,double NOT NULL
+movimenti,enasarco,double NOT NULL
+movimenti,totale,double NOT NULL
+movimenti,pagata,int(11
+movimenti,utente,int(11
+movimenti_banche,id,int(11
+movimenti_banche,data,date NOT NULL
+movimenti_banche,valuta,date NOT NULL
+movimenti_banche,descrizione,text NOT NULL
+movimenti_banche,addebiti,double NOT NULL
+movimenti_banche,accrediti,double NOT NULL
+movimenti_banche,descrizione_estesa,text NOT NULL
+movimenti_luigi,id,int(11
+movimenti_luigi,data_operazione,date NOT NULL
+movimenti_luigi,data_documento,date NOT NULL
+movimenti_luigi,descrizione,longtext NOT NULL
+movimenti_luigi,tipologia,int(11
+movimenti_luigi,conti,int(11
+movimenti_luigi,destinatario,int(11
+movimenti_luigi,importo,double NOT NULL
+movimenti_luigi,utente,int(11
+NAPOLI,Comune,varchar(100
+NAPOLI,Acerra,int(11
+NAPOLI,Afragola,int(11
+NAPOLI,Agerola,int(11
+NAPOLI,Anacapri,int(11
+NAPOLI,Arzano,int(11
+NAPOLI,Bacoli,int(11
+NAPOLI,Barano d'Ischia,int(11
+NAPOLI,Boscoreale,int(11
+NAPOLI,Boscotrecase,int(11
+NAPOLI,Brusciano,int(11
+NAPOLI,Caivano,int(11
+NAPOLI,Calvizzano,int(11
+NAPOLI,Camposano,int(11
+NAPOLI,Capri,int(11
+NAPOLI,Carbonara di Nola,int(11
+NAPOLI,Cardito,int(11
+NAPOLI,Casalnuovo di Napoli,int(11
+NAPOLI,Casamarciano,int(11
+NAPOLI,Casamicciola Terme,int(11
+NAPOLI,Casandrino,int(11
+NAPOLI,Casavatore,int(11
+NAPOLI,Casola di Napoli,int(11
+NAPOLI,Casoria,int(11
+NAPOLI,Castellammare di Stabia,int(11
+NAPOLI,Castello di Cisterna,int(11
+NAPOLI,Cercola,int(11
+NAPOLI,Cicciano,int(11
+NAPOLI,Cimitile,int(11
+NAPOLI,Comiziano,int(11
+NAPOLI,Crispano,int(11
+NAPOLI,Forio,int(11
+NAPOLI,Frattamaggiore,int(11
+NAPOLI,Frattaminore,int(11
+NAPOLI,Giugliano in Campania,int(11
+NAPOLI,Gragnano,int(11
+NAPOLI,Grumo Nevano,int(11
+NAPOLI,Ischia,int(11
+NAPOLI,Lacco Ameno,int(11
+NAPOLI,Lettere,int(11
+NAPOLI,Liveri,int(11
+NAPOLI,Marano di Napoli,int(11
+NAPOLI,Mariglianella,int(11
+NAPOLI,Marigliano,int(11
+NAPOLI,Massa Lubrense,int(11
+NAPOLI,Melito di Napoli,int(11
+NAPOLI,Meta,int(11
+NAPOLI,Monte di Procida,int(11
+NAPOLI,Mugnano di Napoli,int(11
+NAPOLI,Napoli,int(11
+NAPOLI,Nola,int(11
+NAPOLI,Ottaviano,int(11
+NAPOLI,Palma Campania,int(11
+NAPOLI,Piano di Sorrento,int(11
+NAPOLI,Pimonte,int(11
+NAPOLI,Poggiomarino,int(11
+NAPOLI,Pollena Trocchia,int(11
+NAPOLI,Pomigliano d'Arco,int(11
+NAPOLI,Pompei,int(11
+NAPOLI,Portici,int(11
+NAPOLI,Pozzuoli,int(11
+NAPOLI,Procida,int(11
+NAPOLI,Qualiano,int(11
+NAPOLI,Quarto,int(11
+NAPOLI,Ercolano,int(11
+NAPOLI,Roccarainola,int(11
+NAPOLI,San Gennaro Vesuviano,int(11
+NAPOLI,San Giorgio a Cremano,int(11
+NAPOLI,San Giuseppe Vesuviano,int(11
+NAPOLI,San Paolo Bel Sito,int(11
+NAPOLI,San Sebastiano al Vesuvio,int(11
+NAPOLI,Sant'Agnello,int(11
+NAPOLI,Sant'Anastasia,int(11
+NAPOLI,Sant'Antimo,int(11
+NAPOLI,Sant'Antonio Abate,int(11
+NAPOLI,San Vitaliano,int(11
+NAPOLI,Saviano,int(11
+NAPOLI,Scisciano,int(11
+NAPOLI,Serrara Fontana,int(11
+NAPOLI,Somma Vesuviana,int(11
+NAPOLI,Sorrento,int(11
+NAPOLI,Striano,int(11
+NAPOLI,Terzigno,int(11
+NAPOLI,Torre Annunziata,int(11
+NAPOLI,Torre del Greco,int(11
+NAPOLI,Tufino,int(11
+NAPOLI,Vico Equense,int(11
+NAPOLI,Villaricca,int(11
+NAPOLI,Visciano,int(11
+NAPOLI,Volla,int(11
+NAPOLI,Santa Maria la Carita',int(11
+NAPOLI,Trecase,int(11
+NAPOLI,Massa di Somma,int(11
+NAPOLI_old,Comune,varchar(100
+NAPOLI_old,Acerra,int(11
+NAPOLI_old,Afragola,int(11
+NAPOLI_old,Agerola,int(11
+NAPOLI_old,Anacapri,int(11
+NAPOLI_old,Arzano,int(11
+NAPOLI_old,Bacoli,int(11
+NAPOLI_old,Barano d'Ischia,int(11
+NAPOLI_old,Boscoreale,int(11
+NAPOLI_old,Boscotrecase,int(11
+NAPOLI_old,Brusciano,int(11
+NAPOLI_old,Caivano,int(11
+NAPOLI_old,Calvizzano,int(11
+NAPOLI_old,Camposano,int(11
+NAPOLI_old,Capri,int(11
+NAPOLI_old,Carbonara di Nola,int(11
+NAPOLI_old,Cardito,int(11
+NAPOLI_old,Casalnuovo di Napoli,int(11
+NAPOLI_old,Casamarciano,int(11
+NAPOLI_old,Casamicciola Terme,int(11
+NAPOLI_old,Casandrino,int(11
+NAPOLI_old,Casavatore,int(11
+NAPOLI_old,Casola di Napoli,int(11
+NAPOLI_old,Casoria,int(11
+NAPOLI_old,Castellammare di Stabia,int(11
+NAPOLI_old,Castello di Cisterna,int(11
+NAPOLI_old,Cercola,int(11
+NAPOLI_old,Cicciano,int(11
+NAPOLI_old,Cimitile,int(11
+NAPOLI_old,Comiziano,int(11
+NAPOLI_old,Crispano,int(11
+NAPOLI_old,Forio,int(11
+NAPOLI_old,Frattamaggiore,int(11
+NAPOLI_old,Frattaminore,int(11
+NAPOLI_old,Giugliano in Campania,int(11
+NAPOLI_old,Gragnano,int(11
+NAPOLI_old,Grumo Nevano,int(11
+NAPOLI_old,Ischia,int(11
+NAPOLI_old,Lacco Ameno,int(11
+NAPOLI_old,Lettere,int(11
+NAPOLI_old,Liveri,int(11
+NAPOLI_old,Marano di Napoli,int(11
+NAPOLI_old,Mariglianella,int(11
+NAPOLI_old,Marigliano,int(11
+NAPOLI_old,Massa Lubrense,int(11
+NAPOLI_old,Melito di Napoli,int(11
+NAPOLI_old,Meta,int(11
+NAPOLI_old,Monte di Procida,int(11
+NAPOLI_old,Mugnano di Napoli,int(11
+NAPOLI_old,Napoli,int(11
+NAPOLI_old,Nola,int(11
+NAPOLI_old,Ottaviano,int(11
+NAPOLI_old,Palma Campania,int(11
+NAPOLI_old,Piano di Sorrento,int(11
+NAPOLI_old,Pimonte,int(11
+NAPOLI_old,Poggiomarino,int(11
+NAPOLI_old,Pollena Trocchia,int(11
+NAPOLI_old,Pomigliano d'Arco,int(11
+NAPOLI_old,Pompei,int(11
+NAPOLI_old,Portici,int(11
+NAPOLI_old,Pozzuoli,int(11
+NAPOLI_old,Procida,int(11
+NAPOLI_old,Qualiano,int(11
+NAPOLI_old,Quarto,int(11
+NAPOLI_old,Ercolano,int(11
+NAPOLI_old,Roccarainola,int(11
+NAPOLI_old,San Gennaro Vesuviano,int(11
+NAPOLI_old,San Giorgio a Cremano,int(11
+NAPOLI_old,San Giuseppe Vesuviano,int(11
+NAPOLI_old,San Paolo Bel Sito,int(11
+NAPOLI_old,San Sebastiano al Vesuvio,int(11
+NAPOLI_old,Sant'Agnello,int(11
+NAPOLI_old,Sant'Anastasia,int(11
+NAPOLI_old,Sant'Antimo,int(11
+NAPOLI_old,Sant'Antonio Abate,int(11
+NAPOLI_old,San Vitaliano,int(11
+NAPOLI_old,Saviano,int(11
+NAPOLI_old,Scisciano,int(11
+NAPOLI_old,Serrara Fontana,int(11
+NAPOLI_old,Somma Vesuviana,int(11
+NAPOLI_old,Sorrento,int(11
+NAPOLI_old,Striano,int(11
+NAPOLI_old,Terzigno,int(11
+NAPOLI_old,Torre Annunziata,int(11
+NAPOLI_old,Torre del Greco,int(11
+NAPOLI_old,Tufino,int(11
+NAPOLI_old,Vico Equense,int(11
+NAPOLI_old,Villaricca,int(11
+NAPOLI_old,Visciano,int(11
+NAPOLI_old,Volla,int(11
+NAPOLI_old,Santa Maria la Carita',int(11
+NAPOLI_old,Trecase,int(11
+NAPOLI_old,Massa di Somma,int(11
+nominativi,provincia,text
+non_assegnati_con_tr,id_cliente,int(11
+non_assegnati_no_tr,id_cliente,int(10
+note,id,int(11
+note,id_cliente,int(11
+note,note,text NOT NULL
+note_events,id,int(11
+note_events,id_appuntamento,int(11
+note_events,id_appuntamento_precedente,int(11
+note_events,id_cliente,int(11
+note_events,note_appuntamento,text CHARACTER 
+note_events,nota_esito,int(11
+note_events,note_supervisore,text NOT NULL
+note_events,gestione_ripasso,int(11
+note_events,numero_ripasso,int(11
+note_events,esito_precedente,varchar(80
+note_events_,id,int(11
+note_events_,id_appuntamento,int(11
+note_events_,id_appuntamento_precedente,int(11
+note_events_,id_cliente,int(11
+note_events_,note_appuntamento,text CHARACTER 
+note_events_,nota_esito,int(11
+note_events_,note_supervisore,text NOT NULL
+note_events_,gestione_ripasso,int(11
+note_events_,numero_ripasso,int(11
+note_events_,esito_precedente,varchar(80
+offerte,id,int(11
+offerte,nome,text NOT NULL
+offerte,creazione,datetime NOT NULL
+offerte,scadenza,date NOT NULL
+offerte,attivo,int(11
+offerte_opzioni,id_veicolo_offerta,int(11
+offerte_raggruppate,id,int(11
+offerte_semplicissimo,id,int(11
+offerte_semplicissimo,tipologia,text NOT NULL
+offerte_semplicissimo,marca,text NOT NULL
+offerte_semplicissimo,modello,text NOT NULL
+offerte_semplicissimo,versione,longtext NOT NULL
+offerte_semplicissimo,mesi,int(11
+offerte_semplicissimo,km,int(11
+offerte_semplicissimo,anticipo,int(11
+offerte_semplicissimo,commissioni,int(11
+offerte_semplicissimo,partner,text NOT NULL
+offerte_semplicissimo,canone,double NOT NULL
+offerte_semplicissimo,dal,date NOT NULL
+offerte_semplicissimo,al,date NOT NULL
+offerte_semplicissimo,note,longtext NOT NULL
+offerte_semplicissimo,attivo,int(11
+offerte_semplicissimo,percentuale_di_sconto,text NOT NULL
+offerte_semplicissimo,anticipo_zero,text NOT NULL
+offerte_semplicissimo,venticinquemila,text NOT NULL
+offerte_semplicissimo,meno_docici,text NOT NULL
+offerte_semplicissimo,meno_docici_piu_venticinquemila,text NOT NULL
+operatore_province,id,int(11
+operatore_province,id_utente,int(11
+operatore_province,provincia,text NOT NULL
+operatore_province,sigla,text NOT NULL
+operatore_province,attivo,int(11
+Operatori,Operatore,int(11
+Operatori,Supervisore,int(11
+operatori_presenze,id,int(11
+operatori_presenze,operatore,int(11
+operatori_presenze,data,date NOT NULL
+operatori_presenze,ore,double NOT NULL
+operatori_presenze,note,text NOT NULL
+operatori_presenze,domani,double NOT NULL
+operazioni_albania,id,int(11
+operazioni_albania,tipo,text NOT NULL
+operazioni_albania,utente,int(11
+operazioni_albania,comando,longtext NOT NULL
+operazioni_albania,data,time
+operazioni_albania,stato,int(11
+operazioni_albania,note,text NOT NULL
+operazioni_albania,funzione,text DEFAULT NULL
+operazioni_albania,id_anagrafica,int(11
+operazioni_flow,id,int(11
+operazioni_flow,tipo,text NOT NULL
+operazioni_flow,utente,int(11
+operazioni_flow,comando,longtext NOT NULL
+operazioni_flow,data,time
+operazioni_flow,stato,int(11
+operazioni_flow,note,text NOT NULL
+operazioni_flow,funzione,text DEFAULT NULL
+operazioni_flow,id_trattativa,int(11
+operazioni_flow,id_flows,int(11
+operazioni_flow,passo,int(11
+operazioni_italia,id,int(11
+operazioni_italia,tipo,text NOT NULL
+operazioni_italia,utente,int(11
+operazioni_italia,comando,longtext NOT NULL
+operazioni_italia,data,time
+operazioni_italia,stato,int(11
+operazioni_italia,note,text NOT NULL
+operazioni_italia,funzione,text DEFAULT NULL
+operazioni_italia,id_anagrafica,int(11
+oper_per_cli,contatti.clienti.id,int(11
+Opzioni,id,int(11
+Opzioni,id_veicolo,int(11
+Opzioni,data,datetime NOT NULL
+Opzioni,scadenza,datetime NOT NULL
+Opzioni,destinatario,int(11
+Opzioni,richiedente,int(11
+Opzioni,stato_opz_int,int(11
+Opzioni,note,longtext NOT NULL
+Opzioni,commerciale,int(11
+Opzioni,data_commerciale,datetime NOT NULL
+Opzioni,back_office,int(11
+Opzioni,data_backoffice,datetime NOT NULL
+Opzioni,dettaglio_quotazione,int(11
+Opzioni,destinatario_prenotazione,int(11
+Opzioni,data_prenotazione,datetime DEFAULT NULL
+Opzioni,richiedente_prenotazione,int(11
+Opzioni,esito_prenotazione,int(11
+Opzioni,data_esito,datetime DEFAULT NULL
+Opzioni2,id,int(11
+Opzioni2,id_veicolo,int(11
+Opzioni2,data,datetime NOT NULL
+Opzioni2,scadenza,datetime NOT NULL
+Opzioni2,destinatario,int(11
+Opzioni2,richiedente,int(11
+Opzioni2,stato_opz_int,int(11
+Opzioni2,note,longtext NOT NULL
+Opzioni2,commerciale,int(11
+Opzioni2,data_commerciale,datetime NOT NULL
+Opzioni2,back_office,int(11
+Opzioni2,data_backoffice,datetime NOT NULL
+Opzioni2,dettaglio_quotazione,int(11
+Opzioni2,destinatario_prenotazione,int(11
+Opzioni2,data_prenotazione,datetime DEFAULT NULL
+Opzioni2,richiedente_prenotazione,int(11
+Opzioni2,esito_prenotazione,int(11
+Opzioni2,data_esito,datetime DEFAULT NULL
+opzioni_max_id,id,int(11
+opzioni_offerte_dettagli_quotazioni,id_veicolo_offerta,int(11
+opzioni_prenotazioni,id_opzione,int(11
+opzioni_prenotazioni,destinatario_pren,int(11
+opzioni_prenotazioni,richiedente_pren,int(11
+opzioni_prenotazioni,data_pren,datetime NOT NULL
+opzioni_prenotazioni,stato_opzioni_pren,int(11
+opzioni_prenotazioni,note,text DEFAULT NULL
+opzioni_ultimo_id,id_veicolo,int(11
+ordini,id,int(11
+ordini,id_cliente,int(11
+ordini,id_pratica,int(11
+ordini,id_trattativa,int(11
+ordini,id_consulente,int(11
+ordini,tipo_noleggio,int(11
+ordini,autonostop,int(11
+ordini,formazione_autonostop,varchar(2
+ordini,note_formazione,text NOT NULL
+ordini,data_attivazione_autonostop,date NOT NULL
+ordini,articolo94_spedito,int(11
+ordini,data_spedizione_articolo94,date NOT NULL
+ordini,contratto_originale,int(11
+ordini,data_spedizione_contratto_originale,date NOT NULL
+ordini,vendor,int(11
+ordini,partner,int(11
+ordini,stato_ordine,int(11
+ordini,data_inviato,date NOT NULL
+ordini,plafond,float NOT NULL
+ordini,marca,text NOT NULL
+ordini,modello,text NOT NULL
+ordini,versione,text NOT NULL
+ordini,durata,text NOT NULL
+ordini,km_annui,text NOT NULL
+ordini,canone,float NOT NULL
+ordini,valore_auto,float NOT NULL
+ordini,targa,text NOT NULL
+ordini,provv_aziendale,float NOT NULL
+ordini,provv_perc_consulente,float NOT NULL
+ordini,provv_perc_bonus_consulente,float NOT NULL
+ordini,provv_consulente,float NOT NULL
+ordini,data_ordine,date NOT NULL
+ordini,data_prevista_consegna,date NOT NULL
+ordini,data_consegna,date NOT NULL
+ordini,pronta_consegna,int(11
+ordini,note,text CHARACTER 
+ordini,id_ft_vendor,int(11
+ordini,id_ft_consulente,int(11
+ordini,id_utente,int(11
+ordini,point_consegna,text CHARACTER 
+ordini-vista,id,int(11
+ordini_consegnati,id,int(11
+ord_completo,id,int(11
+ord_pla,id,int(11
+ord_ult_anno,id,int(11
+p2,disponibili,bigint(21
+pacchetti_ap,id,int(11
+pacchetti_ap,nome,text NOT NULL
+pacchetti_ap,note,text NOT NULL
+pacchetti_clienti,id,int(11
+pacchetti_clienti,id_cliente,int(11
+pacchetti_clienti,id_pacchetto,int(11
+pacchetti_clienti,annuncio,longtext NOT NULL
+pacchetti_clienti,categoria,text NOT NULL
+pacchetti_clienti,foto,longtext NOT NULL
+pacchetti_clienti,pagato,int(11
+pagamenti,id,int(11
+pagamenti,id_cliente,int(11
+pagamenti,id_contratto,int(11
+pagamenti,data,date NOT NULL
+pagamenti,data_incasso,date NOT NULL
+pagamenti,id_tipologia,int(11
+pagamenti,id_modalita,int(11
+pagamenti,importo,float NOT NULL
+pagamenti,banca,int(11
+pagamenti,note,text NOT NULL
+pagamenti,effettuato,int(3
+pagamenti_da_ricevere,id_cliente,int(11
+pagamenti_da_ricevere_scomparsi,id_cliente,int(11
+pagamenti_ricevuti,id_cliente,int(11
+pagamenti_tributi,id,int(11
+pagamenti_tributi,data,date NOT NULL
+pagamenti_tributi,importo,double NOT NULL
+pagamenti_tributi,tributo,int(11
+pagamenti_tributi,pagamento_totale,double NOT NULL
+pagamenti_tributi,note,longtext NOT NULL
+persona,id,int(11
+persona,nome,text NOT NULL
+persona,cognome,text NOT NULL
+plafond,id_cliente,int(11
+plafond,id_vendor,int(11
+plafond,importo,float NOT NULL
+plafond,data,datetime NOT NULL
+plafond,scadenza,datetime NOT NULL
+plafond,id_ultima_pratica,int(11
+plafond,data_ultima_modifica,datetime NOT NULL
+plafond,note,longtext NOT NULL
+plafond,plafond_totale,int(11
+plafond,plafond_utilizzato,int(11
+plafond_categorie,marca,mediumtext
+plafond_categorie1,marca,mediumtext
+plafond_credito,id_cliente,int(11
+posta,id,int(11
+posta,Account,text NOT NULL
+posta,Data,datetime NOT NULL
+posta,Mittente,text NOT NULL
+posta,Mittente_indirizzo,text NOT NULL
+posta,Oggetto,longtext NOT NULL
+posta,Html,longtext NOT NULL
+posta,Plain,longtext NOT NULL
+posta,Message_id,text NOT NULL
+posta,Allegati,text NOT NULL
+posta,Note,text NOT NULL
+posta,Stato,int(11
+posta,Assegnatario,int(11
+post_vendita,id,int(11
+post_vendita,id_cliente,int(11
+post_vendita,id_ordine,int(11
+post_vendita,id_utente,int(5
+post_vendita,data_operazione,datetime NOT NULL
+post_vendita,data_esito,datetime NOT NULL
+post_vendita,note,text CHARACTER 
+post_vendita,esito,int(5
+post_vendita,stato,int(5
+post_vendita,data_stato,date NOT NULL
+post_vendita,destinatari,text NOT NULL
+post_vendita,messaggio,text NOT NULL
+post_vendita,allegati,text NOT NULL
+post_vendita,oggetto,text NOT NULL
+pratiche,id,int(11
+pratiche,id_trattativa,int(11
+pratiche,tipo_noleggio,int(11
+pratiche,id_cliente,int(11
+pratiche,data_caricamento,date NOT NULL
+pratiche,data_richiesta_fido,date NOT NULL
+pratiche,data_esito,date NOT NULL
+pratiche,scadenza_plafond,date NOT NULL
+pratiche,esito,int(11
+pratiche,societa_noleggio,int(11
+pratiche,linea_di_credito,text NOT NULL
+pratiche,plafond_richiesto,float NOT NULL
+pratiche,num_veicoli_richiesti,int(11
+pratiche,note,text CHARACTER 
+pratiche,id_utente,int(11
+pratiche-trattative,consulente,int(11
+pratiche-vendor,id,int(11
+pratiche_max1,id,int(11
+pratiche_max2,id,int(11
+pratiche_max3,id,int(11
+pratiche_ordini,id,int(11
+pratiche_plafond,id,int(11
+prenotazione_esami,id,int(11
+prenotazione_esami,id_cliente,int(11
+prenotazione_esami,anagrafica,text NOT NULL
+prenotazione_esami,email,text NOT NULL
+prenotazione_esami,telefono,text NOT NULL
+prenotazione_esami,master,text NOT NULL
+prenotazione_esami,tipo_esame,int(11
+prenotazione_esami,sessione,text NOT NULL
+prenotazione_esami,ora_inizio,int(11
+prenotazione_esami,simulatore,text NOT NULL
+prenotazione_esami,confermato,int(11
+prenotazione_esami,esito_esame,int(11
+prenotazione_esami,note,text NOT NULL
+presenze,id,int(11
+presenze,id_lezione,int(11
+presenze,id_cliente,int(11
+presenze,presente,int(11
+presenze,note,text NOT NULL
+presenze_appoggio,id,int(11
+presenze_appoggio,nome_classe,text NOT NULL
+presenze_appoggio,id_anagrafica,int(11
+presenze_appoggio,presenza,int(11
+presenze_appoggio,data,date NOT NULL
+presenze_operatori,id,int(11
+presenze_operatori,id_utente,int(11
+presenze_operatori,data,date NOT NULL
+presenze_operatori,ore,float NOT NULL
+presenze_operatori,tipo,int(11
+presenze_operatori,paga,float NOT NULL COMMENT '0:
+presenze_operatori,note,longtext NOT NULL
+preventivi,id,int(11
+preventivi_lprent,id,int(11
+preventivi_lprent,id_auto,int(11
+preventivi_lprent,marca,text NOT NULL
+preventivi_lprent,modello,text NOT NULL
+preventivi_lprent,versione,text NOT NULL
+preventivi_lprent,trasmissione,text NOT NULL
+preventivi_lprent,alimentazione,text NOT NULL
+preventivi_lprent,vendor,int(11
+preventivi_lprent,tipo_noleggio,int(11
+preventivi_lprent,tipo_contratto,int(11
+preventivi_lprent,anticipo,float NOT NULL
+preventivi_lprent,mesi,int(11
+preventivi_lprent,km,int(11
+preventivi_lprent,canone,float NOT NULL
+preventivi_lprent,provvigione,float NOT NULL
+preventivi_lprent,percentuale_provvigione,int(11
+preventivi_lprent,rca,int(11
+preventivi_lprent,kasko,int(11
+preventivi_lprent,furto,int(11
+preventivi_lprent,manutenzione,int(11
+preventivi_lprent,stato,int(11
+preventivi_lprent,data_preventivo,datetime NOT NULL
+preventivi_lprent,tempi_di_consegna,float NOT NULL
+preventivi_lprent,colore,text NOT NULL
+preventivi_lprent,note,text NOT NULL
+preventivi_lprent,attivo,int(11
+preventivi_lprent,id_simulazione,text DEFAULT NULL
+preventivi_lprent,tipo_tariffa,int(11
+preventivi_semplicissimo,id,int(11
+preventivi_semplicissimo,id_cliente,int(11
+preventivi_semplicissimo,Data,date NOT NULL
+preventivi_semplicissimo,tipologia,text NOT NULL
+preventivi_semplicissimo,marca,text NOT NULL
+preventivi_semplicissimo,modello,text NOT NULL
+preventivi_semplicissimo,versione,longtext NOT NULL
+preventivi_semplicissimo,optional,longtext NOT NULL
+preventivi_semplicissimo,km,int(11
+preventivi_semplicissimo,anticipo,int(11
+preventivi_semplicissimo,data_compilazione,date NOT NULL
+preventivi_semplicissimo,partner,text NOT NULL
+preventivi_semplicissimo,canone0,double NOT NULL
+preventivi_semplicissimo,mesi,int(11
+preventivi_semplicissimo,provvigioni_semplicissimo,double NOT NULL
+preventivi_semplicissimo,canone_agente,double NOT NULL
+preventivi_semplicissimo,canone_agente1,double NOT NULL
+preventivi_semplicissimo,canone_agente2,double NOT NULL
+preventivi_semplicissimo,provvigioni_agente,double NOT NULL
+preventivi_semplicissimo,provvigione_agente1,double NOT NULL
+preventivi_semplicissimo,provvigione_agente2,double NOT NULL
+preventivi_semplicissimo,canone_agente3,double NOT NULL
+preventivi_semplicissimo,canone_scelto,int(11
+preventivi_semplicissimo,kasko,int(11
+preventivi_semplicissimo,provvigione_agente3,double NOT NULL
+preventivi_semplicissimo,rca,int(11
+preventivi_semplicissimo,pneumatici,text NOT NULL
+preventivi_semplicissimo,F_I,varchar(20
+preventivi_semplicissimo,auto_sostitutiva,text NOT NULL
+preventivi_semplicissimo,carburante,text NOT NULL
+preventivi_semplicissimo,permuta,text NOT NULL
+preventivi_semplicissimo,gomme_invernali,text NOT NULL
+preventivi_semplicissimo,note_partner,longtext NOT NULL
+preventivi_semplicissimo,stato,int(11
+proco,Stato,text DEFAULT NULL
+proco,Marca,text DEFAULT NULL
+proco,Modello,text DEFAULT NULL
+proco,Colore,text DEFAULT NULL
+proco,Versione,text DEFAULT NULL
+proco,Id Veicolo,bigint(9
+proco,Telaio Pronta Consegna,text DEFAULT NULL
+proco,Territory,text DEFAULT NULL
+proco,Data_Creazione,date NOT NULL
+proco,Visibilita,text NOT NULL
+proco,ecommerce,text NOT NULL
+proco0,Stato,text
+proco1,Stato,text DEFAULT NULL
+proco1,Marca,text DEFAULT NULL
+proco1,Modello,text DEFAULT NULL
+proco1,Versione,text DEFAULT NULL
+proco1,Colore,varchar(15
+proco1,Id Veicolo,bigint(9
+proco1,Telaio Pronta Consegna,text DEFAULT NULL
+proco1,Territory,text DEFAULT NULL
+proco1,quattro,int(11
+proco1,id,int(11
+proco1,jato_code,text NOT NULL
+proco1,listino,text NOT NULL
+proco1,codice_costruttore,text NOT NULL
+proco1,attivo,tinyint(1
+proco1,tipologia,text NOT NULL
+proco1,alimentazione,text NOT NULL
+proco1,trasmissione,text NOT NULL
+proco1_,Stato,text
+proco1_200225,Stato,text DEFAULT NULL
+proco1_200225,Marca,text DEFAULT NULL
+proco1_200225,Modello,text DEFAULT NULL
+proco1_200225,Versione,text DEFAULT NULL
+proco1_200225,Colore,varchar(15
+proco1_200225,Id Veicolo,bigint(9
+proco1_200225,Telaio Pronta Consegna,text DEFAULT NULL
+proco1_200225,Territory,text DEFAULT NULL
+proco1_200225,quattro,int(11
+proco1_200225,id,int(11
+proco1_200225,jato_code,text NOT NULL
+proco1_200225,listino,text NOT NULL
+proco1_200225,codice_costruttore,text NOT NULL
+proco1_200225,attivo,tinyint(1
+proco1_200225,tipologia,text NOT NULL
+proco1_200225,alimentazione,text NOT NULL
+proco1_200225,trasmissione,text NOT NULL
+proco2,Stato,text
+proco3,Stato,text
+proco3_old,Stato,text
+proco3_prev,Stato,text
+proco3_prev_all,Marca,text
+proco4,Stato,text
+proco4_,Stato,text
+proco_1811,Stato,text DEFAULT NULL
+proco_1811,Marca,text DEFAULT NULL
+proco_1811,Modello,text DEFAULT NULL
+proco_1811,Versione,text DEFAULT NULL
+proco_1811,Colore,varchar(15
+proco_1811,Id Veicolo,bigint(9
+proco_1811,Telaio Pronta Consegna,text DEFAULT NULL
+proco_1811,Territory,text DEFAULT NULL
+proco_config,Marca,text
+proco_config0,Marca,text DEFAULT NULL
+proco_config0,Modello,text DEFAULT NULL
+proco_config0,Versione,text DEFAULT NULL
+proco_config0,Colore,varchar(15
+proco_config0,Id Veicolo,bigint(9
+proco_config0,id_quotazione,int(11
+proco_config0,Territory,text DEFAULT NULL
+proco_config0,MIN,int(11
+proco_config0,MAX,int(11
+proco_config0,quattro,int(11
+proco_config0,note,longtext DEFAULT NULL
+proco_config0,id,int(11
+proco_config0,401,bigint(15
+proco_config0,data,datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+proco_config0,data_scadenza,datetime DEFAULT NULL
+proco_config0,tipologia,text DEFAULT NULL
+proco_config0_finoal170125,Marca,text DEFAULT NULL
+proco_config0_finoal170125,Modello,text DEFAULT NULL
+proco_config0_finoal170125,Versione,text DEFAULT NULL
+proco_config0_finoal170125,Colore,varchar(15
+proco_config0_finoal170125,Id Veicolo,bigint(9
+proco_config0_finoal170125,id_quotazione,int(11
+proco_config0_finoal170125,Territory,text DEFAULT NULL
+proco_config0_finoal170125,MIN,int(11
+proco_config0_finoal170125,MAX,int(11
+proco_config0_finoal170125,quattro,int(11
+proco_config0_finoal170125,note,longtext DEFAULT NULL
+proco_config0_finoal170125,id,int(11
+proco_config0_finoal170125,401,bigint(15
+proco_config0_finoal170125,data,datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+proco_config0_finoal170125,data_scadenza,datetime DEFAULT NULL
+proco_config0_finoal170125,tipologia,text DEFAULT NULL
+proco_config0_old,Marca,text DEFAULT NULL
+proco_config0_old,Modello,text DEFAULT NULL
+proco_config0_old,Versione,text DEFAULT NULL
+proco_config0_old,Colore,varchar(15
+proco_config0_old,Id Veicolo,bigint(9
+proco_config0_old,id_quotazione,int(11
+proco_config0_old,Territory,text DEFAULT NULL
+proco_config0_old,MIN,int(11
+proco_config0_old,MAX,int(11
+proco_config0_old,quattro,int(11
+proco_config0_old,note,longtext DEFAULT NULL
+proco_config0_old,id,int(11
+proco_config0_old,401,bigint(15
+proco_config0_old,data,datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
+proco_config0_old,data_scadenza,datetime DEFAULT NULL
+proco_config0_old,tipologia,text DEFAULT NULL
+proco_db,Stato,text DEFAULT NULL
+proco_db,Marca,text DEFAULT NULL
+proco_db,Modello,text DEFAULT NULL
+proco_db,Versione,text DEFAULT NULL
+proco_db,Colore,varchar(15
+proco_db,Id Veicolo,bigint(9
+proco_db,Telaio Pronta Consegna,text DEFAULT NULL
+proco_db,Territory,text DEFAULT NULL
+proco_disp,Marca,text DEFAULT NULL
+proco_disp,Modello,text DEFAULT NULL
+proco_disp,Versione,text DEFAULT NULL
+proco_disp,Colore,text DEFAULT NULL
+proco_disp,Territory,text DEFAULT NULL
+proco_disp,costr,text DEFAULT NULL
+proco_disp,material,text DEFAULT NULL
+proco_disp,note,longtext DEFAULT NULL
+proco_disp,import,int(5
+proco_disp,quantita,int(11
+proco_disponibili,Marca,text
+proco_disp_m,Territory,text
+proco_disp_mm,Territory,text
+proco_disp_mmq,Stato,text
+proco_disp_mmv,Territory,text
+proco_disp_mmvc,Stato,text
+proco_disp_t,Territory,text
+proco_import,id,int(11
+proco_import,data,datetime NOT NULL
+proco_import,note,longtext NOT NULL
+proco_import,fonte,text NOT NULL
+proco_import,pezzi,int(11
+proco_import,note1,longtext NOT NULL
+proco_import,note2,longtext NOT NULL
+proco_import,attivo,tinyint(4
+proco_lotti,id,int(11
+proco_lotti,Versione,text NOT NULL
+proco_lotti,Territory,text NOT NULL
+proco_lotti,Colore,int(11
+proco_lotti,data,time
+proco_lotti,min,int(11
+proco_lotti,max,int(11
+proco_lotti,quattro,int(11
+proco_old,Stato,text DEFAULT NULL
+proco_old,Marca,text DEFAULT NULL
+proco_old,Modello,text DEFAULT NULL
+proco_old,Versione,text DEFAULT NULL
+proco_old,Colore,varchar(15
+proco_old,Id Veicolo,bigint(9
+proco_old,Telaio Pronta Consegna,text DEFAULT NULL
+proco_old,Territory,text DEFAULT NULL
+proco_old,costr,text DEFAULT NULL
+proco_old,material,text DEFAULT NULL
+proco_old,note,longtext DEFAULT NULL
+proco_old,import,int(1
+proco_prev,Marca,text
+proco_prev2,Marca,text
+proco_prev_all,Marca,text
+proco_riservati,Stato,int(11
+proco_riservati,Marca,text DEFAULT NULL
+proco_riservati,Modello,text DEFAULT NULL
+proco_riservati,Versione,text DEFAULT NULL
+proco_riservati,Colore,text DEFAULT NULL
+proco_riservati,Territory,text DEFAULT NULL
+proco_riservati,costr,text DEFAULT NULL
+proco_riservati,id_cliente,int(11
+proco_riservati,note,longtext DEFAULT NULL
+proco_riservati,import,int(1
+proco_riservati,id_veicolo,int(11
+proco_riservati,id_consulente,int(11
+proco_riservati,id_utente,int(11
+proco_riservati,data,datetime NOT NULL
+proco_riservati,data_riserva,datetime DEFAULT NULL
+proco_riservati,scadenza,datetime NOT NULL
+proco_riservati-vista,Stato,int(11
+proco__,Stato,text DEFAULT NULL
+proco__,Marca,text DEFAULT NULL
+proco__,Modello,text DEFAULT NULL
+proco__,Versione,text DEFAULT NULL
+proco__,Colore,varchar(15
+proco__,Id Veicolo,bigint(9
+proco__,Telaio Pronta Consegna,text DEFAULT NULL
+proco__,Territory,text DEFAULT NULL
+prodotti,id,int(11
+prodotti,nome,text NOT NULL
+prodotti,descrizione,longtext NOT NULL
+prodotti,prezzo,float NOT NULL
+prodotti,id_categoria,int(11
+prodotti,area,varchar(50
+prodotti,durata,int(11
+prodotti,link_libri,text NOT NULL
+prodotti,numero_esami,int(11
+progetti,id,int(11
+progetti,nome,text NOT NULL
+progetti,descrizione,longtext NOT NULL
+progetti,email,text NOT NULL
+progetti,data_progettazione,date NOT NULL
+progetti,data_inizio,date NOT NULL
+progetti,anagrafiche,int(11
+progetti,attivo,int(11
+progetto_scuola,id,int(11
+progetto_scuola,nome_istituto,text NOT NULL
+progetto_scuola,mail,text NOT NULL
+progetto_scuola,referente,text NOT NULL
+progetto_scuola,telefono,text NOT NULL
+progetto_scuola,telefono2,text NOT NULL
+progetto_scuola,comune,text NOT NULL
+progetto_scuola,provincia,text NOT NULL
+progetto_scuola,regione,text NOT NULL
+progetto_scuola,stato,int(11
+progetto_scuola,n_telefonate,int(11
+progetto_scuola,note,text NOT NULL
+programmazione_consulenti,id,int(11
+programmazione_consulenti,id_consulente,int(11
+programmazione_consulenti,comune,text NOT NULL
+programmazione_consulenti,provincia,text NOT NULL
+programmazione_consulenti,id_categoria,int(11
+programmazione_consulenti,attivo,int(11
+programmazione_consulenti,note,text NOT NULL
+programmazione_giornaliera,provincia,text NOT NULL
+programmazione_giornaliera,ids,text NOT NULL
+programmazione_giornaliera,gruppo,int(11
+prova,event_id,int(11
+prova1,disponibili,bigint(21
+provaluigi,provincia,text NOT NULL
+provaluigi,diplomati,int(11
+provaluigi,ata,int(11
+provaluigi2,provincia,text NOT NULL
+provaluigi2,sigla,text NOT NULL
+provaluigi2,10,int(11
+provaluigi2,12,int(11
+provaluigi2,42,int(11
+provaluigi2,16,int(11
+province_disponibilita,provincia,text NOT NULL
+province_disponibilita,sigla,text NOT NULL
+province_disponibilita,nominativi,int(11
+province_disponibilita,nominativi_nec,int(11
+province_disponibilita,interessati,int(11
+province_disponibilita,interessati_nec,int(11
+province_disponibilita,marketing_giornaliero,int(11
+province_disponibilita,attivo,tinyint(1
+province_disponibilita,competenza_tmk,int(11
+province_disponibilita,esclusivo,tinyint(4
+province_disponibilita,bloccati,int(11
+province_disponibilita,terminati,int(11
+province_disponibilita,appuntamenti,int(11
+province_disponibilita,appuntamenti_da_confermare,int(11
+province_disponibilita,appuntamenti_nec,int(11
+province_disponibilita,telefonate,int(11
+province_disponibilita,attivo_fix,tinyint(4
+province_disponibilita,esclusivo_fix,tinyint(4
+province_disponibilita,competenza,int(11
+province_disponibilita,note,text NOT NULL
+province_disponibilita,id_consulente,int(11
+provvigioni,id,int(11
+provvigioni,P,text NOT NULL
+provvigioni,livello,text NOT NULL
+provvigioni,massimo,double NOT NULL
+provvigioni_agente,id,int(11
+provvigioni_agente,da,double NOT NULL
+provvigioni_agente,a,double NOT NULL
+provvigioni_agente,importo,double NOT NULL
+provvigioni_consulente,id,int(11
+provvigioni_consulente,Livello,text NOT NULL
+provvigioni_consulente,P1,double NOT NULL
+provvigioni_consulente,P2,double NOT NULL
+provvigioni_consulente,P3,double NOT NULL
+provvigioni_semplicissimo,id,int(11
+provvigioni_semplicissimo,da,double NOT NULL
+provvigioni_semplicissimo,a,double NOT NULL
+provvigioni_semplicissimo,importo,double NOT NULL
+pubblicazioni_ap,id,int(11
+pubblicazioni_ap,id_annunci_ap,int(11
+pubblicazioni_ap,data,datetime NOT NULL
+pubblicazioni_ap,conferma,int(11
+pubblicazioni_ap,prova,int(11
+quiz,id,int(11
+quiz,id_alunno,int(11
+quiz,email,text NOT NULL
+quiz,nome,text NOT NULL
+quiz,data,datetime NOT NULL
+quiz,num_dom,int(11
+quiz,num_dom_risp,int(11
+quiz,esito,text NOT NULL
+quiz,perc,text NOT NULL
+quotazion,id,int(11
+quotazioni,id,int(11
+quotazioni,marca,text NOT NULL
+quotazioni,canone,float NOT NULL
+quotazioni,mesi,int(11
+quotazioni,rif,int(11
+quotazioni_complete,id_quot,int(11
+quotazioni_medie,canone_medio,double(17
+quotazioni_new,id,int(11
+quotazioni_new,id_veicolo,int(11
+quotazioni_new,veicolo_id_jato,text NOT NULL
+quotazioni_new,marca,mediumtext NOT NULL
+quotazioni_new,modello,mediumtext NOT NULL
+quotazioni_new,versione,text NOT NULL
+quotazioni_new,modello_jato,int(11
+quotazioni_new,prezzo,int(11
+quotazioni_new,categoria,int(11
+quotazioni_new,note,longtext NOT NULL
+quotazioni_new_old,id,int(11
+quotazioni_new_old,id_veicolo,int(11
+quotazioni_new_old,veicolo_id_jato,text NOT NULL
+quotazioni_new_old,marca,mediumtext NOT NULL
+quotazioni_new_old,modello,mediumtext NOT NULL
+quotazioni_new_old,versione,text NOT NULL
+quotazioni_new_old,modello_jato,int(11
+quotazioni_new_old,prezzo,int(11
+quotazioni_new_old,categoria,int(11
+quotazioni_new_old,note,longtext NOT NULL
+quotazioni_new_vista,id,int(11
+referenti_vodafone,id,int(11
+referenti_vodafone,id_cliente,int(11
+referenti_vodafone,nome,text NOT NULL
+referenti_vodafone,cognome,text NOT NULL
+referenti_vodafone,ruolo,int(11
+referenti_vodafone,telefono_fisso,text NOT NULL
+referenti_vodafone,telefono_mobile,text NOT NULL
+referenti_vodafone,fax,text NOT NULL
+referenti_vodafone,mail,text NOT NULL
+referenti_vodafone,via,text NOT NULL
+referenti_vodafone,civico,text NOT NULL
+referenti_vodafone,comune,text NOT NULL
+referenti_vodafone,provincia,text NOT NULL
+referenti_vodafone,cap,text NOT NULL
+referenti_vodafone,note,text NOT NULL
+rent,id_rent,int(11
+rent-pratiche,id_rent,int(11
+rent_complete,id,int(11
+rent_lp,id,int(11
+rent_lp,id_cliente,int(11
+rent_lp,id_dettaglio_quotazione,int(11
+rent_lp,id_veicolo,int(11
+rent_lp,data,date NOT NULL
+rent_lp,id_consulente,int(11
+rent_lp,stato_rent,int(11
+rent_lp,note,longtext NOT NULL
+richieste_preventivo,id,int(11
+richieste_preventivo,id_cliente,int(11
+richieste_preventivo,id_consulente,int(11
+richieste_preventivo,ragione_sociale,varchar(70
+richieste_preventivo,telefono,varchar(50
+richieste_preventivo,telefono2,varchar(50
+richieste_preventivo,forma_giuridica,varchar(30
+richieste_preventivo,indirizzo,varchar(70
+richieste_preventivo,comune,varchar(50
+richieste_preventivo,provincia,varchar(30
+richieste_preventivo,cap,varchar(10
+richieste_preventivo,partita_iva,varchar(20
+richieste_preventivo,codice_fiscale,varchar(20
+richieste_preventivo,referente,varchar(70
+richieste_preventivo,tel_referente,varchar(50
+richieste_preventivo,email,varchar(50
+richieste_preventivo,pec,varchar(50
+richieste_preventivo,iban,varchar(40
+richieste_preventivo,vendor,int(11
+richieste_preventivo,interessato_a,varchar(70
+richieste_preventivo,spesa_mensile,varchar(30
+richieste_preventivo,marca,varchar(40
+richieste_preventivo,modello,varchar(50
+richieste_preventivo,versione,varchar(50
+richieste_preventivo,km_anno,varchar(30
+richieste_preventivo,durata,varchar(50
+richieste_preventivo,optional,varchar(50
+richieste_preventivo,colore,varchar(70
+richieste_preventivo,pneumatici_inv,varchar(10
+richieste_preventivo,pneumatici_est,varchar(10
+richieste_preventivo,sostitutiva,varchar(50
+richieste_preventivo,valutazione_pronta_consegna,varchar(50
+richieste_preventivo,preassegnazione,varchar(50
+richieste_preventivo,manutenzione,varchar(50
+richieste_preventivo,vr67,int(11
+richieste_preventivo,autonostop,int(11
+richieste_preventivo,provvigione,varchar(40
+richieste_preventivo,note,varchar(300
+richieste_preventivo,data_ora,time
+richieste_preventivo,stato,tinyint(4
+richieste_preventivo,tipologia_richiesta,tinyint(1
+richieste_preventivo,tipo_anticipo,int(11
+richieste_preventivo,valore_anticipo,float NOT NULL
+richieste_preventivo,tipo_deposito,int(11
+richieste_preventivo,valore_deposito,float NOT NULL
+richieste_preventivo_quotazioni,id,int(11
+richieste_preventivo_quotazioni,id_utente,int(11
+richieste_preventivo_quotazioni,id_trattativa,int(11
+richieste_preventivo_quotazioni,id_pratica,int(11
+richieste_preventivo_quotazioni,id_cliente,int(11
+richieste_preventivo_quotazioni,id_richiesta,int(11
+richieste_preventivo_quotazioni,data_ora,time
+richieste_preventivo_quotazioni,data_richiesta,datetime NOT NULL
+richieste_preventivo_quotazioni,data_esito,datetime NOT NULL
+richieste_preventivo_quotazioni,data_ricezione_rent,datetime NOT NULL
+richieste_preventivo_quotazioni,vendor,varchar(80
+richieste_preventivo_quotazioni,nome_file,varchar(50
+richieste_preventivo_quotazioni,note,text NOT NULL
+richieste_preventivo_quotazioni,interessato_a,varchar(70
+richieste_preventivo_quotazioni,spesa_mensile,varchar(30
+richieste_preventivo_quotazioni,marca,varchar(40
+richieste_preventivo_quotazioni,modello,varchar(50
+richieste_preventivo_quotazioni,versione,varchar(50
+richieste_preventivo_quotazioni,km_anno,varchar(30
+richieste_preventivo_quotazioni,durata,varchar(50
+richieste_preventivo_quotazioni,optional,varchar(50
+richieste_preventivo_quotazioni,colore,varchar(70
+richieste_preventivo_quotazioni,pneumatici_inv,varchar(10
+richieste_preventivo_quotazioni,pneumatici_est,varchar(10
+richieste_preventivo_quotazioni,sostitutiva,varchar(50
+richieste_preventivo_quotazioni,valutazione_pronta_consegna,varchar(50
+richieste_preventivo_quotazioni,preassegnazione,varchar(50
+richieste_preventivo_quotazioni,manutenzione,varchar(50
+richieste_preventivo_quotazioni,vr67,int(11
+richieste_preventivo_quotazioni,autonostop,int(11
+richieste_preventivo_quotazioni,provvigione,varchar(40
+richieste_preventivo_quotazioni,provvigione_ottenuta,varchar(40
+richieste_preventivo_quotazioni,tipologia_richiesta,tinyint(4
+richieste_preventivo_quotazioni,stato,tinyint(2
+richieste_preventivo_quotazioni,spesa_mensile_desiderata,varchar(30
+richieste_preventivo_quotazioni,tipo_anticipo,int(11
+richieste_preventivo_quotazioni,valore_anticipo,float NOT NULL
+richieste_preventivo_quotazioni,tipo_deposito,int(11
+richieste_preventivo_quotazioni,valore_deposito,float NOT NULL
+richieste_preventivo_quotazioni,n_simulazione,text NOT NULL
+richieste_preventivo_quotazioni,n_preventivo,text NOT NULL
+richieste_preventivo_quotazioni,num_rif_pronta_consegna,text NOT NULL
+riferimenti,id,int(11
+riferimenti,id_anagrafica,int(11
+riferimenti,tipo,text CHARACTER 
+riferimenti,nome,text CHARACTER 
+riferimenti,telefono,text CHARACTER 
+riferimenti,email,text CHARACTER 
+riferimenti,note,longtext CHARACTER 
+ripasso_range,id,int(11
+ripasso_range,min_giorni_ripasso,int(11
+ripasso_range,max_giorni_ripasso,int(11
+ripasso_range,area,varchar(100
+ripasso_range,esito,varchar(70
+riprogramma,id,int(11
+riprogramma,id_pratica,int(11
+riprogramma,max_passo_assegnato,int(11
+riprogramma,lavorato,int(11
+riprogramma,id_flow,int(11
+riprogrammacontrattativa,id,int(11
+riprogramma_old,id,int(11
+riprogramma_old,id_pratica,int(11
+riprogramma_old,max_passo_assegnato,int(11
+riprogramma_old,lavorato,int(11
+riprogramma_old,id_flow,int(11
+rpr,id,int(11
+rpr,id_quotazione,int(11
+rpr,data,date NOT NULL
+scadenziario,id,int(11
+scadenziario,fornitore,int(11
+scadenziario,data_scadenza,date NOT NULL
+scadenziario,data_pagamento,date NOT NULL
+scadenziario,importo,float NOT NULL
+scadenziario,riferimenti,text NOT NULL
+scadenziario,banca,int(11
+scadenziario,note,longtext NOT NULL
+scheda_cliente,id,int(11
+scheda_cliente,id_cliente,int(11
+scheda_cliente,id_trattativa,int(11
+scheda_cliente,vendor,int(11
+scheda_cliente,data,date NOT NULL
+scheda_cliente,interessato_a,int(11
+scheda_cliente,marca,text NOT NULL
+scheda_cliente,modello,text NOT NULL
+scheda_cliente,versione,text NOT NULL
+scheda_cliente,optional,text NOT NULL
+scheda_cliente,durata,int(11
+scheda_cliente,km_anno,float NOT NULL
+scheda_cliente,pneumatici_inv,text NOT NULL
+scheda_cliente,pneumatici_est,text NOT NULL
+scheda_cliente,sostitutiva,int(11
+scheda_cliente,auto_preassegnazione,text NOT NULL
+scheda_cliente,richiesta_pronta_consegna,int(11
+scheda_cliente,spesa_mensile,text NOT NULL
+scheda_cliente,autonostop,text NOT NULL
+scheda_cliente,vr67,int(11
+scheda_cliente,provvigione,text NOT NULL
+scheda_cliente,note,text NOT NULL
+scheda_cliente,id_utente,int(11
+sede_esami,id,int(11
+sede_esami,provincia,text NOT NULL
+sede_esami,comune,text NOT NULL
+sede_esami,indirizzo,text NOT NULL
+sede_esami,note,text NOT NULL
+sede_esami,attivo,int(11
+select,id,int(11
+select,nome,text NOT NULL
+select,valore,text NOT NULL
+select,uso,int(11
+selezioni,selezioni.id,int(11
+selezioni,selezioni.nome,text NOT NULL
+selezioni,selezioni.valore,text NOT NULL
+selezioni,selezioni.uso,int(11
+sequenze,id,int(11
+sequenze,nome,text NOT NULL
+sequenze,mesi,int(11
+sequenze,km,int(11
+sequenze,sequenza,int(11
+sessione_esame,id,int(11
+sessione_esame,sede,int(11
+sessione_esame,data,date NOT NULL
+sessione_esame,nome,text NOT NULL
+sessione_esame,numero_postazioni,int(11
+sessione_esame,ora_inizio,text NOT NULL
+sessione_esame,ora_fine,text NOT NULL
+sessione_esame,piena,int(11
+sessione_esame,attiva,int(11
+sessione_esame,note,text NOT NULL
+sessioni,id,int(11
+sessioni,username,varchar(50
+sessioni,inizio,datetime NOT NULL
+sessioni,fine,datetime NOT NULL
+sessioni,note,varchar(5
+sincronizzazioni,tipo,text NOT NULL
+sincronizzazioni,esito,tinyint(4
+siti_ap,id,int(11
+siti_ap,nome,longtext NOT NULL
+siti_ap,attivo,int(11
+siti_ap,massaggi,tinyint(1
+sms,id,int(11
+sms,nome_tipologia,text NOT NULL
+sms,testo,text NOT NULL
+spettanze,id,int(11
+spettanze,id_collaboratore,int(11
+spettanze,livello,text NOT NULL
+spettanze,fatturato,double NOT NULL
+spettanze,provvigione,double NOT NULL
+spettanze,importo_provvigione,double NOT NULL
+spettanze,fatturato_gruppo,double NOT NULL
+spettanze,provvigione_gruppo,double NOT NULL
+spettanze,fatturato_gruppo_utile,double NOT NULL
+spettanze,over,double NOT NULL
+spettanze,totale,double NOT NULL
+spettanze,verificato,int(11
+spettanze,pagato,int(11
+spettanze,da,date NOT NULL
+spettanze,a,date NOT NULL
+stati,id,int(11
+stati,nome_stato,varchar(20
+stati_preventivo,id,int(11
+stati_preventivo,stato,int(11
+stati_preventivo,data,date NOT NULL
+stati_preventivo,id_richiesta,int(11
+stato_iscritto,id,int(11
+stato_iscritto,nome,text NOT NULL
+stato_iscritto,stato,int(11
+stato_iscritto,note,text NOT NULL
+stock_auto,id,int(11
+stock_auto2,id,int(11
+stock_auto_per_modello,marca,text
+stock_disponibilita_per_vij,disponibili,bigint(21
+stock_disponibilita_per_vij2,id,int(11
+stock_modello_dettagli,uniti,mediumtext
+syncro_log,id,int(11
+syncro_log,data,time
+syncro_log,id_pratica,int(11
+syncro_log,stato,int(11
+tabella_check,id,int(11
+tabella_check,id_utente_apertura,int(5
+tabella_check,id_utente_chiusura,int(5
+tabella_check,id_consulente,int(11
+tabella_check,data_apertura,time
+tabella_check,data_invio_mail,datetime NOT NULL
+tabella_check,data_chiusura,datetime NOT NULL
+tabella_check,stato_check,tinyint(5
+tabella_check,note,text NOT NULL
+target-vista,target.id,int(11
+task,id,int(11
+task,nome,text NOT NULL
+task,id_flow,int(11
+task,id_dettagli_flow,int(11
+task,id_cliente,int(11
+task,id_trattativa,int(11
+task,id_pratica,int(11
+task,data_inserimento,datetime NOT NULL
+task,data_scadenza,datetime NOT NULL
+task,assegnante,text NOT NULL
+task,assegnatario,text NOT NULL
+task,note,text NOT NULL
+task,priorita,int(11
+task,stato,int(11
+task,next,int(11
+task,previous,int(11
+task,durata,int(11
+task,data_scadenza_originale,datetime DEFAULT NULL
+task,data_presa_in_carico,datetime DEFAULT NULL
+task,data_completamento,datetime DEFAULT NULL
+task,id_utente_presa_in_carico,int(11
+task,esito_azione,text DEFAULT NULL
+task,id_istanze,int(11
+task,passo,int(11
+task,letto,int(11
+task,id_flows,int(11
+taskmyweb,id,int(11
+taskmyweb,id_cliente,int(11
+taskmyweb,data,date NOT NULL
+taskmyweb,tipologia,int(11
+taskmyweb,effettuato,int(11
+task_backup28921,id,int(11
+task_backup28921,nome,text NOT NULL
+task_backup28921,id_flow,int(11
+task_backup28921,id_dettagli_flow,int(11
+task_backup28921,id_cliente,int(11
+task_backup28921,id_trattativa,int(11
+task_backup28921,id_pratica,int(11
+task_backup28921,data_inserimento,datetime NOT NULL
+task_backup28921,data_scadenza,datetime NOT NULL
+task_backup28921,assegnante,text NOT NULL
+task_backup28921,assegnatario,text NOT NULL
+task_backup28921,note,text NOT NULL
+task_backup28921,priorita,int(11
+task_backup28921,stato,int(11
+task_backup28921,next,int(11
+task_backup28921,previous,int(11
+task_backup28921,durata,int(11
+task_backup28921,data_scadenza_originale,datetime DEFAULT NULL
+task_backup28921,data_presa_in_carico,datetime DEFAULT NULL
+task_backup28921,data_completamento,datetime DEFAULT NULL
+task_backup28921,id_utente_presa_in_carico,int(11
+task_backup28921,esito_azione,text DEFAULT NULL
+task_backup28921,id_istanze,int(11
+task_backup28921,passo,int(11
+task_backup28921,letto,int(11
+task_bck,id,int(11
+task_bck,nome,text NOT NULL
+task_bck,id_flow,int(11
+task_bck,id_dettagli_flow,int(11
+task_bck,id_cliente,int(11
+task_bck,id_trattativa,int(11
+task_bck,id_pratica,int(11
+task_bck,data_inserimento,datetime NOT NULL
+task_bck,data_scadenza,datetime NOT NULL
+task_bck,assegnante,text NOT NULL
+task_bck,assegnatario,text NOT NULL
+task_bck,note,text NOT NULL
+task_bck,priorita,int(11
+task_bck,stato,int(11
+task_bck,next,int(11
+task_bck,previous,int(11
+task_bck,durata,int(11
+task_bck,data_scadenza_originale,datetime DEFAULT NULL
+task_bck,data_presa_in_carico,datetime DEFAULT NULL
+task_bck,data_completamento,datetime DEFAULT NULL
+task_bck,id_utente_presa_in_carico,int(11
+task_bck,esito_azione,text DEFAULT NULL
+task_bck,id_istanze,int(11
+task_bck,passo,int(11
+task_bck,letto,int(11
+task_con_id_gruppo,id,int(11
+task_distanze,id,int(11
+task_distanze_completo,id,int(11
+task_incompleti,id_task,int(11
+task_incompleti,data,datetime NOT NULL
+task_incompleti,utente,int(11
+task_incompleti,note,int(11
+task_incompleti,attivo,int(11
+task_luigi,id,int(11
+task_luigi,nome,text NOT NULL
+task_luigi,id_flow,int(11
+task_luigi,id_dettagli_flow,int(11
+task_luigi,id_cliente,int(11
+task_luigi,id_trattativa,int(11
+task_luigi,id_pratica,int(11
+task_luigi,data_inserimento,datetime NOT NULL
+task_luigi,data_scadenza,datetime NOT NULL
+task_luigi,assegnante,text NOT NULL
+task_luigi,assegnatario,text NOT NULL
+task_luigi,note,text NOT NULL
+task_luigi,priorita,int(11
+task_luigi,stato,int(11
+task_luigi,next,int(11
+task_luigi,previous,int(11
+task_luigi,durata,int(11
+task_luigi,data_scadenza_originale,datetime DEFAULT NULL
+task_luigi,data_presa_in_carico,datetime DEFAULT NULL
+task_luigi,data_completamento,datetime DEFAULT NULL
+task_luigi,id_utente_presa_in_carico,int(11
+task_luigi,esito_azione,text DEFAULT NULL
+task_luigi,id_istanze,int(11
+task_luigi,passo,int(11
+task_luigi,letto,int(11
+task_raggruppati,assegnatario,text
+task_riunione,id,int(11
+task_riunione,id_utente,int(11
+task_riunione,descrizione,longtext CHARACTER 
+task_riunione,data_riunione,date NOT NULL
+task_riunione,esito,longtext CHARACTER 
+telefonate,id,int(11
+telefonate,id_cliente,int(11
+telefonate,data,datetime NOT NULL
+telefonate,esito,varchar(45
+telefonate,note_esito,varchar(45
+telefonate,data_esito,date DEFAULT NULL
+telefonate,ora_esito,varchar(10
+telefonate,note,longtext DEFAULT NULL
+telefonate,referente,text DEFAULT NULL
+telefonate,email,text DEFAULT NULL
+telefonate,cellulare,text DEFAULT NULL
+telefonate,annuncio,text NOT NULL
+telefonate,variante,text NOT NULL
+telefonate,sito,text NOT NULL
+telefonate,provincia,text NOT NULL
+telefonate,codice,text NOT NULL
+telefonate,id_progetto,int(11
+telefonate,id_utente,int(11
+tel_progetto_scuola,id,int(11
+tel_progetto_scuola,id_scuola,int(11
+tel_progetto_scuola,esito,int(11
+tel_progetto_scuola,data,datetime NOT NULL
+tel_progetto_scuola,note,text NOT NULL
+tel_progetto_scuola,id_utente,int(11
+terminati,provincia,text
+tipologia_documenti,id,int(11
+tipologia_documenti,tipo_azienda,text NOT NULL
+tipologia_documenti,tipo_documento,text NOT NULL
+tipologia_documenti,note,text NOT NULL
+tipologia_documenti,attivo,int(11
+tipologia_documenti,obbligatorio,int(11
+tipologia_documenti,opzionale,int(11
+tipologia_documenti,tipo,int(11
+tipologia_documenti_vendor,id,int(11
+tipologia_documenti_vendor,id_documento,int(11
+tipologia_documenti_vendor,id_vendor,int(11
+tipologia_documenti_vendor,obbligatorio,int(11
+tipologia_documenti_vendor,note,text NOT NULL
+tipologie,id,int(11
+tipologie,nome,text NOT NULL
+tipologie_fasi,id,int(11
+tipologie_fasi,nome,text NOT NULL
+tipo_esame,id,int(11
+tipo_esame,master,int(11
+tipo_esame,nome_esame,text NOT NULL
+tipo_esame,note,text NOT NULL
+totale_quotazioni,versione,text
+tracciati,id,int(11
+tracciati,da,date NOT NULL
+tracciati,al,date NOT NULL
+trattativa_utente,id,int(11
+trattativa_utente,id_trattativa,int(11
+trattativa_utente,data_assegnazione,datetime NOT NULL
+trattativa_utente,id_utente,int(11
+trattativa_utente,attivo,int(11
+trattativa_utente,note,text NOT NULL
+trattative,id,int(11
+trattative,id_cliente,int(11
+trattative,id_consulente,int(11
+trattative,id_appuntamento,int(11
+trattative,avanzamento,int(11
+trattative,voto,int(11
+trattative,tipo_noleggio,int(11
+trattative,stato,int(11
+trattative,note,text CHARACTER 
+trattative,data_ultimo_log,datetime NOT NULL
+trattative,data_trattativa,datetime NOT NULL
+trattative,data_fine_trattativa,date NOT NULL
+trattative,provenienza,int(11
+trat_pra_ord,id,int(11
+tributi,id,int(11
+tributi,nome,text NOT NULL
+tributi,categoria,int(11
+tributi,sotto_categoria,int(11
+tributi,data_inserimento,datetime NOT NULL
+tributi,scadenza,int(11
+tributi,importo,double NOT NULL
+tributi,anno,int(11
+tributi,mese,int(11
+tributi,rateo,int(11
+tributi,note,text NOT NULL
+trt_op_stato,stato,int(11
+tr_con_st,id_consulente,int(11
+tr_pr_or,id,int(11
+tr_pr_ord,id,int(11
+ultima_lavorazione2,contatti.id,decimal(11
+ultimo_contatto,contatti.id,int(11
+utenti,id,int(11
+utenti,nominativo,text NOT NULL
+utenti,utente,text NOT NULL
+utenti,password,text NOT NULL
+utenti,email,text NOT NULL
+utenti,data_inizio,date NOT NULL
+utenti,tipo,int(11
+utenti,attivo,tinyint(1
+utenti,email_invio,text NOT NULL
+utenti,cellulare,text NOT NULL
+utenti,data_log,date NOT NULL
+utenti,paga,float NOT NULL DEFAULT 0
+utenti,ore,float NOT NULL
+utenti,cambio_password,tinyint(1
+utenti,data_cambio_password,datetime NOT NULL
+utenti,ip,varchar(255
+utenti,password_invio,text NOT NULL
+utenti_bilanciamento,id,int(11
+utenti_bilanciamento,id_utente,int(11
+utenti_bilanciamento,gruppo,int(11
+utenti_email,id,int(11
+utenti_email,idr,int(11
+utenti_email,nominativo,text NOT NULL
+utenti_email,qualifica,text NOT NULL
+utenti_email,email,text NOT NULL
+utenti_email,password,text NOT NULL
+utenti_email,cellulare,text NOT NULL
+utenti_gruppi,id,int(11
+utenti_gruppi,id_utente,int(11
+utenti_gruppi,id_gruppo,int(11
+utenti_per_flow,id,int(11
+utenti_routing,id_consulente,int(11
+utenti_routing,id_routing,int(11
+utenti_task,id,int(11
+utenti_task,id_utente,int(11
+utenti_task,tipo_task,int(11
+utenti_task,attivo,int(11
+varianti,id,int(11
+varianti,data,datetime NOT NULL
+varianti,scadenza,datetime NOT NULL
+varianti,selezione,int(11
+varianti,sub_selezione,int(11
+varianti,anticipo,double DEFAULT 0
+varianti,mesi,double NOT NULL
+varianti,km,double NOT NULL
+varianti,kasko,double NOT NULL
+varianti,rca,double NOT NULL
+varianti,furto,double NOT NULL
+varianti,canone,double NOT NULL
+varianti,provvigioni,double NOT NULL
+varianti,tipologia,int(11
+varianti,note,longtext NOT NULL
+varianti,riferimento_old,text NOT NULL COMMENT 'uniti variante di
+varie,id,int(11
+varie,tipo,text NOT NULL
+varie,valore,text NOT NULL
+veicoli,Id,int(11
+veicoli,codice,mediumtext DEFAULT NULL
+veicoli,versione,mediumtext DEFAULT NULL
+veicoli,marca,mediumtext DEFAULT NULL
+veicoli,modello,mediumtext DEFAULT NULL
+veicoli,tipo_carrozzeria,mediumtext DEFAULT NULL
+veicoli,modello_jato,int(11
+veicoli,generazione,int(11
+veicoli,codice_costruttore,mediumtext DEFAULT NULL
+veicoli,eurotax,mediumtext DEFAULT NULL
+veicoli,cavalli,float DEFAULT NULL
+veicoli,kw,float DEFAULT NULL
+veicoli,cilindrata,int(11
+veicoli,trasmissione,mediumtext DEFAULT NULL
+veicoli,type,mediumtext DEFAULT NULL
+veicoli,tipo_ibrido,mediumtext DEFAULT NULL
+veicoli,cavalli_fiscali,float DEFAULT NULL
+veicoli,disponibilita,mediumtext DEFAULT NULL
+veicoli,attivo,mediumtext DEFAULT NULL
+veicoli,anno,int(11
+veicoli,porte,int(11
+veicoli,alimentazione,mediumtext DEFAULT NULL
+veicoli,normativa,mediumtext DEFAULT NULL
+veicoli,segmento,mediumtext DEFAULT NULL
+veicoli,prezzo,float DEFAULT NULL
+veicoli,categoria,int(11
+veicoli_bk,Id,int(11
+veicoli_bk,codice,mediumtext DEFAULT NULL
+veicoli_bk,versione,mediumtext DEFAULT NULL
+veicoli_bk,marca,mediumtext DEFAULT NULL
+veicoli_bk,modello,mediumtext DEFAULT NULL
+veicoli_bk,tipo_carrozzeria,mediumtext DEFAULT NULL
+veicoli_bk,modello_jato,int(11
+veicoli_bk,generazione,int(11
+veicoli_bk,codice_costruttore,mediumtext DEFAULT NULL
+veicoli_bk,eurotax,mediumtext DEFAULT NULL
+veicoli_bk,cavalli,float DEFAULT NULL
+veicoli_bk,kw,float DEFAULT NULL
+veicoli_bk,cilindrata,int(11
+veicoli_bk,trasmissione,mediumtext DEFAULT NULL
+veicoli_bk,type,mediumtext DEFAULT NULL
+veicoli_bk,tipo_ibrido,mediumtext DEFAULT NULL
+veicoli_bk,cavalli_fiscali,float DEFAULT NULL
+veicoli_bk,disponibilita,mediumtext DEFAULT NULL
+veicoli_bk,attivo,mediumtext DEFAULT NULL
+veicoli_bk,anno,int(11
+veicoli_bk,porte,int(11
+veicoli_bk,alimentazione,mediumtext DEFAULT NULL
+veicoli_bk,normativa,mediumtext DEFAULT NULL
+veicoli_bk,segmento,mediumtext DEFAULT NULL
+veicoli_bk,prezzo,float DEFAULT NULL
+veicoli_bk,categoria,int(11
+veicoli_imp,id,int(11
+veicoli_imp,id_prodotto,mediumtext NOT NULL
+veicoli_imp,codice,mediumtext DEFAULT NULL
+veicoli_imp,versione,mediumtext DEFAULT NULL
+veicoli_imp,marca,mediumtext DEFAULT NULL
+veicoli_imp,modello,mediumtext DEFAULT NULL
+veicoli_imp,tipo_carrozzeria,mediumtext DEFAULT NULL
+veicoli_imp,modello_jato,int(11
+veicoli_imp,generazione,int(11
+veicoli_imp,codice_costruttore,mediumtext DEFAULT NULL
+veicoli_imp,eurotax,mediumtext DEFAULT NULL
+veicoli_imp,cavalli,float DEFAULT NULL
+veicoli_imp,kw,float DEFAULT NULL
+veicoli_imp,cilindrata,int(11
+veicoli_imp,trasmissione,mediumtext DEFAULT NULL
+veicoli_imp,type,mediumtext DEFAULT NULL
+veicoli_imp,tipo_ibrido,mediumtext DEFAULT NULL
+veicoli_imp,cavalli_fiscali,float DEFAULT NULL
+veicoli_imp,disponibilita,mediumtext DEFAULT NULL
+veicoli_imp,attivo,mediumtext DEFAULT NULL
+veicoli_imp,anno,int(11
+veicoli_imp,porte,int(11
+veicoli_imp,alimentazione,mediumtext DEFAULT NULL
+veicoli_imp,normativa,mediumtext DEFAULT NULL
+veicoli_imp,segmento,mediumtext DEFAULT NULL
+veicoli_imp,prezzo,float DEFAULT NULL
+veicoli_imp,categoria,int(11
+veicoli_imp_old,id,int(11
+veicoli_imp_old,id_prodotto,mediumtext NOT NULL
+veicoli_imp_old,codice,mediumtext DEFAULT NULL
+veicoli_imp_old,versione,mediumtext DEFAULT NULL
+veicoli_imp_old,marca,mediumtext DEFAULT NULL
+veicoli_imp_old,modello,mediumtext DEFAULT NULL
+veicoli_imp_old,tipo_carrozzeria,mediumtext DEFAULT NULL
+veicoli_imp_old,modello_jato,int(11
+veicoli_imp_old,generazione,int(11
+veicoli_imp_old,codice_costruttore,mediumtext DEFAULT NULL
+veicoli_imp_old,eurotax,mediumtext DEFAULT NULL
+veicoli_imp_old,cavalli,float DEFAULT NULL
+veicoli_imp_old,kw,float DEFAULT NULL
+veicoli_imp_old,cilindrata,int(11
+veicoli_imp_old,trasmissione,mediumtext DEFAULT NULL
+veicoli_imp_old,type,mediumtext DEFAULT NULL
+veicoli_imp_old,tipo_ibrido,mediumtext DEFAULT NULL
+veicoli_imp_old,cavalli_fiscali,float DEFAULT NULL
+veicoli_imp_old,disponibilita,mediumtext DEFAULT NULL
+veicoli_imp_old,attivo,mediumtext DEFAULT NULL
+veicoli_imp_old,anno,int(11
+veicoli_imp_old,porte,int(11
+veicoli_imp_old,alimentazione,mediumtext DEFAULT NULL
+veicoli_imp_old,normativa,mediumtext DEFAULT NULL
+veicoli_imp_old,segmento,mediumtext DEFAULT NULL
+veicoli_imp_old,prezzo,float DEFAULT NULL
+veicoli_imp_old,categoria,int(11
+veicoli_offerte,id,int(11
+veicoli_offerte,marca,text NOT NULL
+veicoli_offerte,modello,text NOT NULL
+veicoli_offerte,versione,text NOT NULL
+veicoli_offerte,showcase,text NOT NULL
+veicoli_offerte,colore_esterno,text NOT NULL
+veicoli_offerte,colore_interno,text NOT NULL
+veicoli_offerte,optional,text NOT NULL
+veicoli_offerte,location,text NOT NULL
+veicoli_offerte,id_veicolo,text NOT NULL COMMENT 'pezzo di ferro'
+veicoli_offerte,stato_opzione,text NOT NULL COMMENT '0=lib
+veicoli_offerte,data_opzione,date DEFAULT NULL
+veicoli_offerte,stato_opzione2,text NOT NULL
+veicoli_offerte,targa,text NOT NULL
+veicoli_offerte,km,float NOT NULL
+veicoli_offerte,registration_date,date DEFAULT NULL COMMENT 'data previ
+veicoli_offerte,fuel,text NOT NULL
+veicoli_offerte,cambio,text NOT NULL
+veicoli_offerte,vendor,int(11
+veicoli_offerte,modello_jato,text NOT NULL
+veicoli_offerte,prezzo,float NOT NULL
+veicoli_offerte,categoria,int(11
+veicoli_offerte,veicolo_id_jato,text NOT NULL
+veicoli_offerte,agglomerato,int(11
+veicoli_offerte,caricamento,tinyint(4
+veicoli_offerte_agglomerati,liberi,decimal(22
+veicoli_offerte_old,id,int(11
+veicoli_offerte_old,marca,text NOT NULL
+veicoli_offerte_old,modello,text NOT NULL
+veicoli_offerte_old,versione,text NOT NULL
+veicoli_offerte_old,showcase,text NOT NULL
+veicoli_offerte_old,colore_esterno,text NOT NULL
+veicoli_offerte_old,colore_interno,text NOT NULL
+veicoli_offerte_old,optional,text NOT NULL
+veicoli_offerte_old,location,text NOT NULL
+veicoli_offerte_old,id_veicolo,text NOT NULL
+veicoli_offerte_old,stato_opzione,text NOT NULL
+veicoli_offerte_old,data_opzione,text NOT NULL
+veicoli_offerte_old,stato_opzione2,text NOT NULL
+veicoli_offerte_old,targa,text NOT NULL
+veicoli_offerte_old,km,float NOT NULL
+veicoli_offerte_old,registration_date,date NOT NULL
+veicoli_offerte_old,fuel,text NOT NULL
+veicoli_offerte_old,cambio,text NOT NULL
+veicoli_offerte_old,vendor,int(11
+veicoli_offerte_old,modello_jato,text NOT NULL
+veicoli_offerte_old,prezzo,float NOT NULL
+veicoli_offerte_old,categoria,int(11
+veicoli_offerte_old,veicolo_id_jato,text NOT NULL
+veicoli_offerte_old2,id,int(11
+veicoli_offerte_old2,marca,text NOT NULL
+veicoli_offerte_old2,modello,text NOT NULL
+veicoli_offerte_old2,versione,text NOT NULL
+veicoli_offerte_old2,showcase,text NOT NULL
+veicoli_offerte_old2,colore_esterno,text NOT NULL
+veicoli_offerte_old2,colore_interno,text NOT NULL
+veicoli_offerte_old2,optional,text NOT NULL
+veicoli_offerte_old2,location,text NOT NULL
+veicoli_offerte_old2,id_veicolo,text NOT NULL
+veicoli_offerte_old2,stato_opzione,text NOT NULL
+veicoli_offerte_old2,data_opzione,text NOT NULL
+veicoli_offerte_old2,stato_opzione2,text NOT NULL
+veicoli_offerte_old2,targa,text NOT NULL
+veicoli_offerte_old2,km,float NOT NULL
+veicoli_offerte_old2,registration_date,date NOT NULL
+veicoli_offerte_old2,fuel,text NOT NULL
+veicoli_offerte_old2,cambio,text NOT NULL
+veicoli_offerte_old2,vendor,int(11
+veicoli_offerte_old2,modello_jato,text NOT NULL
+veicoli_offerte_old2,prezzo,float NOT NULL
+veicoli_offerte_old2,categoria,int(11
+veicoli_offerte_old2,veicolo_id_jato,text NOT NULL
+veicoli_offerte_raggruppate,liberi,decimal(22
+veicoli_old,Id,int(11
+veicoli_old,codice,mediumtext DEFAULT NULL
+veicoli_old,versione,mediumtext DEFAULT NULL
+veicoli_old,marca,mediumtext DEFAULT NULL
+veicoli_old,modello,mediumtext DEFAULT NULL
+veicoli_old,tipo_carrozzeria,mediumtext DEFAULT NULL
+veicoli_old,modello_jato,int(11
+veicoli_old,generazione,int(11
+veicoli_old,codice_costruttore,mediumtext DEFAULT NULL
+veicoli_old,eurotax,mediumtext DEFAULT NULL
+veicoli_old,cavalli,float DEFAULT NULL
+veicoli_old,kw,float DEFAULT NULL
+veicoli_old,cilindrata,int(11
+veicoli_old,trasmissione,mediumtext DEFAULT NULL
+veicoli_old,type,mediumtext DEFAULT NULL
+veicoli_old,tipo_ibrido,mediumtext DEFAULT NULL
+veicoli_old,cavalli_fiscali,float DEFAULT NULL
+veicoli_old,disponibilita,mediumtext DEFAULT NULL
+veicoli_old,attivo,mediumtext DEFAULT NULL
+veicoli_old,anno,int(11
+veicoli_old,porte,int(11
+veicoli_old,alimentazione,mediumtext DEFAULT NULL
+veicoli_old,normativa,mediumtext DEFAULT NULL
+veicoli_old,segmento,mediumtext DEFAULT NULL
+veicoli_old,prezzo,float DEFAULT NULL
+veicoli_old,categoria,int(11
+vendor_partner,id,int(11
+vendor_partner,vendor,int(11
+vendor_partner,partner,int(11
+vendor_partner,note,text NOT NULL
+vo_a,id,int(11
+vo_a_q,liberi,decimal(22
+vo_a_q1,liberi,decimal(22
+vo_a_q1_app,id_quot,int(11
+vo_a_r,liberi,decimal(22
+vo_a_raggruppati,liberi,decimal(22
+vo_a_raggruppati_somme,disponibili,decimal(22
+vo_a_r_all,liberi,decimal(22
+_budget,budget.id,int(11
+_budget,budget.programmati,int(11
+_budget,budget.effettuati,int(11
+_budget,budget.trattative,int(11
+_budget,budget.documentzione,int(11
+_budget,budget.importo,int(11
+_budget,budget.data_inizio,datetime NOT NULL
+_budget,budget.data_fine,datetime NOT NULL
+_budget,budget.attivo,int(11
+_carico_utenti,id,int(11
+_check,id,int(11
+_check,data,date NOT NULL
+_check,consulente,longtext NOT NULL
+_check,id_consulente,int(11
+_check,npratiche,int(11
+_check,nclienti,int(11
+_check,ntrattative,int(11
+_check,pratiche,longtext NOT NULL
+_check,clienti,longtext NOT NULL
+_check,trattative,longtext NOT NULL
+_check,note,int(11
+_check_1,id,int(11
+_check_1,data,date NOT NULL
+_check_1,consulente,longtext NOT NULL
+_check_1,id_consulente,int(11
+_check_1,npratiche,int(11
+_check_1,nclienti,int(11
+_check_1,ntrattative,int(11
+_check_1,pratiche,longtext NOT NULL
+_check_1,clienti,longtext NOT NULL
+_check_1,trattative,longtext NOT NULL
+_check_1,note,int(11
+_con,id,int(11
+_con,stato_new,int(11
+_con,data,datetime NOT NULL
+_contratti-vista,id,int(11
+_dettagli_flow,dettagli_flow.id,int(11
+_dettagli_flow,dettagli_flow.nome,text NOT NULL
+_dettagli_flow,dettagli_flow.flow.id,bigint(15
+_dettagli_flow,dettagli_flow.passo,int(11
+_dettagli_flow,dettagli_flow.azione,longtext DEFAULT NULL
+_dettagli_flow,dettagli_flow.assegnatario,text CHARACTER 
+_dettagli_flow,dettagli_flow.scadenza,int(11
+_dettagli_flow,dettagli_flow.parametri,longtext NOT NULL COMMENT 'parametri 
+_dettagli_flow,dettagli_flow.note,longtext NOT NULL
+_dettagli_flow,dettagli_flow.priorita,int(11
+_dettagli_istanze,dettagli_istanze.id,int(11
+_dettagli_istanze,dettagli_istanze.istanze.id,int(11
+_dettagli_istanze,dettagli_istanze.id_gruppo,int(11
+_dettagli_istanze,dettagli_istanze.id_utente,int(11
+_dettagli_istanze,dettagli_istanze.data_ultimo,datetime NOT NULL
+_dettagli_istanze,dettagli_istanze.task_ultimo,int(11
+_dettagli_istanze,dettagli_istanze.id_trattativa,bigint(15
+_dettagli_istanze2,dettagli_istanze.id,int(11
+_dettagli_istanze2,dettagli_istanze.istanze.id,int(11
+_dettagli_istanze2,dettagli_istanze.id_gruppo,int(11
+_dettagli_istanze2,dettagli_istanze.id_utente,int(11
+_dettagli_istanze2,dettagli_istanze.data_ultimo,datetime NOT NULL
+_dettagli_istanze2,dettagli_istanze.task_ultimo,int(11
+_dettagli_istanze2,dettagli_istanze.id_trattativa,bigint(15
+_dettagli_istanze_1,dettagli_istanze.id,int(11
+_dettagli_istanze_1,dettagli_istanze.istanze.id,int(11
+_dettagli_istanze_1,dettagli_istanze.id_gruppo,int(11
+_dettagli_istanze_1,dettagli_istanze.id_utente,int(11
+_dettagli_istanze_1,dettagli_istanze.data_ultimo,datetime NOT NULL
+_dettagli_istanze_1,dettagli_istanze.task_ultimo,int(11
+_dettagli_istanze_1,dettagli_istanze.id_trattativa,bigint(15
+_di_distanza_da_oggi,dettagli_istanze.id,int(11
+_doc,id,int(11
+_doc,tipologia_doc_new,int(11
+_documenti,documenti.id,int(11
+_documenti,documenti.id_cliente,int(11
+_documenti,documenti.tipologia_doc,text NOT NULL
+_documenti,documenti.ricevuto,int(11
+_documenti,documenti.scannerizzato,int(11
+_documenti,documenti.approvato,int(11
+_documenti,documenti.data_caricamento,datetime NOT NULL
+_documenti,documenti.data_di_scadenza,date NOT NULL
+_documenti,documenti.note,text CHARACTER 
+_documenti,documenti.import,int(11
+_documenti2,id,int(11
+_documenti3,documenti.id,int(11
+_documenti3,documenti.id_cliente,int(11
+_documenti3,documenti.tipologia_doc,text NOT NULL
+_documenti3,documenti.ricevuto,int(11
+_documenti3,documenti.scannerizzato,int(11
+_documenti3,documenti.approvato,int(11
+_documenti3,documenti.data_caricamento,datetime NOT NULL
+_documenti3,documenti.data_di_scadenza,date NOT NULL
+_documenti3,documenti.note,text CHARACTER 
+_documenti3,documenti.import,int(11
+_documenti_old,documenti.id,int(11
+_documenti_old,documenti.id_cliente,int(11
+_documenti_old,documenti.tipologia_doc,text NOT NULL
+_documenti_old,documenti.ricevuto,int(11
+_documenti_old,documenti.scannerizzato,int(11
+_documenti_old,documenti.approvato,int(11
+_documenti_old,documenti.data_caricamento,datetime NOT NULL
+_documenti_old,documenti.data_di_scadenza,date NOT NULL
+_documenti_old,documenti.note,text CHARACTER 
+_documenti_old,documenti.import,int(11
+_documenti_vendor,id,int(11
+_documenti_vendor,id_documento,int(11
+_documenti_vendor,id_vendor,int(11
+_documenti_vendor,tipo_societa,int(11
+_documenti_vendor,obbligatorio,int(11
+_documenti_vendor,id_documento_old,int(11
+_documenti_vendor,note,text NOT NULL
+_documenti_vendor_old,id,int(11
+_documenti_vendor_old,id_documento,int(11
+_documenti_vendor_old,id_vendor,int(11
+_documenti_vendor_old,tipo_societa,int(11
+_documenti_vendor_old,obbligatorio,int(11
+_documenti_vendor_old,note,text NOT NULL
+_doc_completi,id,int(11
+_doc_obbl,id,int(11
+_events_notr,cliente,text
+_events_notr-vista,id_cliente,text
+_flow,flow.id,bigint(11
+_flow,flow.nome,text NOT NULL
+_flow,flow.responsabile,int(11
+_flow,flow.note,text NOT NULL
+_flow,flow.attivo,int(11
+_gruppi,id,int(11
+_gruppi,nome,text NOT NULL
+_gruppi,descrizione,longtext NOT NULL
+_gruppi,attivo,int(11
+_istanze,istanze.id,int(11
+_istanze,istanze.flow.id,int(11
+_istanze,istanze.attivo,int(11
+_istanze,istanze.max_passo_assegnato,int(11
+_istanze,istanze.data_max_passo,datetime DEFAULT NULL
+_istanze,istanze.cliente.id,int(11
+_istanze,istanze.id_trattativa,bigint(15
+_istanze,istanze.istanza_master,int(11
+_istanze,istanze.ultimo_aggiornamento,datetime DEFAULT NULL
+_istanze,istanze.id_utente_ultimo_aggiornamento,bigint(15
+_istanze,istanze.categoria,text NOT NULL COMMENT '
+_istanze,istanze.pratica.id,bigint(15
+_istanze,istanze.rent.id,bigint(15
+_istanze,istanze.id_df_max_passo,int(11
+_istanze,istanze.note,text NOT NULL COMMENT '
+_istanze,istanze.data_inserimento,datetime DEFAULT NULL
+_istanze,istanze.note_max_passo,text NOT NULL
+_istanze,istanze.note_max_agg,text NOT NULL
+_istanze2,istanze.id,int(11
+_istanze2,istanze.flow.id,int(11
+_istanze2,istanze.attivo,int(11
+_istanze2,istanze.max_passo_assegnato,int(11
+_istanze2,istanze.data_max_passo,datetime DEFAULT NULL
+_istanze2,istanze.cliente.id,int(11
+_istanze2,istanze.id_trattativa,bigint(15
+_istanze2,istanze.istanza_master,int(11
+_istanze2,istanze.ultimo_aggiornamento,datetime DEFAULT NULL
+_istanze2,istanze.id_utente_ultimo_aggiornamento,bigint(15
+_istanze2,istanze.categoria,text NOT NULL COMMENT '
+_istanze2,istanze.pratica.id,bigint(15
+_istanze2,istanze.rent.id,bigint(15
+_istanze2,istanze.id_df_max_passo,int(11
+_istanze2,istanze.note,text NOT NULL COMMENT '
+_istanze2,istanze.data_inserimento,datetime DEFAULT NULL
+_istanze22,istanze.id,int(11
+_istanze22,istanze.flow.id,int(11
+_istanze22,istanze.attivo,int(11
+_istanze22,istanze.max_passo_assegnato,int(11
+_istanze22,istanze.data_max_passo,datetime DEFAULT NULL
+_istanze22,istanze.cliente.id,int(11
+_istanze22,istanze.id_trattativa,bigint(15
+_istanze22,istanze.istanza_master,int(11
+_istanze22,istanze.ultimo_aggiornamento,datetime DEFAULT NULL
+_istanze22,istanze.id_utente_ultimo_aggiornamento,bigint(15
+_istanze22,istanze.categoria,text NOT NULL COMMENT '
+_istanze22,istanze.pratica.id,bigint(15
+_istanze22,istanze.rent.id,bigint(15
+_istanze22,istanze.id_df_max_passo,int(11
+_istanze22,istanze.note,text NOT NULL COMMENT '
+_istanze22,istanze.data_inserimento,datetime DEFAULT NULL
+_istanze_1,istanze.id,int(11
+_istanze_1,istanze.flow.id,int(11
+_istanze_1,istanze.attivo,int(11
+_istanze_1,istanze.max_passo_assegnato,int(11
+_istanze_1,istanze.data_max_passo,datetime DEFAULT NULL
+_istanze_1,istanze.cliente.id,int(11
+_istanze_1,istanze.id_trattativa,bigint(15
+_istanze_1,istanze.istanza_master,int(11
+_istanze_1,istanze.ultimo_aggiornamento,datetime DEFAULT NULL
+_istanze_1,istanze.id_utente_ultimo_aggiornamento,bigint(15
+_istanze_1,istanze.categoria,text NOT NULL COMMENT '
+_istanze_1,istanze.pratica.id,bigint(15
+_istanze_1,istanze.rent.id,bigint(15
+_istanze_1,istanze.id_df_max_passo,int(11
+_istanze_1,istanze.note,text NOT NULL COMMENT '
+_istanze_1,istanze.data_inserimento,datetime DEFAULT NULL
+_istanze_consulente,id_consulente,int(11
+_istanze_distanza_da_oggi,istanze.id,int(11
+_istanze_distanza_da_oggi_rag,istanze.id,int(11
+_istanze_task_max_passo,istanze.id,int(11
+_istanze_task_passo1,task.id,int(11
+_lavorabili,id,int(11
+_max_passo_istanze,task.id,int(11
+_max_passo_istanze_completo,task.id,int(11
+_max_passo_trattativa,task.id,int(11
+_ord,id,int(11
+_ord,stato_new,int(11
+_ord,data,datetime NOT NULL
+_ordini-vista,id,int(11
+_ordini_anno,id_cliente,int(11
+_pra,id,int(11
+_pra,stato_new,int(11
+_pra,data,datetime NOT NULL
+_pratiche,pratiche.id,int(11
+_pratiche,pratiche.id_trattativa,int(11
+_pratiche,pratiche.tipo_noleggio,int(11
+_pratiche,pratiche.id_cliente,int(11
+_pratiche,pratiche.data_caricamento,date NOT NULL
+_pratiche,pratiche.data_richiesta_fido,date NOT NULL
+_pratiche,pratiche.data_esito,date NOT NULL
+_pratiche,pratiche.scadenza_plafond,date NOT NULL
+_pratiche,pratiche.esito,int(11
+_pratiche,pratiche.societa_noleggio,int(11
+_pratiche,pratiche.linea_di_credito,text NOT NULL
+_pratiche,pratiche.plafond_richiesto,float NOT NULL
+_pratiche,pratiche.note,text CHARACTER 
+_pratiche,pratiche.id_utente,int(11
+_pratiche,pratiche.import,int(11
+_pratiche-vendor,id,int(11
+_pratiche-vista,id,int(11
+_pratiche_1,pratiche.id,int(11
+_pratiche_1,pratiche.id_trattativa,int(11
+_pratiche_1,pratiche.tipo_noleggio,int(11
+_pratiche_1,pratiche.id_cliente,int(11
+_pratiche_1,pratiche.data_caricamento,date NOT NULL
+_pratiche_1,pratiche.data_richiesta_fido,date NOT NULL
+_pratiche_1,pratiche.data_esito,date NOT NULL
+_pratiche_1,pratiche.scadenza_plafond,date NOT NULL
+_pratiche_1,pratiche.esito,int(11
+_pratiche_1,pratiche.societa_noleggio,int(11
+_pratiche_1,pratiche.linea_di_credito,text NOT NULL
+_pratiche_1,pratiche.plafond_richiesto,float NOT NULL
+_pratiche_1,pratiche.note,text CHARACTER 
+_pratiche_1,pratiche.id_utente,int(11
+_pratiche_1,pratiche.import,int(11
+_pratiche_lavorabili_luigi,id,int(11
+_quo,id,int(11
+_quo,id_pratica,int(11
+_quo,id_vendor,int(11
+_quotazioni,quotazioni.id,int(11
+_quotazioni,quotazioni.id_utente,int(11
+_quotazioni,quotazioni.id_trattativa,int(11
+_quotazioni,quotazioni.id_pratica,int(11
+_quotazioni,quotazioni.id_cliente,int(11
+_quotazioni,quotazioni.id_richiesta,int(11
+_quotazioni,quotazioni.data_ora,time
+_quotazioni,quotazioni.data_richiesta,datetime NOT NULL
+_quotazioni,quotazioni.data_esito,datetime NOT NULL
+_quotazioni,quotazioni.data_ricezione_rent,datetime NOT NULL
+_quotazioni,quotazioni.vendor,varchar(80
+_quotazioni,quotazioni.nome_file,varchar(50
+_quotazioni,quotazioni.note,text NOT NULL
+_quotazioni,quotazioni.interessato_a,varchar(70
+_quotazioni,quotazioni.spesa_mensile,varchar(30
+_quotazioni,quotazioni.marca,varchar(40
+_quotazioni,quotazioni.modello,varchar(50
+_quotazioni,quotazioni.versione,varchar(50
+_quotazioni,quotazioni.km_anno,varchar(30
+_quotazioni,quotazioni.durata,varchar(50
+_quotazioni,quotazioni.optional,varchar(50
+_quotazioni,quotazioni.colore,varchar(70
+_quotazioni,quotazioni.pneumatici_inv,varchar(10
+_quotazioni,quotazioni.pneumatici_est,varchar(10
+_quotazioni,quotazioni.sostitutiva,varchar(50
+_quotazioni,quotazioni.valutazione_pronta_consegna,varchar(50
+_quotazioni,quotazioni.preassegnazione,varchar(50
+_quotazioni,quotazioni.manutenzione,varchar(50
+_quotazioni,quotazioni.vr67,int(11
+_quotazioni,quotazioni.autonostop,int(11
+_quotazioni,quotazioni.provvigione,varchar(40
+_quotazioni,quotazioni.provvigione_ottenuta,varchar(40
+_quotazioni,quotazioni.tipologia_richiesta,tinyint(4
+_quotazioni,quotazioni.stato,tinyint(2
+_quotazioni,quotazioni.spesa_mensile_desiderata,varchar(30
+_quotazioni,quotazioni.tipo_anticipo,int(11
+_quotazioni,quotazioni.valore_anticipo,float NOT NULL
+_quotazioni,quotazioni.tipo_deposito,int(11
+_quotazioni,quotazioni.valore_deposito,float NOT NULL
+_quotazioni,quotazioni.n_simulazione,text NOT NULL
+_quotazioni,quotazioni.n_preventivo,text NOT NULL
+_quotazioni,quotazioni.num_rif_pronta_consegna,text NOT NULL
+_quotazioni,quotazioni.import,int(11
+_quotazioni_1,quotazioni.id,int(11
+_quotazioni_1,quotazioni.id_utente,int(11
+_quotazioni_1,quotazioni.id_trattativa,int(11
+_quotazioni_1,quotazioni.id_pratica,int(11
+_quotazioni_1,quotazioni.id_cliente,int(11
+_quotazioni_1,quotazioni.id_richiesta,int(11
+_quotazioni_1,quotazioni.data_ora,time
+_quotazioni_1,quotazioni.data_richiesta,datetime NOT NULL
+_quotazioni_1,quotazioni.data_esito,datetime NOT NULL
+_quotazioni_1,quotazioni.data_ricezione_rent,datetime NOT NULL
+_quotazioni_1,quotazioni.vendor,varchar(80
+_quotazioni_1,quotazioni.nome_file,varchar(50
+_quotazioni_1,quotazioni.note,text NOT NULL
+_quotazioni_1,quotazioni.interessato_a,varchar(70
+_quotazioni_1,quotazioni.spesa_mensile,varchar(30
+_quotazioni_1,quotazioni.marca,varchar(40
+_quotazioni_1,quotazioni.modello,varchar(50
+_quotazioni_1,quotazioni.versione,varchar(50
+_quotazioni_1,quotazioni.km_anno,varchar(30
+_quotazioni_1,quotazioni.durata,varchar(50
+_quotazioni_1,quotazioni.optional,varchar(50
+_quotazioni_1,quotazioni.colore,varchar(70
+_quotazioni_1,quotazioni.pneumatici_inv,varchar(10
+_quotazioni_1,quotazioni.pneumatici_est,varchar(10
+_quotazioni_1,quotazioni.sostitutiva,varchar(50
+_quotazioni_1,quotazioni.valutazione_pronta_consegna,varchar(50
+_quotazioni_1,quotazioni.preassegnazione,varchar(50
+_quotazioni_1,quotazioni.manutenzione,varchar(50
+_quotazioni_1,quotazioni.vr67,int(11
+_quotazioni_1,quotazioni.autonostop,int(11
+_quotazioni_1,quotazioni.provvigione,varchar(40
+_quotazioni_1,quotazioni.provvigione_ottenuta,varchar(40
+_quotazioni_1,quotazioni.tipologia_richiesta,tinyint(4
+_quotazioni_1,quotazioni.stato,tinyint(2
+_quotazioni_1,quotazioni.spesa_mensile_desiderata,varchar(30
+_quotazioni_1,quotazioni.tipo_anticipo,int(11
+_quotazioni_1,quotazioni.valore_anticipo,float NOT NULL
+_quotazioni_1,quotazioni.tipo_deposito,int(11
+_quotazioni_1,quotazioni.valore_deposito,float NOT NULL
+_quotazioni_1,quotazioni.n_simulazione,text NOT NULL
+_quotazioni_1,quotazioni.n_preventivo,text NOT NULL
+_quotazioni_1,quotazioni.num_rif_pronta_consegna,text NOT NULL
+_quotazioni_1,quotazioni.import,int(11
+_ric,id,int(11
+_ric,stato_new,int(11
+_ric,data,datetime NOT NULL
+_ric-vista,id,int(11
+_richieste,richieste.id,int(11
+_richieste,richieste.id_cliente,int(11
+_richieste,richieste.id_consulente,int(11
+_richieste,richieste.ragione_sociale,varchar(70
+_richieste,richieste.telefono,varchar(50
+_richieste,richieste.telefono2,varchar(50
+_richieste,richieste.forma_giuridica,varchar(30
+_richieste,richieste.indirizzo,varchar(70
+_richieste,richieste.comune,varchar(50
+_richieste,richieste.provincia,varchar(30
+_richieste,richieste.cap,varchar(10
+_richieste,richieste.partita_iva,varchar(20
+_richieste,richieste.codice_fiscale,varchar(20
+_richieste,richieste.referente,varchar(70
+_richieste,richieste.tel_referente,varchar(50
+_richieste,richieste.email,varchar(50
+_richieste,richieste.pec,varchar(50
+_richieste,richieste.iban,varchar(40
+_richieste,richieste.vendor,int(11
+_richieste,richieste.interessato_a,varchar(70
+_richieste,richieste.spesa_mensile,varchar(30
+_richieste,richieste.marca,varchar(40
+_richieste,richieste.modello,varchar(50
+_richieste,richieste.versione,varchar(50
+_richieste,richieste.km_anno,varchar(30
+_richieste,richieste.durata,varchar(50
+_richieste,richieste.optional,varchar(50
+_richieste,richieste.colore,varchar(70
+_richieste,richieste.pneumatici_inv,varchar(10
+_richieste,richieste.pneumatici_est,varchar(10
+_richieste,richieste.sostitutiva,varchar(50
+_richieste,richieste.valutazione_pronta_consegna,varchar(50
+_richieste,richieste.preassegnazione,varchar(50
+_richieste,richieste.manutenzione,varchar(50
+_richieste,richieste.vr67,int(11
+_richieste,richieste.autonostop,int(11
+_richieste,richieste.provvigione,varchar(40
+_richieste,richieste.note,varchar(300
+_richieste,richieste.data_ora,time
+_richieste,richieste.stato,tinyint(4
+_richieste,richieste.tipologia_richiesta,tinyint(1
+_richieste,richieste.tipo_anticipo,int(11
+_richieste,richieste.valore_anticipo,float NOT NULL
+_richieste,richieste.tipo_deposito,int(11
+_richieste,richieste.valore_deposito,float NOT NULL
+_richieste,richieste.import,int(11
+_richieste_1,richieste.id,int(11
+_richieste_1,richieste.id_cliente,int(11
+_richieste_1,richieste.id_consulente,int(11
+_richieste_1,richieste.ragione_sociale,varchar(70
+_richieste_1,richieste.telefono,varchar(50
+_richieste_1,richieste.telefono2,varchar(50
+_richieste_1,richieste.forma_giuridica,varchar(30
+_richieste_1,richieste.indirizzo,varchar(70
+_richieste_1,richieste.comune,varchar(50
+_richieste_1,richieste.provincia,varchar(30
+_richieste_1,richieste.cap,varchar(10
+_richieste_1,richieste.partita_iva,varchar(20
+_richieste_1,richieste.codice_fiscale,varchar(20
+_richieste_1,richieste.referente,varchar(70
+_richieste_1,richieste.tel_referente,varchar(50
+_richieste_1,richieste.email,varchar(50
+_richieste_1,richieste.pec,varchar(50
+_richieste_1,richieste.iban,varchar(40
+_richieste_1,richieste.vendor,int(11
+_richieste_1,richieste.interessato_a,varchar(70
+_richieste_1,richieste.spesa_mensile,varchar(30
+_richieste_1,richieste.marca,varchar(40
+_richieste_1,richieste.modello,varchar(50
+_richieste_1,richieste.versione,varchar(50
+_richieste_1,richieste.km_anno,varchar(30
+_richieste_1,richieste.durata,varchar(50
+_richieste_1,richieste.optional,varchar(50
+_richieste_1,richieste.colore,varchar(70
+_richieste_1,richieste.pneumatici_inv,varchar(10
+_richieste_1,richieste.pneumatici_est,varchar(10
+_richieste_1,richieste.sostitutiva,varchar(50
+_richieste_1,richieste.valutazione_pronta_consegna,varchar(50
+_richieste_1,richieste.preassegnazione,varchar(50
+_richieste_1,richieste.manutenzione,varchar(50
+_richieste_1,richieste.vr67,int(11
+_richieste_1,richieste.autonostop,int(11
+_richieste_1,richieste.provvigione,varchar(40
+_richieste_1,richieste.note,varchar(300
+_richieste_1,richieste.data_ora,time
+_richieste_1,richieste.stato,tinyint(4
+_richieste_1,richieste.tipologia_richiesta,tinyint(1
+_richieste_1,richieste.tipo_anticipo,int(11
+_richieste_1,richieste.valore_anticipo,float NOT NULL
+_richieste_1,richieste.tipo_deposito,int(11
+_richieste_1,richieste.valore_deposito,float NOT NULL
+_richieste_1,richieste.import,int(11
+_riepiloghi,riepiloghi.id_cliente,int(11
+_riepiloghi,riepiloghi.documentazione,text DEFAULT NULL
+_riepiloghi,riepiloghi.trattative_aperte,longtext DEFAULT NULL
+_riepiloghi,riepiloghi.trattative_chiuse,longtext DEFAULT NULL
+_riepiloghi,riepiloghi.ordini,int(11
+_riepiloghi,riepiloghi.ultimo_aggiornamento,datetime NOT NULL
+_riepiloghi,riepiloghi.note,longtext NOT NULL
+_riepiloghi,riepiloghi.operatore,int(11
+_riepiloghi-vista,riepiloghi.id_cliente,int(11
+_riepiloghi_tot_ordini,riepiloghi.id_cliente,int(11
+_rik,id_richiesta,int(11
+_rik,id_pratica,int(11
+_rik,note,longtext NOT NULL
+_rik,id_ordine,int(11
+_routing_notr_noord,id,int(11
+_routing_notr_ord,id,int(11
+_routing_nuovi,ID,int(10
+_routing_tr_doc_noord,id,int(11
+_routing_tr_doc_ord,id,int(11
+_routing_tr_nodoc,id,int(11
+_target,target.id,int(11
+_target,target.consulente.id,int(11
+_target,target.data,datetime NOT NULL
+_target,target.settimana,int(11
+_target,target.programmati,int(11
+_target,target.effettuati,int(11
+_target,target.trattative,int(11
+_target,target.documentazioni,int(11
+_target,target.importo,float NOT NULL DEFAULT 0
+_target,target.pr.check,int(11
+_target,target.ef.check,int(11
+_target,target.tr.check,int(11
+_target,target.do.check,int(11
+_task,task.id,int(11
+_task,task.nome,text NOT NULL
+_task,task.flow.id,int(11
+_task,task.dettagli_flow.id,int(11
+_task,task.cliente.id,int(11
+_task,task.trattativa.id,int(11
+_task,task.pratica.id,int(11
+_task,task.data_inserimento,datetime NOT NULL
+_task,task.data_scadenza,datetime NOT NULL
+_task,task.assegnante,text NOT NULL
+_task,task.assegnatario,text NOT NULL
+_task,task.note,text NOT NULL
+_task,task.priorita,int(11
+_task,task.stato,int(11
+_task,task.next,int(11
+_task,task.previous,int(11
+_task,task.durata,int(11
+_task,task.data_scadenza_originale,datetime DEFAULT NULL
+_task,task.data_presa_in_carico,datetime DEFAULT NULL
+_task,task.data_completamento,datetime DEFAULT NULL
+_task,task.id_utente_presa_in_carico,int(11
+_task,task.esito_azione,text DEFAULT NULL
+_task,task.istanze.id,int(11
+_task,task.passo,int(11
+_task,task.letto,int(11
+_task2,task.id,int(11
+_task2,task.nome,text NOT NULL
+_task2,task.flow.id,int(11
+_task2,task.dettagli_flow.id,int(11
+_task2,task.cliente.id,int(11
+_task2,task.trattativa.id,int(11
+_task2,task.pratica.id,int(11
+_task2,task.data_inserimento,datetime NOT NULL
+_task2,task.data_scadenza,datetime NOT NULL
+_task2,task.assegnante,text NOT NULL
+_task2,task.assegnatario,text NOT NULL
+_task2,task.note,text NOT NULL
+_task2,task.priorita,int(11
+_task2,task.stato,int(11
+_task2,task.next,int(11
+_task2,task.previous,int(11
+_task2,task.durata,int(11
+_task2,task.data_scadenza_originale,datetime DEFAULT NULL
+_task2,task.data_presa_in_carico,datetime DEFAULT NULL
+_task2,task.data_completamento,datetime DEFAULT NULL
+_task2,task.id_utente_presa_in_carico,int(11
+_task2,task.esito_azione,text DEFAULT NULL
+_task2,task.istanze.id,int(11
+_task2,task.passo,int(11
+_task2,task.letto,int(11
+_task_1,task.id,int(11
+_task_1,task.nome,text NOT NULL
+_task_1,task.flow.id,int(11
+_task_1,task.dettagli_flow.id,int(11
+_task_1,task.cliente.id,int(11
+_task_1,task.trattativa.id,int(11
+_task_1,task.pratica.id,int(11
+_task_1,task.data_inserimento,datetime NOT NULL
+_task_1,task.data_scadenza,datetime NOT NULL
+_task_1,task.assegnante,text NOT NULL
+_task_1,task.assegnatario,text NOT NULL
+_task_1,task.note,text NOT NULL
+_task_1,task.priorita,int(11
+_task_1,task.stato,int(11
+_task_1,task.next,int(11
+_task_1,task.previous,int(11
+_task_1,task.durata,int(11
+_task_1,task.data_scadenza_originale,datetime DEFAULT NULL
+_task_1,task.data_presa_in_carico,datetime DEFAULT NULL
+_task_1,task.data_completamento,datetime DEFAULT NULL
+_task_1,task.id_utente_presa_in_carico,int(11
+_task_1,task.esito_azione,text DEFAULT NULL
+_task_1,task.istanze.id,int(11
+_task_1,task.passo,int(11
+_task_1,task.letto,int(11
+_task_distanze,task.id,int(11
+_task_distanze_completo,task.id,int(11
+_task_distanze_completo_new,task.id,int(11
+_task_distanze_completo_new0,task.id,int(11
+_task_distanze_completo_new2,task.id,int(11
+_task_distanze_ore,task.id,int(11
+_task_old,task.id,int(11
+_task_old,task.nome,text NOT NULL
+_task_old,task.flow.id,int(11
+_task_old,task.dettagli_flow.id,int(11
+_task_old,task.cliente.id,int(11
+_task_old,task.trattativa.id,int(11
+_task_old,task.pratica.id,int(11
+_task_old,task.data_inserimento,datetime NOT NULL
+_task_old,task.data_scadenza,datetime NOT NULL
+_task_old,task.assegnante,text NOT NULL
+_task_old,task.assegnatario,text NOT NULL
+_task_old,task.note,text NOT NULL
+_task_old,task.priorita,int(11
+_task_old,task.stato,int(11
+_task_old,task.next,int(11
+_task_old,task.previous,int(11
+_task_old,task.durata,int(11
+_task_old,task.data_scadenza_originale,datetime DEFAULT NULL
+_task_old,task.data_presa_in_carico,datetime DEFAULT NULL
+_task_old,task.data_completamento,datetime DEFAULT NULL
+_task_old,task.id_utente_presa_in_carico,int(11
+_task_old,task.esito_azione,text DEFAULT NULL
+_task_old,task.istanze.id,int(11
+_task_old,task.passo,int(11
+_task_old,task.letto,int(11
+_tipologia_documenti,id,int(11
+_tipologia_documenti,tipo_documento,text NOT NULL
+_tipologia_documenti,note,text NOT NULL
+_tipologia_documenti,attivo,int(11
+_tipologia_documenti,obbligatorio,int(11
+_tipologia_documenti,valido_solo,text DEFAULT NULL
+_tipologia_documenti,escluso,text DEFAULT NULL
+_tipologia_doc_nuova,id_documento_old,int(11
+_trattativa_da_lavorare_per_consulente,id_consulente,int(11
+_trattative,trattative.id,int(11
+_trattative,trattative.id_cliente,int(11
+_trattative,trattative.id_consulente,int(11
+_trattative,trattative.id_appuntamento,int(11
+_trattative,trattative.avanzamento,int(11
+_trattative,trattative.voto,int(11
+_trattative,trattative.tipo_noleggio,int(11
+_trattative,trattative.stato,int(11
+_trattative,trattative.note,text CHARACTER 
+_trattative,trattative.data_ultimo_log,datetime NOT NULL
+_trattative,trattative.data_trattativa,datetime NOT NULL
+_trattative,trattative.data_fine_trattativa,date NOT NULL
+_trattative,trattative.provenienza,int(11
+_trattative-vista,id,int(11
+_trattative_2,trattative.id,int(11
+_trattative_2,trattative.id_cliente,int(11
+_trattative_2,trattative.id_consulente,int(11
+_trattative_2,trattative.id_appuntamento,int(11
+_trattative_2,trattative.avanzamento,int(11
+_trattative_2,trattative.voto,int(11
+_trattative_2,trattative.tipo_noleggio,int(11
+_trattative_2,trattative.stato,int(11
+_trattative_2,trattative.note,text CHARACTER 
+_trattative_2,trattative.data_ultimo_log,datetime NOT NULL
+_trattative_2,trattative.data_trattativa,datetime NOT NULL
+_trattative_2,trattative.data_fine_trattativa,date NOT NULL
+_trattative_2,trattative.provenienza,int(11
+_trattative_da_lavorare,id,int(11
+_trattative_istanze,nominativo,text
+_trattative_lavorabili_luigi,id,int(11
+_trattative_pratiche_,id,int(11
+_trattative_pratiche_completo,id,int(11
+_trattative_v,id,int(11
+_utenti_gruppi,id,int(11
+_utenti_gruppi,id_gruppo,int(11
+_utenti_gruppi,id_utente,int(11
+_utenti_gruppi3,id,int(11
+_utenti_gruppi3,id_utente,int(11
+_utenti_gruppi3,id_gruppo,int(11
+_utenti_per_flow,id,int(11
+__clienti_assegnati_com,contatti.utente.id,int(11

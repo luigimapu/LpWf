@@ -1,0 +1,49 @@
+Candidates by keyword:
+\n# clienti
+\n# cliente
+cliente
+\n# client
+\n# customer
+\n# fornitori
+\n# fornit
+\n# contatti
+contatti
+\n# contatto
+\n# anagraf
+\n# articoli
+\n# articolo
+\n# prodotti
+prodotti
+\n# prodotto
+\n# documenti
+documenti
+\n# documento
+\n# fattur
+\n# fatture
+\n# ordini
+ordini
+ordini-vista
+\n# ordine
+\n# pagamenti
+pagamenti
+\n# pagamento
+\n# contrat
+\n# contratti
+contratti
+\n# ticket
+\n# persona
+persona
+\n# anagra
+anagrafiche
+anagrafiche2
+anagrafiche_da_vecchio
+anagrafiche_luigi
+anagrafiche_o
+anagrafiche_old
+anagrafiche_old2
+anagrafiche_old24062016
+anagrafiche_progetti
+anagrafiche_progetti_luigi
+anagrafiche_progetti_o
+documenti_mancanti_anagrafiche
+importa_anagrafiche
