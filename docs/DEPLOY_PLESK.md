@@ -63,6 +63,7 @@ Repository Settings → Secrets → Actions → New repository secret
 - `SSH_PORT` = `22`
 - `SSH_USER` = `root`
 - `SSH_KEY` = contenuto di `~/.ssh/lpwf_deploy` (chiave privata ED25519)
+- (in alternativa) `SSH_KEY_B64` = la stessa chiave privata ma codificata in base64 (comodo per evitare problemi di newline)
 - `DEPLOY_PATH_STAGING` = `/var/www/vhosts/lprent.it/httpdocs/LpWf_staging`
 - `DEPLOY_PATH_PROD` = `/var/www/vhosts/lprent.it/httpdocs/LpWF_refactor`
 - `PHP_BIN` = `/opt/plesk/php/8.3/bin/php`
@@ -77,6 +78,16 @@ cat known_hosts
 
 Incolla il contenuto nel secret `SSH_KNOWN_HOSTS`. Così evitiamo `StrictHostKeyChecking=no`.
 
+Se preferisci usare `SSH_KEY_B64` (base64)
+```bash
+# Linux/macOS
+base64 -w 0 ~/.ssh/lpwf_deploy > lpwf_key.b64
+
+# Windows PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.ssh\lpwf_deploy"))
+```
+Incolla il risultato nel secret `SSH_KEY_B64`. Il workflow decodificherà la chiave e la caricherà nell'agent.
+
 ### Step 3 — Workflow
 
 Il file `.github/workflows/deploy.yml` è già in repo e:
@@ -86,6 +97,7 @@ Il file `.github/workflows/deploy.yml` è già in repo e:
 - Esegue post-deploy:
     - `${PHP_BIN} tools/setup_hub_db.php`
     - `${PHP_BIN} tools/setup_tenant_db.php`
+ - Valida la presenza dei secrets richiesti e fallisce subito se mancanti (incluso `SSH_KEY` o `SSH_KEY_B64`).
 
 Puoi anche lanciare manualmente il deploy da GitHub → Actions → Deploy → Run workflow scegliendo `staging` o `production`.
 
