@@ -97,6 +97,7 @@ Il file `.github/workflows/deploy.yml` è già in repo e:
 - Esegue post-deploy:
     - `${PHP_BIN} tools/setup_hub_db.php`
     - `${PHP_BIN} tools/setup_tenant_db.php`
+ - Valida la presenza dei secrets richiesti e fallisce subito se mancanti (incluso `SSH_KEY` o `SSH_KEY_B64`).
 
 Puoi anche lanciare manualmente il deploy da GitHub → Actions → Deploy → Run workflow scegliendo `staging` o `production`.
 
