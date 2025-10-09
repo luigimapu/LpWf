@@ -51,6 +51,32 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+            
+            - name: Validate required secrets
+              run: |
+                  missing=()
+                  require() { [ -n "$1" ] || missing+=("$2"); }
+
+                  # Almeno uno tra SSH_KEY_B64 o SSH_KEY
+                  if [ -z "${{ secrets.SSH_KEY_B64 }}" ] && [ -z "${{ secrets.SSH_KEY }}" ]; then
+                    missing+=("SSH_KEY_B64 or SSH_KEY")
+                  fi
+
+                  require "${{ secrets.SSH_USER }}" "SSH_USER"
+                  require "${{ secrets.SSH_PORT }}" "SSH_PORT"
+                  require "${{ secrets.SSH_HOST_STAGING }}" "SSH_HOST_STAGING"
+                  require "${{ secrets.SSH_HOST_PROD }}" "SSH_HOST_PROD"
+                  require "${{ secrets.DEPLOY_PATH_STAGING }}" "DEPLOY_PATH_STAGING"
+                  require "${{ secrets.DEPLOY_PATH_PROD }}" "DEPLOY_PATH_PROD"
+                  require "${{ secrets.PHP_BIN }}" "PHP_BIN"
+
+                  if [ "${#missing[@]}" -gt 0 ]; then
+                    echo "ERROR: Missing required secrets:" >&2
+                    for k in "${missing[@]}"; do echo " - $k" >&2; done
+                    exit 1
+                  else
+                    echo "All required secrets are present."
+                  fi
 
             - name: Set target based on branch
               run: |
@@ -69,10 +95,23 @@ jobs:
                     echo "TARGET_PATH=${{ secrets.DEPLOY_PATH_PROD }}" >> $GITHUB_ENV
                   fi
 
-            - name: Add SSH key
-              uses: webfactory/ssh-agent@v0.9.0
-              with:
-                  ssh-private-key: ${{ secrets.SSH_KEY }}
+            - name: Prepare SSH key (SSH_KEY_B64 or SSH_KEY)
+              run: |
+                  mkdir -p ~/.ssh
+                  if [ -n "${{ secrets.SSH_KEY_B64 }}" ]; then
+                    echo "Using SSH_KEY_B64"
+                    echo "${{ secrets.SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
+                  elif [ -n "${{ secrets.SSH_KEY }}" ]; then
+                    echo "Using SSH_KEY"
+                    printf '%s' "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+                  else
+                    echo "ERROR: Provide either SSH_KEY_B64 or SSH_KEY in repo Secrets" >&2
+                    exit 1
+                  fi
+                  chmod 600 ~/.ssh/deploy_key
+                  eval "$(ssh-agent -s)"
+                  ssh-add ~/.ssh/deploy_key
+                  ssh-add -l || true
 
             - name: Configure known_hosts (if provided)
               run: |
