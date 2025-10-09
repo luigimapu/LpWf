@@ -100,6 +100,7 @@ Il file `.github/workflows/deploy.yml` è già in repo e:
     - `${PHP_BIN} tools/setup_hub_db.php`
     - `${PHP_BIN} tools/setup_tenant_db.php`
 - Valida la presenza dei secrets richiesti e fallisce subito se mancanti (incluso `SSH_KEY` o `SSH_KEY_B64`).
+- Se `SSH_KNOWN_HOSTS` non è impostato, il workflow effettua automaticamente `ssh-keyscan` sull'host/porta target per popolare `known_hosts` (con formattazione `[host]:port` se la porta ≠ 22) e applica `StrictHostKeyChecking=yes`. Se lo scan fallisce, ricade su `StrictHostKeyChecking=accept-new`.
 
 Puoi anche lanciare manualmente il deploy da GitHub → Actions → Deploy → Run workflow scegliendo `staging` o `production`.
 
