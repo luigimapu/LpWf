@@ -112,6 +112,7 @@ jobs:
                   eval "$(ssh-agent -s)"
                   ssh-add ~/.ssh/deploy_key
                   ssh-add -l || true
+                  echo "SSH_IDENTITY=$HOME/.ssh/deploy_key" >> $GITHUB_ENV
 
             - name: Configure known_hosts (provided or auto-scan)
               run: |
@@ -141,11 +142,11 @@ jobs:
             - name: SSH handshake test
               run: |
                   echo "Testing SSH to ${TARGET_HOST}:${{ secrets.SSH_PORT }} as ${{ secrets.SSH_USER }}"
-                  ssh $SSH_OPTS -o BatchMode=yes -o ConnectTimeout=15 "${{ secrets.SSH_USER }}@${TARGET_HOST}" exit
+                  ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 "${{ secrets.SSH_USER }}@${TARGET_HOST}" exit
 
             - name: Rsync files to server
               run: |
-                  RSYNC_RSH="ssh $SSH_OPTS"
+                  RSYNC_RSH="ssh $SSH_OPTS -i \"$SSH_IDENTITY\" -o IdentitiesOnly=yes"
                   rsync -az --delete \
                     --exclude ".git/" \
                     --exclude ".github/" \
