@@ -61,7 +61,7 @@ Repository Settings → Secrets → Actions → New repository secret
 - `SSH_HOST_STAGING` = `95.110.227.54`
 - `SSH_HOST_PROD` = `95.110.227.54`
 - `SSH_PORT` = `22`
-- `SSH_USER` = `root`
+- `SSH_USER` = utente di sistema della subscription Plesk che possiede il path di deploy (es. `admin_prova`). Usa `root` solo se necessario e abilitato via SSH.
 - `SSH_KEY` = contenuto di `~/.ssh/lpwf_deploy` (chiave privata ED25519)
 - (in alternativa) `SSH_KEY_B64` = la stessa chiave privata ma codificata in base64 (comodo per evitare problemi di newline)
 - `DEPLOY_PATH_STAGING` = `/var/www/vhosts/lprent.it/httpdocs/LpWf_staging`
@@ -101,6 +101,13 @@ Il file `.github/workflows/deploy.yml` è già in repo e:
     - `${PHP_BIN} tools/setup_tenant_db.php`
 - Valida la presenza dei secrets richiesti e fallisce subito se mancanti (incluso `SSH_KEY` o `SSH_KEY_B64`).
 - Se `SSH_KNOWN_HOSTS` non è impostato, il workflow effettua automaticamente `ssh-keyscan` sull'host/porta target per popolare `known_hosts` (con formattazione `[host]:port` se la porta ≠ 22) e applica `StrictHostKeyChecking=yes`. Se lo scan fallisce, ricade su `StrictHostKeyChecking=accept-new`.
+
+### Nota — Utente SSH e chiavi
+
+- `SSH_USER` deve corrispondere all'utente di sistema Plesk proprietario di `${DEPLOY_PATH_*}` (Plesk → Subscription → Web Hosting Access). Se usi `root`, assicurati che l'accesso SSH con chiave sia consentito e che la chiave sia installata in `~root/.ssh/authorized_keys`.
+- Installa la CHIAVE PUBBLICA corrispondente al secret `SSH_KEY`/`SSH_KEY_B64` in `~$SSH_USER/.ssh/authorized_keys` (oppure da Plesk → SSH Keys). Permessi consigliati: `chmod 700 ~/.ssh` e `chmod 600 ~/.ssh/authorized_keys` (proprietario: `$SSH_USER`).
+- Il workflow forza l'uso della chiave caricata (`ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes`); verifica che la chiave pubblica installata corrisponda esattamente alla privata nel secret.
+- Per ottenere la chiave pubblica dalla privata (locale): `ssh-keygen -y -f ~/.ssh/lpwf_deploy > lpwf_deploy.pub` e poi appendi il contenuto a `authorized_keys` dell'utente target.
 
 Puoi anche lanciare manualmente il deploy da GitHub → Actions → Deploy → Run workflow scegliendo `staging` o `production`.
 
