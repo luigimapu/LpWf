@@ -113,15 +113,29 @@ jobs:
                   ssh-add ~/.ssh/deploy_key
                   ssh-add -l || true
 
-            - name: Configure known_hosts (if provided)
+            - name: Configure known_hosts (provided or auto-scan)
               run: |
+                  mkdir -p ~/.ssh
                   if [ -n "${{ secrets.SSH_KNOWN_HOSTS }}" ]; then
-                    mkdir -p ~/.ssh
-                    echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
                     echo "Using provided SSH_KNOWN_HOSTS"
-                    echo "SSH_OPTS=-p ${{ secrets.SSH_PORT }}" >> $GITHUB_ENV
+                    printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+                    echo "SSH_OPTS=-p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=yes" >> $GITHUB_ENV
                   else
-                    echo "SSH_OPTS=-p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" >> $GITHUB_ENV
+                    HOST="${TARGET_HOST}"
+                    PORT="${{ secrets.SSH_PORT }}"
+                    echo "Auto-generating known_hosts via ssh-keyscan for ${HOST}:${PORT}"
+                    if [ "$PORT" = "22" ]; then
+                      ssh-keyscan -t ecdsa,ed25519,rsa -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+                    else
+                      ssh-keyscan -t ecdsa,ed25519,rsa -p "$PORT" "$HOST" 2>/dev/null | sed -e "s/^$HOST/[${HOST}]:$PORT/" >> ~/.ssh/known_hosts || true
+                    fi
+                    if [ -s ~/.ssh/known_hosts ]; then
+                      echo "known_hosts populated. Enforcing StrictHostKeyChecking=yes"
+                      echo "SSH_OPTS=-p $PORT -o StrictHostKeyChecking=yes" >> $GITHUB_ENV
+                    else
+                      echo "WARNING: ssh-keyscan failed; falling back to accept-new" >&2
+                      echo "SSH_OPTS=-p $PORT -o StrictHostKeyChecking=accept-new" >> $GITHUB_ENV
+                    fi
                   fi
 
             - name: Rsync files to server
