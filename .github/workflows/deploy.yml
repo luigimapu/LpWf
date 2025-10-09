@@ -138,6 +138,11 @@ jobs:
                     fi
                   fi
 
+            - name: SSH handshake test
+              run: |
+                  echo "Testing SSH to ${TARGET_HOST}:${{ secrets.SSH_PORT }} as ${{ secrets.SSH_USER }}"
+                  ssh $SSH_OPTS -o BatchMode=yes -o ConnectTimeout=15 "${{ secrets.SSH_USER }}@${TARGET_HOST}" exit
+
             - name: Rsync files to server
               run: |
                   RSYNC_RSH="ssh $SSH_OPTS"
