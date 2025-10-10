@@ -66,3 +66,22 @@ Troubleshooting rapido
 
 - `Permission denied (publickey,...)`: chiave pubblica non installata per `SSH_USER` o `SSH_USER` errato.
 - `Host key verification failed`: rigenera `SSH_KNOWN_HOSTS` con `ssh-keyscan` per host/porta corretti.
+
+## Deploy manuale da terminale
+
+Per evitare Plesk Git o Actions, puoi fare deploy direttamente da terminale sul server.
+
+- Script helper: `bash tools/deploy_manual.sh`
+  - Opzioni:
+    - `-b, --branch <name>`: branch da deployare (default auto: `main` se esiste, altrimenti `staging`).
+    - `--no-db`: non esegue gli script di setup DB.
+    - `--php </path/to/php>`: specifica il binario PHP (default: `/opt/plesk/php/8.3/bin/php` o `php`).
+  - Esempi:
+    - `bash tools/deploy_manual.sh`
+    - `bash tools/deploy_manual.sh --branch main`
+    - `bash tools/deploy_manual.sh -b staging --no-db`
+
+Requisiti
+
+- `.env` presente nella root del progetto con credenziali DB (vedi `.env.example`).
+- L'utente del server deve avere accesso al repo Git remoto (origin) per `fetch/pull`.
