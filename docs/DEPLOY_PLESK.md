@@ -102,6 +102,16 @@ Il file `.github/workflows/deploy.yml` è già in repo e:
 - Valida la presenza dei secrets richiesti e fallisce subito se mancanti (incluso `SSH_KEY` o `SSH_KEY_B64`).
 - Se `SSH_KNOWN_HOSTS` non è impostato, il workflow effettua automaticamente `ssh-keyscan` sull'host/porta target per popolare `known_hosts` (con formattazione `[host]:port` se la porta ≠ 22) e applica `StrictHostKeyChecking=yes`. Se lo scan fallisce, ricade su `StrictHostKeyChecking=accept-new`.
 
+### Plesk Git — Additional Deploy Actions (consigliato)
+
+Se usi l'estensione Plesk Git per il deploy automatico, imposta nelle "Additional deploy actions" il comando:
+
+```
+bash tools/post_deploy.sh
+```
+
+Il file `tools/post_deploy.sh` esegue gli script PHP di setup DB usando `/opt/plesk/php/8.3/bin/php` se presente, altrimenti `php` nel PATH. Non richiede variabili segrete.
+
 ### Nota — Utente SSH e chiavi
 
 - `SSH_USER` deve corrispondere all'utente di sistema Plesk proprietario di `${DEPLOY_PATH_*}` (Plesk → Subscription → Web Hosting Access). Se usi `root`, assicurati che l'accesso SSH con chiave sia consentito e che la chiave sia installata in `~root/.ssh/authorized_keys`.

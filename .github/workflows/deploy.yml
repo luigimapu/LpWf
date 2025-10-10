@@ -1,8 +1,6 @@
 name: Deploy
 
 on:
-    push:
-        branches: [main, staging]
     workflow_dispatch:
         inputs:
             target:
@@ -19,31 +17,7 @@ jobs:
     # (richiede required status checks per garantire ordine)
     # Concurrency è definita a livello di job via il nome della branch
     # e del workflow stesso.
-    verify:
-        runs-on: ubuntu-latest
-        concurrency:
-            group: verify-${{ github.workflow }}-${{ github.ref_name }}
-            cancel-in-progress: true
-        steps:
-            - uses: actions/checkout@v4
-            - name: PHP syntax check
-              run: |
-                  find . -type f -name "*.php" \
-                    -not -path "./vendor/*" \
-                    -print0 | xargs -0 -n1 -P4 php -l
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 18
-                  cache: 'npm'
-            - name: Install deps
-              run: npm ci
-            - name: ESLint
-              run: npm run lint
-            - name: Prettier check
-              run: npm run format
-
     deploy:
-        needs: verify
         runs-on: ubuntu-latest
         concurrency:
             group: deploy-${{ github.workflow }}-${{ github.ref_name }}
