@@ -17,9 +17,9 @@ ON DUPLICATE KEY UPDATE descrizione = VALUES(descrizione);
 
 -- Relazioni utenti-gruppi
 INSERT IGNORE INTO utenti_gruppi (utente_id, gruppo_id)
-SELECT u.id, g.id
+SELECT u.id,
+       (SELECT id FROM gruppi WHERE nome = 'Commerciale' ORDER BY id LIMIT 1) AS gruppo_id
 FROM utenti u
-JOIN gruppi g ON g.nome = 'Commerciale'
 WHERE u.email = 'operatore@example.com';
 
 -- Clienti demo
@@ -69,7 +69,7 @@ VALUES ('Noleggio base', 'Workflow di riferimento per noleggio veicolo', 1,
        (SELECT id FROM utenti WHERE email = 'admin@example.com'))
 ON DUPLICATE KEY UPDATE descrizione = VALUES(descrizione);
 
-SET @workflow_id = (SELECT id FROM workflow_modelli WHERE nome = 'Noleggio base');
+SET @workflow_id = (SELECT MIN(id) FROM workflow_modelli WHERE nome = 'Noleggio base');
 SET @azione_crea = (SELECT id FROM azioni_standard WHERE codice = 'CREA_ORDINE');
 SET @azione_scorte = (SELECT id FROM azioni_standard WHERE codice = 'VERIFICA_SCORTE_MAGAZZINO');
 SET @azione_pagamento = (SELECT id FROM azioni_standard WHERE codice = 'RICHIEDI_PAGAMENTO_DIGITALE');
@@ -86,7 +86,7 @@ ON DUPLICATE KEY UPDATE nome_passo = VALUES(nome_passo);
 -- Documento demo (fattura)
 INSERT INTO documenti (tipo_documento, numero, serie, data_emissione, cliente_id, stato, totale_imponibile, totale_imposta, totale_documento)
 VALUES ('FATTURA', '1', 'A', CURDATE(),
-        (SELECT id FROM clienti WHERE ragione_sociale = 'Cliente Demo S.r.l.'),
+        (SELECT id FROM clienti WHERE ragione_sociale = 'Cliente Demo S.r.l.' ORDER BY id LIMIT 1),
         'EMESSO', 1000.00, 220.00, 1220.00)
 ON DUPLICATE KEY UPDATE totale_documento = VALUES(totale_documento);
 
@@ -110,9 +110,9 @@ ON DUPLICATE KEY UPDATE importo = VALUES(importo);
 INSERT INTO pagamenti (direzione, cliente_id, conti_finanziari_id, metodo_pagamento_id, importo, stato)
 VALUES
   ('ENTRATA',
-   (SELECT id FROM clienti WHERE ragione_sociale = 'Cliente Demo S.r.l.'),
-   (SELECT id FROM conti_finanziari WHERE nome = 'Banca principale'),
-   (SELECT id FROM metodi_pagamento WHERE nome = 'Bonifico bancario'),
+   (SELECT id FROM clienti WHERE ragione_sociale = 'Cliente Demo S.r.l.' ORDER BY id LIMIT 1),
+   (SELECT id FROM conti_finanziari WHERE nome = 'Banca principale' ORDER BY id LIMIT 1),
+   (SELECT id FROM metodi_pagamento WHERE nome = 'Bonifico bancario' ORDER BY id LIMIT 1),
    610.00,
    'REGISTRATO')
 ON DUPLICATE KEY UPDATE importo = VALUES(importo);
@@ -123,4 +123,3 @@ SET @scadenza_id = (SELECT id FROM scadenze WHERE documento_id = @doc_id ORDER B
 INSERT INTO pagamenti_documenti (pagamento_id, documento_id, scadenza_id, importo_allocato)
 VALUES (@payment_id, @doc_id, @scadenza_id, 610.00)
 ON DUPLICATE KEY UPDATE importo_allocato = VALUES(importo_allocato);
-
