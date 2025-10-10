@@ -144,16 +144,34 @@ jobs:
                   echo "Testing SSH to ${TARGET_HOST}:${{ secrets.SSH_PORT }} as ${{ secrets.SSH_USER }}"
                   ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 "${{ secrets.SSH_USER }}@${TARGET_HOST}" exit
 
-            - name: Rsync files to server
+            - name: Show deploy variables
+              run: |
+                  echo "TARGET_HOST=$TARGET_HOST"
+                  echo "TARGET_PATH=$TARGET_PATH"
+                  echo "SSH_OPTS=$SSH_OPTS"
+
+            - name: Ensure remote target path exists and writable
+              run: |
+                  ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
+                    "set -e; mkdir -p '$TARGET_PATH'; ls -ld '$TARGET_PATH'; touch '$TARGET_PATH/.deploy_write_test' && rm -f '$TARGET_PATH/.deploy_write_test' && echo 'Write test OK'"
+
+            - name: Rsync files to server (verbose)
               run: |
                   RSYNC_RSH="ssh $SSH_OPTS -i \"$SSH_IDENTITY\" -o IdentitiesOnly=yes"
-                  rsync -az --delete \
+                  echo "Using RSYNC_RSH: $RSYNC_RSH"
+                  # Use rltz (no owner/group preservation), verbose and progress info
+                  rsync -rltzvv --delete \
                     --exclude ".git/" \
                     --exclude ".github/" \
                     --exclude "node_modules/" \
                     --exclude ".phpunit.cache/" \
                     --exclude "out/" \
                     -e "$RSYNC_RSH" ./ "${{ secrets.SSH_USER }}@${TARGET_HOST}:${TARGET_PATH}/"
+
+            - name: Verify files on remote
+              run: |
+                  ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
+                    "set -e; echo 'Remote path content:'; ls -la '$TARGET_PATH' | sed -n '1,120p'; echo 'Count of PHP files:'; find '$TARGET_PATH' -maxdepth 2 -name '*.php' | wc -l"
 
             - name: Post-deploy scripts (DB setup)
               run: |
