@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandbox Frontend LpWF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body class="dashboard-app">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">LpWF Sandbox</div>
+      <nav class="sidebar__nav" aria-label="Sezioni sandbox">
+        <a href="#overview" class="sidebar__link">Overview</a>
+        <a href="#api" class="sidebar__link">API</a>
+        <a href="#ui-blocks" class="sidebar__link">UI Blocks</a>
+      </nav>
+      <div class="sidebar__footer">
+        <small>&copy; LpWF Playground</small>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar__info">
+          <h1>Sandbox Frontend</h1>
+          <p>Area personale per sperimentare componenti e chiamate API.</p>
+        </div>
+        <div class="topbar__actions">
+          <div class="input-group">
+            <label for="sandbox-api-base">API base</label>
+            <input id="sandbox-api-base" type="url" placeholder="https://dominio.example.com/api">
+          </div>
+          <div class="input-group">
+            <span>&nbsp;</span>
+            <button type="button" class="btn btn-secondary" id="sandbox-save-api">Salva</button>
+          </div>
+          <div class="input-group">
+            <span>&nbsp;</span>
+            <button type="button" class="btn btn-primary" id="sandbox-open-dashboard">Apri dashboard</button>
+          </div>
+        </div>
+      </header>
+
+      <section id="overview" class="section section--card">
+        <header class="section__header">
+          <h2>Stato autenticazione</h2>
+          <p>Controlla rapidamente token, utente e connettivit&agrave; API.</p>
+        </header>
+        <div class="panel-grid">
+          <article class="panel">
+            <div class="panel__header">
+              <h3>Dettagli account</h3>
+            </div>
+            <div class="panel__body">
+              <p><strong>Token:</strong> <span id="sandbox-token-status">--</span></p>
+              <p><strong>Utente:</strong> <span id="sandbox-user-info">--</span></p>
+              <div class="panel__actions" style="display:flex; gap:12px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" id="sandbox-clear-token">Svuota token</button>
+                <button type="button" class="btn" id="sandbox-refresh-user">Aggiorna utente</button>
+              </div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel__header">
+              <h3>Verifica rapida API</h3>
+            </div>
+            <div class="panel__body">
+              <p>Usa il pulsante per testare `GET /health` o aggiorna l'endpoint qui sotto.</p>
+              <label class="input-group">
+                <span>Endpoint</span>
+                <input type="text" id="sandbox-endpoint" value="health">
+              </label>
+              <div class="panel__actions" style="display:flex; gap:12px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" id="sandbox-run-call">Esegui chiamata</button>
+                <button type="button" class="btn btn-secondary" id="sandbox-copy-result">Copia risultato</button>
+              </div>
+              <pre id="sandbox-response" class="code-block" style="margin-top:12px; max-height:240px; overflow:auto;">{}</pre>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="api" class="section section--card">
+        <header class="section__header">
+          <h2>Note operative</h2>
+          <p>Annota appunti personali per integrazioni, TODO o test.</p>
+        </header>
+        <div class="panel panel--wide">
+          <div class="panel__body">
+            <textarea id="sandbox-notes" rows="8" placeholder="Scrivi le tue note qui..." style="width:100%;"></textarea>
+            <div class="panel__actions" style="display:flex; gap:12px; margin-top:12px;">
+              <button type="button" class="btn btn-primary" id="sandbox-save-notes">Salva note locali</button>
+              <button type="button" class="btn btn-secondary" id="sandbox-clear-notes">Svuota</button>
+            </div>
+            <small>I dati sono salvati in `localStorage` per uso personale (non sincronizzato).</small>
+          </div>
+        </div>
+      </section>
+
+      <section id="ui-blocks" class="section section--card">
+        <header class="section__header">
+          <h2>Componenti UI</h2>
+          <p>Catalogo rapido di elementi ricorrenti dall'app principale.</p>
+        </header>
+        <div class="panel-grid">
+          <article class="panel">
+            <div class="panel__header">
+              <h3>Badge</h3>
+            </div>
+            <div class="panel__body" style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="badge">Default</span>
+              <span class="badge badge--success">Successo</span>
+              <span class="badge badge--warning">Attenzione</span>
+              <span class="badge badge--danger">Errore</span>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel__header">
+              <h3>Bottoni</h3>
+            </div>
+            <div class="panel__body" style="display:flex; gap:12px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-primary">Primary</button>
+              <button type="button" class="btn btn-secondary">Secondary</button>
+              <button type="button" class="btn">Default</button>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel__header">
+              <h3>Card vuota</h3>
+            </div>
+            <div class="panel__body">
+              <p>Usa questo spazio per prototipi veloci (es. liste, form, grafici).</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="auth.js" defer></script>
+  <script src="sandbox.js" defer></script>
+</body>
+</html>
