@@ -72,14 +72,14 @@ Troubleshooting rapido
 Per evitare Plesk Git o Actions, puoi fare deploy direttamente da terminale sul server.
 
 - Script helper: `bash tools/deploy_manual.sh`
-  - Opzioni:
-    - `-b, --branch <name>`: branch da deployare (default auto: `main` se esiste, altrimenti `staging`).
-    - `--no-db`: non esegue gli script di setup DB.
-    - `--php </path/to/php>`: specifica il binario PHP (default: `/opt/plesk/php/8.3/bin/php` o `php`).
-  - Esempi:
-    - `bash tools/deploy_manual.sh`
-    - `bash tools/deploy_manual.sh --branch main`
-    - `bash tools/deploy_manual.sh -b staging --no-db`
+    - Opzioni:
+        - `-b, --branch <name>`: branch da deployare (default auto: `main` se esiste, altrimenti `staging`).
+        - `--no-db`: non esegue gli script di setup DB.
+        - `--php </path/to/php>`: specifica il binario PHP (default: `/opt/plesk/php/8.3/bin/php` o `php`).
+    - Esempi:
+        - `bash tools/deploy_manual.sh`
+        - `bash tools/deploy_manual.sh --branch main`
+        - `bash tools/deploy_manual.sh -b staging --no-db`
 
 Requisiti
 
