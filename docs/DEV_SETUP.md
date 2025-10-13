@@ -11,16 +11,16 @@
 
 - Copia `.env.example` in `.env` e compila le variabili locali (senza committarle).
 - Setup DB (idempotenti):
-  - Linux/macOS:
-    - `php tools/setup_hub_db.php`
-    - `php tools/setup_tenant_db.php`
-    - Oppure: `bash tools/deploy_manual.sh --no-db` per solo codice; poi i due comandi PHP.
-  - Windows (PowerShell):
-    - `./tools/dev_bootstrap.ps1` (Composer deps, npm deps, configura VS Code; opz. `-RunSetup` per DB)
-    - `./tools/setup.ps1` (esegue solo gli script DB)
-    - Solo Hub: `./tools/setup.ps1 -HubOnly`
-    - Solo Tenant: `./tools/setup.ps1 -TenantOnly`
-    - PHP custom: `./tools/setup.ps1 -Php "C:\\xampp\\php\\php.exe"`
+    - Linux/macOS:
+        - `php tools/setup_hub_db.php`
+        - `php tools/setup_tenant_db.php`
+        - Oppure: `bash tools/deploy_manual.sh --no-db` per solo codice; poi i due comandi PHP.
+    - Windows (PowerShell):
+        - `./tools/dev_bootstrap.ps1` (Composer deps, npm deps, configura VS Code; opz. `-RunSetup` per DB)
+        - `./tools/setup.ps1` (esegue solo gli script DB)
+        - Solo Hub: `./tools/setup.ps1 -HubOnly`
+        - Solo Tenant: `./tools/setup.ps1 -TenantOnly`
+        - PHP custom: `./tools/setup.ps1 -Php "C:\\xampp\\php\\php.exe"`
 
 ## Test rapidi
 
@@ -81,24 +81,24 @@ Troubleshooting rapido
 Per evitare Plesk Git o Actions, puoi fare deploy direttamente da terminale sul server.
 
 - Linux/macOS: `bash tools/deploy_manual.sh`
-  - Opzioni:
-    - `-b, --branch <name>`: branch da deployare (default auto: `main` se esiste, altrimenti `staging`).
-    - `--no-db`: non esegue gli script di setup DB.
-    - `--php </path/to/php>`: specifica il binario PHP (default: `/opt/plesk/php/8.3/bin/php` o `php`).
-  - Esempi:
-    - `bash tools/deploy_manual.sh`
-    - `bash tools/deploy_manual.sh --branch main`
-    - `bash tools/deploy_manual.sh -b staging --no-db`
+    - Opzioni:
+        - `-b, --branch <name>`: branch da deployare (default auto: `main` se esiste, altrimenti `staging`).
+        - `--no-db`: non esegue gli script di setup DB.
+        - `--php </path/to/php>`: specifica il binario PHP (default: `/opt/plesk/php/8.3/bin/php` o `php`).
+    - Esempi:
+        - `bash tools/deploy_manual.sh`
+        - `bash tools/deploy_manual.sh --branch main`
+        - `bash tools/deploy_manual.sh -b staging --no-db`
 
 - Windows (PowerShell): `./tools/deploy_manual.ps1`
-  - Parametri:
-    - `-Branch <name>`: branch da deployare (default auto: `main`/`staging`).
-    - `-NoDb`: non esegue gli script di setup DB.
-    - `-Php <path>`: percorso di `php.exe` (se non nel PATH). Prova automaticamente: `php`, `C:\xampp\php\php.exe`, `C:\Program Files\php\php.exe`, `C:\php\php.exe`.
-  - Esempi (PowerShell):
-    - `./tools/deploy_manual.ps1`
-    - `./tools/deploy_manual.ps1 -Branch main`
-    - `./tools/deploy_manual.ps1 -Branch staging -NoDb`
+    - Parametri:
+        - `-Branch <name>`: branch da deployare (default auto: `main`/`staging`).
+        - `-NoDb`: non esegue gli script di setup DB.
+        - `-Php <path>`: percorso di `php.exe` (se non nel PATH). Prova automaticamente: `php`, `C:\xampp\php\php.exe`, `C:\Program Files\php\php.exe`, `C:\php\php.exe`.
+    - Esempi (PowerShell):
+        - `./tools/deploy_manual.ps1`
+        - `./tools/deploy_manual.ps1 -Branch main`
+        - `./tools/deploy_manual.ps1 -Branch staging -NoDb`
 
 Requisiti
 
@@ -112,4 +112,4 @@ Suggerimento Windows
 Bootstrap Windows (one‑liner)
 
 - PowerShell: `./tools/dev_bootstrap.ps1 -RunSetup`
-  - Esegue: Composer install (o composer.phar locale), npm install/ci, crea `.vscode` consigliato, e lancia il setup DB.
+    - Esegue: Composer install (o composer.phar locale), npm install/ci, crea `.vscode` consigliato, e lancia il setup DB.
