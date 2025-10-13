@@ -163,6 +163,8 @@ jobs:
                   rsync -rltzvv --delete \
                     --exclude ".git/" \
                     --exclude ".github/" \
+                    --exclude ".env" \
+                    --exclude ".env.*" \
                     --exclude "node_modules/" \
                     --exclude ".phpunit.cache/" \
                     --exclude "out/" \
@@ -173,8 +175,36 @@ jobs:
                   ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
                     "set -e; echo 'Remote path content:'; ls -la '$TARGET_PATH' | sed -n '1,120p'; echo 'Count of PHP files:'; find '$TARGET_PATH' -maxdepth 2 -name '*.php' | wc -l"
 
+            - name: Check remote .env (DB vars)
+              run: |
+                  set -e
+                  REQ_VARS=(HUB_DB_HOST HUB_DB_NAME HUB_DB_USER HUB_DB_PASS)
+                  MISSING=0
+                  if ! ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" "test -f '$TARGET_PATH/.env'"; then
+                    echo ".env not found on remote path: $TARGET_PATH" >&2
+                    echo "RUN_DB_SETUP=false" >> $GITHUB_ENV
+                  else
+                    for v in "${REQ_VARS[@]}"; do
+                      if ! ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" "grep -q '^${v}=' '$TARGET_PATH/.env'"; then
+                        echo "Missing $v in remote .env" >&2
+                        MISSING=$((MISSING+1))
+                      fi
+                    done
+                    if [ "$MISSING" -eq 0 ]; then
+                      echo "RUN_DB_SETUP=true" >> $GITHUB_ENV
+                    else
+                      echo "RUN_DB_SETUP=false" >> $GITHUB_ENV
+                    fi
+                  fi
+
             - name: Post-deploy scripts (DB setup)
+              if: env.RUN_DB_SETUP == 'true'
               run: |
                   ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
                     "${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_hub_db.php && \
                      ${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_tenant_db.php"
+
+            - name: DB setup skipped (no .env or vars)
+              if: env.RUN_DB_SETUP != 'true'
+              run: |
+                  echo "Skipping DB setup: remote .env missing or incomplete (HUB_DB_*)." >&2
