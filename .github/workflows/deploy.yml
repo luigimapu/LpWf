@@ -175,6 +175,6 @@ jobs:
 
             - name: Post-deploy scripts (DB setup)
               run: |
-                  ssh $SSH_OPTS "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
+                  ssh $SSH_OPTS -i "$SSH_IDENTITY" -o IdentitiesOnly=yes "${{ secrets.SSH_USER }}@${TARGET_HOST}" \
                     "${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_hub_db.php && \
                      ${{ secrets.PHP_BIN }} ${TARGET_PATH}/tools/setup_tenant_db.php"
