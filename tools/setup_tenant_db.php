@@ -321,6 +321,11 @@ try {
         echo "Aggiungo colonna longitudine…\n";
         $pdo->exec("ALTER TABLE clienti ADD COLUMN longitudine DECIMAL(10,6) NULL AFTER latitudine");
     }
+    if (!in_array('hub_cliente_id', $cols, true)) {
+        echo "Aggiungo colonna hub_cliente_id…\n";
+        $pdo->exec("ALTER TABLE clienti ADD COLUMN hub_cliente_id BIGINT UNSIGNED NULL AFTER id");
+        $pdo->exec("CREATE INDEX idx_clienti_hub_id ON clienti(hub_cliente_id)");
+    }
 } catch (Throwable $e) {
     fwrite(STDERR, "Errore migrazione geocoding clienti: " . $e->getMessage() . "\n");
 }

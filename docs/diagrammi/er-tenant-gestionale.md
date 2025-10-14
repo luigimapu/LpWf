@@ -1,5 +1,7 @@
 # ER diagramma – Tenant (workflow, documenti, pagamenti)
 
+Vedi anche: `docs/diagrammi/overview-multi-tenant.md` per una panoramica a livelli (LPWF → Tenant → Clienti/Risorse).
+
 ```mermaid
 erDiagram
     UTENTI ||--o{ WORKFLOW_MODELLI : "crea"
@@ -69,6 +71,7 @@ erDiagram
 
     CLIENTI {
         int id PK
+        int hub_cliente_id
         string ragione_sociale
         string partita_iva
     }

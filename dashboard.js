@@ -13,6 +13,37 @@
         const AUDIT_ROLE_LIMIT = 200;
         const AUDIT_AUTH_DEFAULT_LIMIT = 200;
 
+        // Sostituisce gli alert nativi con toast non bloccanti per coerenza UI
+        try {
+            if (!window.__lpwfAlertShimInstalled) {
+                window.alert = (message) => {
+                    try {
+                        let container = document.getElementById('toast-container');
+                        if (!container) {
+                            container = document.createElement('div');
+                            container.id = 'toast-container';
+                            container.className = 'toast-container';
+                            document.body.appendChild(container);
+                        }
+                        const t = document.createElement('div');
+                        t.className = 'toast toast--error';
+                        t.textContent = String(message ?? '');
+                        t.addEventListener('click', () => t.remove());
+                        container.appendChild(t);
+                        requestAnimationFrame(() => { t.classList.add('is-visible'); });
+                        setTimeout(() => {
+                            t.classList.remove('is-visible');
+                            setTimeout(() => t.remove(), 180);
+                        }, 5000);
+                    } catch (e) {
+                        // Fallback: log in console
+                        try { console.error('[Alert]', message); } catch (e2) {}
+                    }
+                };
+                window.__lpwfAlertShimInstalled = true;
+            }
+        } catch (e) {}
+
         const dom = {
             main: document.getElementById('dashboard-main'),
             taskSearch: document.getElementById('task-search'),
@@ -24,6 +55,23 @@
             instancesList: document.getElementById('instances-list'),
             clientsList: document.getElementById('clients-list'),
             clientDetail: document.getElementById('client-detail'),
+            tenantsList: document.getElementById('tenants-list'),
+            tenantsSearch: document.getElementById('filter-tenants'),
+            btnTenantsRefresh: document.getElementById('btn-tenants-refresh'),
+            tenantsCount: document.getElementById('tenants-count'),
+            tenantDetailName: document.getElementById('tenant-detail-name'),
+            tenantDetailSubtitle: document.getElementById('tenant-detail-subtitle'),
+            editTenantName: document.getElementById('edit-tenant-name'),
+            editTenantSlug: document.getElementById('edit-tenant-slug'),
+            editTenantStatus: document.getElementById('edit-tenant-status'),
+            btnTenantSave: document.getElementById('btn-tenant-save'),
+            linkTenantHub: document.getElementById('link-tenant-hub'),
+            linkTenantCatalogo: document.getElementById('link-tenant-catalogo'),
+            tenantCreateBox: document.getElementById('tenant-create-box'),
+            newTenantName: document.getElementById('new-tenant-name'),
+            newTenantSlug: document.getElementById('new-tenant-slug'),
+            newTenantStatus: document.getElementById('new-tenant-status'),
+            btnTenantCreate: document.getElementById('btn-tenant-create'),
             groupsList: document.getElementById('gruppi-list'),
             usersList: document.getElementById('utenti-list'),
             filterUsers: document.getElementById('filter-users'),
@@ -206,6 +254,75 @@
             btnImportMediaCancel: document.getElementById('btn-import-media-cancel'),
         };
 
+        // Selezione tenant e dettaglio (Admin può modificare)
+        const selectTenant = async (id, currentList = []) => {
+            try {
+                state.selectedTenantId = id;
+                const detail = await authFetch(`hub_tenants/${id}`);
+                const name = detail?.ragione_sociale || (currentList.find((t) => Number(t.id) === id)?.ragione_sociale) || `Tenant #${id}`;
+                const slug = detail?.slug || (currentList.find((t) => Number(t.id) === id)?.slug) || '';
+                if (dom.tenantDetailName) dom.tenantDetailName.textContent = name;
+                if (dom.editTenantName) dom.editTenantName.value = name || '';
+                if (dom.editTenantSlug) dom.editTenantSlug.value = slug || '';
+                if (dom.editTenantStatus) dom.editTenantStatus.value = detail?.stato || 'IN_ONBOARDING';
+                const siteRoot2 = (window.lpwfAuth?.getApiBase?.() || '/api').replace(/\/$/, '').replace(/\/api$/, '');
+                if (dom.linkTenantHub) dom.linkTenantHub.href = `${siteRoot2}/hub_catalogo/index.php?path=tenants`;
+                if (dom.linkTenantCatalogo) dom.linkTenantCatalogo.href = `${siteRoot2}/hub_catalogo/index.php?path=articoli&tenant=${encodeURIComponent(slug)}`;
+            } catch (e) {
+                try { showToast(e.message || 'Errore caricamento dettaglio tenant', { type: 'error' }); } catch (err) {}
+            }
+        };
+
+        // Delegated click sulla lista tenants
+        if (dom.tenantsList) {
+            dom.tenantsList.addEventListener('click', (ev) => {
+                const card = ev.target.closest('[data-tenant-id]');
+                if (!card) return;
+                const id = Number(card.dataset.tenantId);
+                if (!Number.isNaN(id)) selectTenant(id);
+            });
+        }
+
+        if (dom.btnTenantSave) {
+            dom.btnTenantSave.addEventListener('click', async () => {
+                if (!state.selectedTenantId) { alert('Seleziona un tenant'); return; }
+                const payload = {
+                    ragione_sociale: (dom.editTenantName?.value || '').trim(),
+                    slug: (dom.editTenantSlug?.value || '').trim(),
+                    stato: (dom.editTenantStatus?.value || '').trim(),
+                };
+                if (!payload.ragione_sociale || !payload.slug) { alert('Compila ragione sociale e slug'); return; }
+                try {
+                    await authFetch(`hub_tenants/${state.selectedTenantId}`, { method: 'PUT', json: true, body: payload });
+                    try { showToast('Tenant aggiornato', { type: 'success' }); } catch (e) {}
+                    await renderTenantsList();
+                } catch (e) {
+                    alert(e.message || 'Errore aggiornamento tenant');
+                }
+            });
+        }
+
+        if (dom.btnTenantCreate) {
+            dom.btnTenantCreate.addEventListener('click', async () => {
+                const payload = {
+                    ragione_sociale: (dom.newTenantName?.value || '').trim(),
+                    slug: (dom.newTenantSlug?.value || '').trim(),
+                    stato: (dom.newTenantStatus?.value || '').trim() || 'IN_ONBOARDING',
+                };
+                if (!payload.ragione_sociale || !payload.slug) { alert('Compila ragione sociale e slug'); return; }
+                try {
+                    const res = await authFetch('hub_tenants', { method: 'POST', json: true, body: payload });
+                    try { showToast('Tenant creato', { type: 'success' }); } catch (e) {}
+                    if (dom.newTenantName) dom.newTenantName.value = '';
+                    if (dom.newTenantSlug) dom.newTenantSlug.value = '';
+                    await renderTenantsList();
+                    if (res?.id) selectTenant(Number(res.id));
+                } catch (e) {
+                    alert(e.message || 'Errore creazione tenant');
+                }
+            });
+        }
+
         const stepActionSelect = document.getElementById('select-step-action');
         const actionParamsSection = document.getElementById('action-params-section');
         const actionParamsContainer = document.getElementById('action-params-container');
@@ -308,6 +425,7 @@
             groups: [],
             clients: [],
             selectedClientId: null,
+            selectedTenantId: null,
             clientFilters: { search: '', province: '', city: '' },
             clientPage: 1,
             clientPageSize: 50,
@@ -563,6 +681,8 @@
                 manageGroups: isAdmin || isSupervisor,
                 manageWorkflows: isAdmin || isSupervisor,
                 manageRoles: isAdmin,
+                viewTenants: isAdmin || isSupervisor,
+                manageTenants: isAdmin,
             };
         };
 
@@ -585,7 +705,7 @@
             } catch (e) {
                 /* ignore */
             }
-            // Nascondi/mostra voci sidebar per Admin
+            // Nascondi/mostra voci sidebar per Admin/Supervisor
             try {
                 const linkModels = document.querySelector(
                     'a.sidebar__link[href="#workflow-models"]',
@@ -593,9 +713,16 @@
                 if (linkModels) linkModels.hidden = !p.viewConfig;
                 const linkConfig = document.querySelector('a.sidebar__link[href="#config"]');
                 if (linkConfig) linkConfig.hidden = !p.viewConfig;
+                const linkTenants = document.querySelector('a.sidebar__link[href="#tenants"]');
+                if (linkTenants) linkTenants.hidden = !p.viewTenants;
             } catch (e) {
                 /* ignore */
             }
+            const tenantsSection = document.getElementById('tenants');
+            if (tenantsSection) tenantsSection.hidden = !p.viewTenants;
+            // Crea/Salva tenants solo Admin
+            if (dom.tenantCreateBox) dom.tenantCreateBox.hidden = !p.manageTenants;
+            if (dom.btnTenantSave) dom.btnTenantSave.disabled = !p.manageTenants;
             const usersPanel = document.querySelector('article[data-resource="utenti"]');
             const groupsPanel = document.querySelector('article[data-resource="gruppi"]');
             if (usersPanel) usersPanel.hidden = true; // pannello utenti rimosso
@@ -816,6 +943,40 @@
         const renderMessage = (container, text) => {
             if (!container) return;
             container.innerHTML = `<p>${sanitize(text)}</p>`;
+        };
+
+        // Render elenco Tenants (hub read-only)
+        const renderTenantsList = async () => {
+            const listEl = dom.tenantsList;
+            const badge = dom.tenantsCount;
+            if (!listEl) return;
+            try {
+                const tenants = await hubFetch('tenants');
+                const q = (dom.tenantsSearch?.value || '').toLowerCase().trim();
+                const arr = (Array.isArray(tenants) ? tenants : []).filter((t) => {
+                    if (!q) return true;
+                    const name = String(t.ragione_sociale || '').toLowerCase();
+                    const slug = String(t.slug || '').toLowerCase();
+                    return name.includes(q) || slug.includes(q);
+                });
+                if (badge) badge.textContent = String(arr.length);
+                if (!arr.length) {
+                    renderMessage(listEl, 'Nessun tenant trovato.');
+                    return;
+                }
+                listEl.innerHTML = arr
+                    .map((t) => {
+                        const name = sanitize(t.ragione_sociale || `Tenant #${t.id}`);
+                        const slug = sanitize(t.slug || '—');
+                        return `<div class="instance-card" data-tenant-id="${Number(t.id)}">
+  <div class="instance-card__title">${name}</div>
+  <div class="instance-card__meta">Slug: <span class="badge">${slug}</span></div>
+</div>`;
+                    })
+                    .join('');
+            } catch (e) {
+                renderMessage(listEl, 'Errore caricamento tenants.');
+            }
         };
 
         // Hub Catalogo fetch (read-only)
@@ -2702,6 +2863,15 @@
                 meta.textContent = `P.IVA ${piva} • ${mail}`;
                 btn.appendChild(title);
                 btn.appendChild(meta);
+                try {
+                    if (cli.hub_cliente_id) {
+                        const b = document.createElement('span');
+                        b.className = 'badge badge-success';
+                        b.textContent = 'Hub';
+                        b.title = `Collegato a Hub #${cli.hub_cliente_id}`;
+                        btn.appendChild(b);
+                    }
+                } catch (e) { /* ignore */ }
                 container.appendChild(btn);
             });
         };
@@ -4419,7 +4589,7 @@
             if (!state.activeTask || !taskModalElements.noteInput) return;
             const noteText = taskModalElements.noteInput.value.trim();
             if (!noteText) {
-                alert('Inserisci il testo della nota prima di procedere.');
+                try { showToast('Inserisci il testo della nota prima di procedere.', { type: 'warn' }); } catch (e) {}
                 return;
             }
 
@@ -4888,6 +5058,18 @@
                         loadClients();
                     }, 300),
                 );
+            }
+            // Ricerca tenants
+            if (dom.tenantsSearch) {
+                dom.tenantsSearch.addEventListener(
+                    'input',
+                    debounce(() => {
+                        renderTenantsList();
+                    }, 200),
+                );
+            }
+            if (dom.btnTenantsRefresh) {
+                dom.btnTenantsRefresh.addEventListener('click', () => renderTenantsList());
             }
             if (dom.btnClientsRefresh) {
                 dom.btnClientsRefresh.addEventListener('click', () => loadClients());
@@ -8453,6 +8635,7 @@
                     loadClients(),
                     loadProductFilters(),
                     loadProducts(),
+                    renderTenantsList(),
                 ]);
                 // Se Supervisor/Admin, mostra metriche team e caricale
                 try {
@@ -8702,8 +8885,7 @@
                 const cnt = Number(r?.count || 0);
                 try { showToast(`Retry falliti: ${cnt} elaborati`, { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore retry falliti');
-                try { showToast('Retry falliti: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore retry falliti', { type: 'error' }); } catch (e2) {}
             }
         }
 
@@ -8719,18 +8901,18 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`WhatsApp: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`WhatsApp: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('WhatsApp: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('WhatsApp: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnWaWeb) svc.btnWaWeb.addEventListener('click', async () => {
             const to = (svc.waTo?.value || '').trim();
             const msg = svc.waMsg?.value || '';
-            if (!to) { try { showToast('Inserisci un numero', { type: 'warning' }); } catch (e) {} return; }
+            if (!to) { try { showToast('Inserisci un numero', { type: 'warn' }); } catch (e) {} return; }
             const digits = String(to).replace(/[^\d]/g, '');
-            if (!digits) { try { showToast('Numero non valido', { type: 'danger' }); } catch (e) {} return; }
+            if (!digits) { try { showToast('Numero non valido', { type: 'warn' }); } catch (e) {} return; }
             const base = `https://wa.me/${digits}`;
             const url = msg ? `${base}?text=${encodeURIComponent(msg)}` : base;
             try { window.open(url, '_blank', 'noopener'); } catch (e) { window.location.href = url; }
@@ -8748,10 +8930,10 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`Email: ${ok ? 'inviata' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`Email: ${ok ? 'inviata' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Email: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Email: errore', { type: 'error' }); } catch (e2) {}
             }
         });
 
@@ -8776,7 +8958,7 @@
                 try { showToast(`Pagamento: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Pagamento: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Pagamento: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnRetryFailed) svc.btnRetryFailed.addEventListener('click', () => retryFailed(20, 24));
@@ -8811,10 +8993,10 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`Ordine: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`Ordine: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Ordine: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Ordine: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnDoc) svc.btnDoc.addEventListener('click', async () => {
@@ -8824,10 +9006,10 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`Documento: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`Documento: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Documento: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Documento: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnTicket) svc.btnTicket.addEventListener('click', async () => {
@@ -8838,10 +9020,10 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`Ticket: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`Ticket: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Ticket: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Ticket: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnChat) svc.btnChat.addEventListener('click', async () => {
@@ -8852,10 +9034,10 @@
                 svc.out.textContent = JSON.stringify(r, null, 2);
                 const ok = !!(r?.result?.ok ?? r?.ok ?? true);
                 const code = r?.result?.code ?? r?.code ?? '';
-                try { showToast(`Chat: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+                try { showToast(`Chat: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'error' }); } catch (e) {}
             } catch (e) {
                 svc.out.textContent = e.message || 'Errore';
-                try { showToast('Chat: errore', { type: 'danger' }); } catch (e2) {}
+                try { showToast('Chat: errore', { type: 'error' }); } catch (e2) {}
             }
         });
         if (svc.btnChat) svc.btnChat.addEventListener('click', async () => {
@@ -8880,7 +9062,7 @@
                     return hay.some(s => s.includes(q));
                 });
             }
-            if (!rows.length) { alert('Nessun dato da esportare.'); return; }
+            if (!rows.length) { try { showToast('Nessun dato da esportare.', { type: 'warn' }); } catch (e) {} return; }
             const cols = ['created_at','service','action','provider','status','http_code','user_id','request','response'];
             const esc = (v) => {
                 let s = v === null || v === undefined ? '' : String(v);
@@ -9216,7 +9398,7 @@
                 ]);
                 const attachments = Array.isArray(atts) ? atts : [];
                 const byComment = attachments.reduce((acc, a) => { const k = Number(a.commento_id); (acc[k] = acc[k] || []).push(a); return acc; }, {});
-                if (!Array.isArray(list) || !list.length) { tk.comments.innerHTML = '<p class="form-hint">Nessun commento.</p>'; return; }
+        if (!Array.isArray(list) || !list.length) { tk.comments.innerHTML = '<p class="form-hint">Nessun commento.</p>'; return; }
                 tk.comments.innerHTML = list.map(c => {
                     const group = byComment[Number(c.id)] || [];
                     const links = group.map(a => `<li><a href=\"${sanitize(a.percorso_file || '#')}\" target=\"_blank\" rel=\"noopener\">${sanitize(a.nome_file_originale || 'file')}</a></li>`).join('');
@@ -9232,7 +9414,7 @@
             const titolo = (tk.title?.value || '').trim();
             const descrizione = (tk.desc?.value || '').trim();
             const priorita = (tk.prio?.value || 'MEDIA');
-            if (!titolo) { try { showToast('Inserisci un titolo', { type: 'warning' }); } catch (e) {} return; }
+            if (!titolo) { try { showToast('Inserisci un titolo', { type: 'warn' }); } catch (e) {} return; }
             try {
                 const r = await authFetch('tickets', { method: 'POST', json: true, body: { titolo, descrizione, priorita } });
                 if (tk.title) tk.title.value = '';
@@ -9240,30 +9422,34 @@
                 await loadTickets();
                 try { showToast('Ticket creato', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore creazione ticket');
-                try { showToast('Ticket: errore creazione', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore creazione ticket', { type: 'error' }); } catch (e2) {}
             }
         }
 
         async function addComment() {
-            if (!selectedTicketId) return;
+        if (!selectedTicketId) return;
             const messaggio = (tk.commentText?.value || '').trim();
-            if (!messaggio) return;
+            if (!messaggio) {
+                try { showToast('Inserisci un commento', { type: 'warn' }); } catch (e) {}
+                return;
+            }
             try {
                 await authFetch(`tickets/${selectedTicketId}/comment`, { method: 'POST', json: true, body: { messaggio } });
                 if (tk.commentText) tk.commentText.value = '';
                 await loadTicketComments(selectedTicketId);
                 try { showToast('Ticket: commento aggiunto', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore invio commento');
-                try { showToast('Ticket: errore commento', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore invio commento', { type: 'error' }); } catch (e2) {}
             }
         }
 
         async function attachFile() {
             if (!selectedTicketId) return;
             const f = tk.file?.files && tk.file.files[0];
-            if (!f) return;
+            if (!f) {
+                try { showToast('Seleziona un file da allegare', { type: 'warn' }); } catch (e) {}
+                return;
+            }
             const fd = new FormData();
             try {
                 // crea un commento placeholder e allega il file
@@ -9277,8 +9463,7 @@
                 await loadTicketComments(selectedTicketId);
                 try { showToast('Ticket: allegato caricato', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore upload allegato');
-                try { showToast('Ticket: errore allegato', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore upload allegato', { type: 'error' }); } catch (e2) {}
             }
         }
 
@@ -9289,8 +9474,7 @@
                 await loadTicketDetail(selectedTicketId); await loadTickets();
                 try { showToast('Ticket: assegnato', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore assegnazione');
-                try { showToast('Ticket: errore assegnazione', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore assegnazione', { type: 'error' }); } catch (e2) {}
             }
         }
 
@@ -9301,8 +9485,7 @@
                 await loadTicketDetail(selectedTicketId); await loadTickets();
                 try { showToast('Ticket: chiuso', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore chiusura');
-                try { showToast('Ticket: errore chiusura', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore chiusura', { type: 'error' }); } catch (e2) {}
             }
         }
         async function reopenTicket() {
@@ -9312,8 +9495,7 @@
                 await loadTicketDetail(selectedTicketId); await loadTickets();
                 try { showToast('Ticket: riaperto', { type: 'success' }); } catch (e) {}
             } catch (e) {
-                alert(e.message || 'Errore riapertura');
-                try { showToast('Ticket: errore riapertura', { type: 'danger' }); } catch (e2) {}
+                try { showToast(e.message || 'Errore riapertura', { type: 'error' }); } catch (e2) {}
             }
         }
 
@@ -9385,7 +9567,7 @@
                 const qs = params.length ? ('?' + params.join('&')) : '';
                 const rows = await authFetch('tickets' + qs);
                 const list = Array.isArray(rows) ? rows : [];
-                if (!list.length) { alert('Nessun dato da esportare.'); return; }
+                if (!list.length) { try { showToast('Nessun dato da esportare.', { type: 'warn' }); } catch (e) {} return; }
                 const cols = ['id','titolo','stato','priorita','creato_da_nome','assegnato_a_nome','cliente_nome','creato_il','chiuso_il'];
                 const esc = (v) => {
                     let s = v === null || v === undefined ? '' : String(v);
@@ -9406,7 +9588,7 @@
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
-            } catch (e) { alert(e.message || 'Errore export CSV'); }
+            } catch (e) { try { showToast(e.message || 'Errore export CSV', { type: 'error' }); } catch (e2) {} }
         }
 
         if (tk.btnExport) tk.btnExport.addEventListener('click', exportTicketsCsv);

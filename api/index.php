@@ -42,6 +42,7 @@ require_once __DIR__ . '/CatalogRelationsController.php';
 require_once __DIR__ . '/CatalogListsController.php';
 require_once __DIR__ . '/ServiceController.php';
 require_once __DIR__ . '/CatalogCategoriesController.php';
+require_once __DIR__ . '/HubTenantsController.php';
 require_once __DIR__ . '/../services/AuthService.php';
 
 function sendJson(int $status, array $payload): void
@@ -277,6 +278,20 @@ if ($resource_name === 'catalog_media') {
     }
     $controller = new CatalogMediaController();
     $controller->handle($request_method, $id, $action);
+    exit();
+}
+
+// Hub Tenants (autenticato): gestione tenants su Hub (solo Admin)
+if ($resource_name === 'hub_tenants') {
+    try {
+        $currentUser = $authService->authenticateRequest($authorizationHeader);
+        $_SERVER['AUTH_USER'] = $currentUser;
+    } catch (Throwable $ex) {
+        sendJson(401, ['message' => 'Non autenticato']);
+        exit();
+    }
+    try { $ctrl = new HubTenantsController(); $ctrl->handle($request_method, $id); }
+    catch (Throwable $e) { sendJson(500, ['message'=>'Errore inizializzazione HubTenantsController']); }
     exit();
 }
 

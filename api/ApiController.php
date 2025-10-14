@@ -20,6 +20,7 @@ require_once __DIR__ . '/../models/Ticket.php';
 require_once __DIR__ . '/../models/TicketComment.php';
 require_once __DIR__ . '/../services/ServiceDispatcher.php';
 require_once __DIR__ . '/../services/ActionExecutor.php';
+require_once __DIR__ . '/../config/HubDatabase.php';
 
 class ApiController
 {
@@ -461,11 +462,91 @@ class ApiController
             }
         }
 
+        // Cliente: lookup/normalizzazione su hub, con precompilazione e link
+        if ($model instanceof Cliente) {
+            $hubId = null;
+            $tenantId = getenv('TENANT_ID') ?: null;
+            $piva = isset($data->partita_iva) ? trim((string)$data->partita_iva) : '';
+            $cf = isset($data->codice_fiscale) ? trim((string)$data->codice_fiscale) : '';
+            try {
+                $hub = new HubDatabase();
+                // Cerca su hub per P.IVA o CF
+                $found = null;
+                if ($piva !== '') {
+                    $found = $hub->selectOne('SELECT * FROM clienti WHERE partita_iva = ? LIMIT 1', [$piva]);
+                }
+                if (!$found && $cf !== '') {
+                    $found = $hub->selectOne('SELECT * FROM clienti WHERE codice_fiscale = ? LIMIT 1', [$cf]);
+                }
+                // Opzionale: dedup "soft" via email/telefono se abilitato e nessun match rigido
+                if (!$found) {
+                    $soft = getenv('HUB_CLIENTI_SOFT_DEDUP') ?: '';
+                    $softEnabled = ($soft === '1' || strtolower($soft) === 'true');
+                    $email = isset($data->email) ? trim((string)$data->email) : '';
+                    $tel = isset($data->telefono) ? trim((string)$data->telefono) : '';
+                    if ($softEnabled && ($email !== '' || $tel !== '')) {
+                        $ids = [];
+                        if ($email !== '') {
+                            $rows = $hub->select('SELECT id, ragione_sociale, email, telefono FROM clienti WHERE email = ? LIMIT 5', [$email]);
+                            foreach ($rows as $r) { $ids[(int)$r['id']] = $r; }
+                        }
+                        if ($tel !== '') {
+                            $rows = $hub->select('SELECT id, ragione_sociale, email, telefono FROM clienti WHERE telefono = ? LIMIT 5', [$tel]);
+                            foreach ($rows as $r) { $ids[(int)$r['id']] = $r + ['id' => (int)$r['id']]; }
+                        }
+                        if (count($ids) === 1) {
+                            $only = array_values($ids)[0];
+                            $found = $hub->selectOne('SELECT * FROM clienti WHERE id = ? LIMIT 1', [$only['id']]);
+                        }
+                        // Se >1 candidati, ambiguità: non colleghiamo automaticamente.
+                    }
+                }
+                if ($found) {
+                    $hubId = (int)$found['id'];
+                    // Precompila i campi mancanti con dati hub
+                    $prefillKeys = ['ragione_sociale','email','telefono','indirizzo','cap','citta','provincia','nazione','tipo_cliente','partita_iva','codice_fiscale'];
+                    foreach ($prefillKeys as $k) {
+                        if ((!isset($data->{$k}) || $data->{$k} === '' || $data->{$k} === null) && isset($found[$k]) && $found[$k] !== null && $found[$k] !== '') {
+                            $data->{$k} = $found[$k];
+                        }
+                    }
+                } else {
+                    // Crea su hub un nuovo cliente
+                    $hKeys = ['ragione_sociale','partita_iva','codice_fiscale','email','telefono','indirizzo','cap','citta','provincia','nazione','tipo_cliente'];
+                    $cols = [];$ph=[];$vals=[];
+                    foreach ($hKeys as $k) {
+                        if (isset($data->{$k}) && $data->{$k} !== '') { $cols[] = $k; $ph[]='?'; $vals[] = $data->{$k}; }
+                    }
+                    if (!in_array('ragione_sociale', $cols, true)) {
+                        // Richiede ragione_sociale (garantito a livello API), altrimenti uso placeholder
+                        $cols[] = 'ragione_sociale'; $ph[]='?'; $vals[] = (isset($data->ragione_sociale) ? (string)$data->ragione_sociale : '');
+                    }
+                    $sql = 'INSERT INTO clienti (' . implode(', ', $cols) . ', creato_il, aggiornato_il) VALUES (' . implode(', ', $ph) . ', NOW(), NOW())';
+                    try {
+                        $hub->executeStatement($sql, $vals);
+                        $hubId = (int)$hub->lastInsertId();
+                    } catch (Throwable $e) {
+                        // In caso di dup key su piva/cf, riprova lookup
+                        if ($piva !== '') { $row = $hub->selectOne('SELECT * FROM clienti WHERE partita_iva = ? LIMIT 1', [$piva]); if ($row) { $hubId = (int)$row['id']; } }
+                        if (!$hubId && $cf !== '') { $row = $hub->selectOne('SELECT * FROM clienti WHERE codice_fiscale = ? LIMIT 1', [$cf]); if ($row) { $hubId = (int)$row['id']; } }
+                    }
+                }
+            } catch (Throwable $e) {
+                // Config hub mancante o errore: continua senza bloccare la creazione locale
+                $hubId = null;
+            }
+
+        }
+
         $fillable = $model->getFillableFields();
         foreach ($data as $key => $value) {
             if (in_array($key, $fillable)) {
                 $model->{$key} = $value;
             }
+        }
+        if ($model instanceof Cliente && isset($hubId) && $hubId) {
+            // Assicura che il link hub non venga sovrascritto dal payload
+            $model->hub_cliente_id = $hubId;
         }
 
         // Set automatismi per Ticket: utente creatore e stato default
@@ -478,6 +559,29 @@ class ApiController
         }
 
         if ($model->create()) {
+            // Se cliente, registra mapping su hub (best effort)
+            if ($model instanceof Cliente && !empty($model->hub_cliente_id)) {
+                try {
+                    $tenantId = getenv('TENANT_ID') ?: null;
+                    if ($tenantId) {
+                        $hub = new HubDatabase();
+                        $hub->executeStatement(
+                            'INSERT INTO clienti_tenant_map (cliente_id, tenant_id, cliente_id_tenant, creato_il) VALUES (?, ?, ?, NOW())',
+                            [ (int)$model->hub_cliente_id, (int)$tenantId, (string)$model->id ]
+                        );
+                    }
+                } catch (Throwable $e) { /* ignore mapping errors */ }
+            }
+            // Risposta dedicata per Cliente: include stato link a Hub
+            if ($model instanceof Cliente) {
+                $this->sendResponse(201, [
+                    'message' => 'Record creato con successo.',
+                    'id' => (int)$model->id,
+                    'link_hub' => !empty($model->hub_cliente_id),
+                    'hub_cliente_id' => isset($model->hub_cliente_id) ? (int)$model->hub_cliente_id : 0,
+                ]);
+                return;
+            }
             // Bridge opzionale a webhook ticket
             if ($model instanceof Ticket) {
                 try {

@@ -138,7 +138,19 @@ Gruppi: CRUD `/api/gruppi` (+ `with_user_counts=true`)
 ## Clienti
 
 - GET `/api/clienti` (CRUD standard)
-- Colonne lat/long create da migrazione idempotente.
+- POST `/api/clienti` effettua dedup su hub e precompilazione dati:
+  - Se nel body è presente `partita_iva` o `codice_fiscale`, l'API verifica su hub (DB `hub_catalogo`) l'esistenza del cliente.
+  - Se trovato, precompila i campi mancanti e collega il record locale con `hub_cliente_id`.
+  - Se non esiste, crea l'anagrafica centrale su hub e salva l'ID in `hub_cliente_id`.
+  - Se configurato `TENANT_ID`, viene registrata la mappatura su hub (`clienti_tenant_map`).
+  - Opzione dedup "soft" (email/telefono): se `HUB_CLIENTI_SOFT_DEDUP=1` e P.IVA/CF non sono presenti o non matchano, l'API prova un match esatto su `email` e/o `telefono`. Solo se c'è un unico candidato su hub, viene effettuato il link; in caso di ambiguità non viene agganciato automaticamente.
+- Colonne `latitudine`/`longitudine` e `hub_cliente_id` sono gestite da migrazione idempotente (`tools/setup_tenant_db.php`).
+
+Response 201 (POST /api/clienti)
+
+```json
+{ "message": "Record creato con successo.", "id": 123, "link_hub": true, "hub_cliente_id": 456 }
+```
 
 ## Audit & Service Logs
 
@@ -180,10 +192,20 @@ hub_catalogo/index.php?path=articoli&q=term&categoria=...&tenant=...&tipologia=.
 hub_catalogo/index.php?path=categorie
 ```
 
+## Tenants (Hub)
+
+- GET `/api/hub_tenants` (lista, autenticato)
+- GET `/api/hub_tenants/{id}` (dettaglio con `stato`)
+- POST `/api/hub_tenants` (solo Admin): `{ ragione_sociale, slug, stato? }`
+- PUT `/api/hub_tenants/{id}` (solo Admin): `{ ragione_sociale?, slug?, stato? }`
+
+Note
+- L'endpoint `hub_catalogo` rimane read‑only; la gestione in scrittura avviene tramite `/api/hub_tenants`.
+- Lo slug deve essere univoco (a‑z, 0‑9, `._-`).
+
 ---
 
 Suggerimenti
 
 - Imposta `.env` con JWT e DB per l’ambiente locale.
 - Test rapidi UI: `login.html` per token, `services_test.html` per integrazioni, `api_test.html` (nuovo) per provare le rotte.
-

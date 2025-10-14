@@ -114,6 +114,14 @@ Post-deploy
 
 - Esegue: `${PHP_BIN} tools/setup_hub_db.php` e `${PHP_BIN} tools/setup_tenant_db.php`.
 
+### Clienti centralizzati (dedup su hub)
+
+- Configura nel `.env` le variabili dell'hub: `HUB_DB_HOST`, `HUB_DB_NAME`, `HUB_DB_USER`, `HUB_DB_PASS` e `TENANT_ID`.
+- Lo script `tools/setup_hub_db.php` crea le tabelle `clienti` (anagrafica centralizzata) e `clienti_tenant_map` (mappature).
+- Su tenant, lo script `tools/setup_tenant_db.php` aggiunge automaticamente la colonna `hub_cliente_id` a `clienti` (se assente).
+- L'endpoint `POST /api/clienti` esegue lookup su hub per `partita_iva/codice_fiscale`, precompila e collega la scheda locale.
+  - Facoltativo: abilita dedup "soft" via `HUB_CLIENTI_SOFT_DEDUP=1` per tentare match esatto su `email`/`telefono` quando mancano P.IVA/CF; in caso di ambiguità l'aggancio non avviene automaticamente.
+
 Troubleshooting rapido
 
 - `Permission denied (publickey,...)`: chiave pubblica non installata per `SSH_USER` o `SSH_USER` errato.

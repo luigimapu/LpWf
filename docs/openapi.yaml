@@ -521,14 +521,30 @@ paths:
         '200': { description: OK }
     post:
       tags: [Clients]
-      summary: Crea cliente
+      summary: Crea cliente (dedup su hub)
+      description: |
+        In creazione, se presenti `partita_iva` o `codice_fiscale`, esegue lookup sull'hub
+        (`hub_catalogo.clienti`) per deduplicare e precompilare i dati. Collega il record locale
+        a quello centrale tramite `hub_cliente_id` e, se `TENANT_ID` è configurato, registra la mappatura.
+        Se `HUB_CLIENTI_SOFT_DEDUP=1`, in assenza di P.IVA/CF o di match rigido, tenta un match esatto
+        su `email`/`telefono`. In caso di più candidati, l'aggancio non viene eseguito automaticamente.
       requestBody:
         required: true
         content:
           application/json:
             schema: { $ref: '#/components/schemas/ClientCreateRequest' }
       responses:
-        '201': { description: Creato }
+        '201':
+          description: Creato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: integer }
+                  link_hub: { type: boolean }
+                  hub_cliente_id: { type: integer }
   /clienti/{id}:
     get:
       tags: [Clients]
@@ -901,3 +917,47 @@ components:
 externalDocs:
   description: Hub Catalogo (read‑only)
   url: ../hub_catalogo/index.php?path=articoli
+  /hub_tenants:
+    get:
+      tags: [System]
+      summary: Lista tenants (hub)
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [System]
+      summary: Crea tenant su Hub (solo Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ragione_sociale: { type: string }
+                slug: { type: string }
+                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
+              required: [ragione_sociale, slug]
+      responses:
+        '201': { description: Creato }
+  /hub_tenants/{id}:
+    get:
+      tags: [System]
+      summary: Dettaglio tenant (hub)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [System]
+      summary: Aggiorna tenant su Hub (solo Admin)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ragione_sociale: { type: string }
+                slug: { type: string }
+                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
+      responses:
+        '200': { description: OK }

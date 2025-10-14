@@ -19,6 +19,7 @@
         <nav class="sidebar__nav" aria-label="Sezioni principali">
             <a href="#overview" class="sidebar__link">Dashboard</a>
             <a href="#clienti" class="sidebar__link">Clienti</a>
+            <a href="#tenants" class="sidebar__link">Tenants</a>
             <a href="#workflow-models" class="sidebar__link" hidden>Modelli</a>
             <a href="#operations" class="sidebar__link">Operatività</a>
             <a href="#catalogo" class="sidebar__link">Catalogo</a>
@@ -145,6 +146,71 @@
                         <p class="metric-card__value" id="metric-ticket-closed30-team">--</p>
                         <p class="metric-card__hint">Ultimi 30 giorni (team).</p>
                     </article>
+                </div>
+            </section>
+
+            <section id="tenants" class="section section--card">
+                <header class="section__header">
+                    <div>
+                        <h2>Tenants (Hub)</h2>
+                        <p>Elenco tenants registrati sull'hub centrale (solo lettura).</p>
+                    </div>
+                    <div class="section__actions" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+                        <label class="input-group" style="min-width:260px;">
+                            <span>Ricerca</span>
+                            <input type="search" id="filter-tenants" placeholder="Cerca per nome o slug…">
+                        </label>
+                        <small id="tenants-count" class="badge" title="Totale risultati">0</small>
+                        <button type="button" class="btn" id="btn-tenants-refresh">Aggiorna</button>
+                        <a class="btn btn-secondary" href="hub_catalogo/index.php?path=tenants" target="_blank" rel="noopener">Apri hub (tenants)</a>
+                    </div>
+                </header>
+                <div class="instance-grid">
+                    <div id="tenants-list" class="instance-list"></div>
+                    <section class="instance-detail" id="tenant-detail" aria-live="polite">
+                        <header class="instance-detail__header">
+                            <h4 id="tenant-detail-name">Dettagli tenant</h4>
+                            <p id="tenant-detail-subtitle">Seleziona un tenant per maggiori informazioni.</p>
+                        </header>
+                        <div class="instance-detail__tasks">
+                            <div class="form-grid" id="tenant-edit-form">
+                                <label class="form-control"><span>Ragione sociale</span><input type="text" id="edit-tenant-name"></label>
+                                <label class="form-control"><span>Slug</span><input type="text" id="edit-tenant-slug" placeholder="es. azienda-xyz"></label>
+                                <label class="form-control"><span>Stato</span>
+                                    <select id="edit-tenant-status">
+                                        <option value="IN_ONBOARDING">IN_ONBOARDING</option>
+                                        <option value="ATTIVO">ATTIVO</option>
+                                        <option value="SOSPESO">SOSPESO</option>
+                                    </select>
+                                </label>
+                                <div class="form-control"><span>&nbsp;</span>
+                                    <button type="button" class="btn btn-primary" id="btn-tenant-save">Salva</button>
+                                </div>
+                            </div>
+                            <div class="form-grid" id="tenant-links" style="margin-top:6px;">
+                                <a class="btn" id="link-tenant-hub" href="#" target="_blank" rel="noopener">Apri in Hub</a>
+                                <a class="btn" id="link-tenant-catalogo" href="#" target="_blank" rel="noopener">Catalogo articoli (Hub)</a>
+                            </div>
+                            <p id="tenant-edit-hint" class="form-hint">Solo Admin può creare/modificare tenants.</p>
+                        </div>
+                    </section>
+                </div>
+                <div class="section__sub" id="tenant-create-box" style="margin-top:12px;">
+                    <h4>Crea nuovo tenant</h4>
+                    <div class="form-grid">
+                        <label class="form-control"><span>Ragione sociale</span><input type="text" id="new-tenant-name" placeholder="Azienda S.p.A."></label>
+                        <label class="form-control"><span>Slug</span><input type="text" id="new-tenant-slug" placeholder="azienda-spa"></label>
+                        <label class="form-control"><span>Stato</span>
+                            <select id="new-tenant-status">
+                                <option value="IN_ONBOARDING" selected>IN_ONBOARDING</option>
+                                <option value="ATTIVO">ATTIVO</option>
+                                <option value="SOSPESO">SOSPESO</option>
+                            </select>
+                        </label>
+                        <div class="form-control"><span>&nbsp;</span>
+                            <button type="button" class="btn btn-primary" id="btn-tenant-create">Crea</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
