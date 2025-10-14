@@ -187,7 +187,7 @@ class ServiceDispatcher
                 ];
                 $res = $this->curlJson($hook, 'POST', $payload);
                 $res['provider'] = 'mailup';
-                return $res;
+                return $this->normalizeMailupResponse($res);
             }
 
             // Opzione B: integrazione diretta via OAuth MailUp (endpoint configurabile)
@@ -197,16 +197,22 @@ class ServiceDispatcher
             $password = getenv('MAILUP_PASSWORD') ?: '';
             $tokenUrl = getenv('MAILUP_TOKEN_URL') ?: 'https://services.mailup.com/Authorization/OAuth/Token';
             $sendUrl = getenv('MAILUP_SEND_URL') ?: '';
+            $grant = strtolower((string)(getenv('MAILUP_GRANT_TYPE') ?: 'password'));
+            $scope = getenv('MAILUP_SCOPE') ?: '';
             if ($clientId && $clientSecret && $username && $password && $sendUrl) {
                 // 1) Ottieni access token (grant password)
                 $ch = curl_init($tokenUrl);
-                $post = http_build_query([
-                    'grant_type' => 'password',
+                $tokenPayload = [
+                    'grant_type' => $grant,
                     'client_id' => $clientId,
                     'client_secret' => $clientSecret,
-                    'username' => $username,
-                    'password' => $password,
-                ]);
+                ];
+                if ($grant === 'password') {
+                    $tokenPayload['username'] = $username;
+                    $tokenPayload['password'] = $password;
+                }
+                if ($scope !== '') { $tokenPayload['scope'] = $scope; }
+                $post = http_build_query($tokenPayload);
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
@@ -245,7 +251,7 @@ class ServiceDispatcher
                 $headers = ["Authorization: Bearer {$access}"];
                 $res = $this->curlJson($sendUrl, 'POST', $payload, $headers);
                 $res['provider'] = 'mailup';
-                return $res;
+                return $this->normalizeMailupResponse($res);
             }
         } else { // smtp via mail()
             $headers = 'From: ' . (getenv('SMTP_FROM') ?: 'noreply@example.com') . "\r\n" .
@@ -332,3 +338,60 @@ class ServiceDispatcher
         return ['ok' => true, 'simulated' => true];
     }
 }
+
+    /**
+     * Normalizza alcune risposte MailUp per fornire un esito più leggibile.
+     * Ritorna sempre lo stesso shape di base: { ok, code, provider, body, [summary], [id] }
+     */
+    private function normalizeMailupResponse(array $res): array
+    {
+        $res['provider'] = 'mailup';
+        $body = $res['body'] ?? null;
+        if (is_string($body)) {
+            $decoded = json_decode($body, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $body = $decoded;
+                $res['body'] = $body;
+            }
+        }
+        // Se HTTP non 2xx, lascia ok=false ma aggiungi summary se possibile
+        if (isset($res['ok']) && $res['ok'] === false) {
+            if (is_array($body)) {
+                $msg = $body['error_description'] ?? $body['error'] ?? ($body['message'] ?? ($body['Message'] ?? null));
+                if ($msg) { $res['summary'] = 'error: ' . (is_string($msg) ? $msg : json_encode($msg)); }
+            }
+            return $res;
+        }
+
+        // HTTP ok: verifica se il body contiene segnali di errore
+        $hasError = false;
+        $msg = null;
+        if (is_array($body)) {
+            if (isset($body['error']) || isset($body['Error']) || isset($body['ErrorCode']) || isset($body['errors']) || isset($body['Errors'])) {
+                $hasError = true;
+                $msg = $body['error_description'] ?? $body['error'] ?? $body['Error'] ?? null;
+                if (!$msg && isset($body['errors']) && is_array($body['errors'])) {
+                    $msg = json_encode($body['errors']);
+                }
+            }
+        }
+        if ($hasError) {
+            $res['ok'] = false;
+            if ($msg) { $res['summary'] = 'error: ' . (is_string($msg) ? $msg : json_encode($msg)); }
+            return $res;
+        }
+
+        // Estrai ID/MessageId/Queued
+        if (is_array($body)) {
+            $id = $body['id'] ?? $body['Id'] ?? $body['messageId'] ?? $body['MessageId'] ?? null;
+            if ($id !== null) { $res['id'] = $id; }
+            $status = $body['status'] ?? $body['Status'] ?? null;
+            $queued = $body['queued'] ?? $body['Queued'] ?? null;
+            if ($queued === true || (is_string($status) && stripos($status, 'queued') !== false)) {
+                $res['summary'] = 'queued';
+            } else {
+                $res['summary'] = 'sent';
+            }
+        }
+        return $res;
+    }
