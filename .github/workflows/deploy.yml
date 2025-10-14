@@ -41,6 +41,22 @@ jobs:
               run: npm run lint
             - name: Prettier check
               run: npm run format
+            - name: Validate OpenAPI (docs/openapi.yaml)
+              run: |
+                  set -e
+                  if [ -f docs/openapi.yaml ]; then
+                    echo "Linting OpenAPI with Redocly CLI (npx)…"
+                    npx --yes @redocly/cli@1.19.0 lint docs/openapi.yaml || true
+                    echo "Validating with swagger-cli…"
+                    npx --yes swagger-cli@4.0.4 validate docs/openapi.yaml
+                  else
+                    echo "No docs/openapi.yaml found, skipping."
+                  fi
+            - name: Check docs artifacts exist
+              run: |
+                  test -f docs/api.html || (echo "docs/api.html mancante" && exit 1)
+                  test -f docs/API_REFERENCE.md || (echo "docs/API_REFERENCE.md mancante" && exit 1)
+                  echo "Docs artifacts presenti."
 
     deploy:
         needs: verify
