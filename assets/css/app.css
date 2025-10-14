@@ -240,6 +240,26 @@ body {
     align-items: center;
 }
 
+/* Services & Retry layout */
+#services .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-6);
+    align-items: start;
+}
+#services .panel { min-width: 0; }
+#services pre { white-space: pre-wrap; word-break: break-word; }
+#services .panel__body .form-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+#services .input-group { min-width: 200px; }
+#services .table-wrap { overflow: auto; max-height: var(--card-vh-limit); }
+#services .panel__body { max-height: var(--card-vh-limit); overflow: visible; }
+#panel-services-test .panel__body { max-height: 50vh; overflow: auto; }
+#panel-services-logs .table-wrap { max-height: 55vh; }
+#panel-services-status .panel__body { max-height: 45vh; overflow: auto; }
+#services .panel { box-shadow: var(--shadow-soft); }
+.badge { display: inline-block; padding: 2px 8px; background: var(--color-neutral-100); border: 1px solid var(--color-neutral-200); border-radius: 10px; font-size: 12px; }
+.btn { white-space: nowrap; }
+
 .statusbar {
     display: flex;
     gap: var(--spacing-4);

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stato Servizi – LpWF</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <style>
+    .status-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 12px; }
+    .status-card { border:1px solid #e6e6e6; border-radius:8px; padding:10px; background:#fff; }
+    .ok { color: #0a8f3c; }
+    .ko { color: #b00020; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eee; padding: 6px; text-align: left; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="section__header">
+      <h1>Stato Servizi</h1>
+      <p>Panoramica configurazione provider e ultimi log. Richiede login.</p>
+    </header>
+
+    <section class="section">
+      <div id="status" class="status-grid"></div>
+    </section>
+
+    <section class="section">
+      <header class="section__header">
+        <h2>Ultime richieste</h2>
+        <p>Truncate ai più recenti 50 elementi.</p>
+      </header>
+      <div id="logs"></div>
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    const api = window.lpwfAuth?.getApiBase?.() || '';
+    const token = window.lpwfAuth?.getToken?.() || '';
+
+    async function authGet(path){
+      const res = await fetch(`${api}/${path}`, { headers: { 'Authorization': token ? `Bearer ${token}` : '' } });
+      if(!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+    function bool(v){ return v ? '<span class="ok">Sì</span>' : '<span class="ko">No</span>'; }
+
+    async function load(){
+      try{
+        const s = await authGet('services/status');
+        const st = s?.status || {};
+        const el = document.getElementById('status');
+        el.innerHTML = `
+          <div class="status-card"><h3>WhatsApp</h3><p><strong>Provider:</strong> ${st.whatsapp?.provider || '—'}</p><p><strong>Configurato:</strong> ${bool(st.whatsapp?.configured)}</p></div>
+          <div class="status-card"><h3>Email</h3><p><strong>Provider:</strong> ${st.email?.provider || 'smtp'}</p><p><strong>Configurata:</strong> ${bool(st.email?.configured)}</p><p><strong>From:</strong> ${st.email?.from || '—'}</p></div>
+          <div class="status-card"><h3>Pagamenti</h3><p><strong>Stripe:</strong> ${bool(st.payment?.stripe)}</p><p><strong>Valuta:</strong> ${st.payment?.currency || 'EUR'}</p></div>
+          <div class="status-card"><h3>Webhooks</h3>
+            <p><strong>Ordini:</strong> ${bool(st.webhooks?.order)}</p>
+            <p><strong>Documenti:</strong> ${bool(st.webhooks?.document)}</p>
+            <p><strong>Pagamenti:</strong> ${bool(st.webhooks?.payment)}</p>
+            <p><strong>Ticket:</strong> ${bool(st.webhooks?.ticket)}</p>
+            <p><strong>Chat:</strong> ${bool(st.webhooks?.chat)}</p>
+          </div>
+        `;
+      } catch(e){
+        document.getElementById('status').innerHTML = '<p class="empty-state">Errore caricamento stato.</p>';
+      }
+
+      try{
+        const logs = await authGet('service_logs?limit=50');
+        const container = document.getElementById('logs');
+        if(!Array.isArray(logs) || logs.length === 0){
+          container.innerHTML = '<p class="form-hint">Nessun log.</p>';
+          return;
+        }
+        container.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Servizio</th><th>Azione</th><th>Provider</th><th>Stato</th><th>HTTP</th></tr></thead><tbody>'+
+          logs.map(r => `<tr><td>${r.created_at || ''}</td><td>${r.service || ''}</td><td>${r.action || ''}</td><td>${r.provider || ''}</td><td>${r.status || ''}</td><td>${r.http_code ?? ''}</td></tr>`).join('')+
+          '</tbody></table></div>';
+      } catch(e){
+        document.getElementById('logs').innerHTML = '<p class="empty-state">Errore caricamento log.</p>';
+      }
+    }
+    load();
+  </script>
+</body>
+</html>

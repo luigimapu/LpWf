@@ -1,0 +1,903 @@
+openapi: 3.0.3
+info:
+  title: LpWF Gestionale API
+  version: 1.0.0
+  description: |
+    API REST del gestionale LpWF e servizi correlati.
+
+    Autenticazione con JWT Bearer. Alcuni endpoint (health, tenant_health, hub_catalogo) sono pubblici.
+  contact:
+    name: LpWF Team
+servers:
+  - url: https://www.lprent.it/LpWF_refactor/api
+    description: Produzione
+  - url: https://www.lprent.it/LpWf_staging/api
+    description: Staging
+  - url: /api
+    description: Locale (stesso host)
+tags:
+  - name: Auth
+  - name: System
+  - name: Tickets
+  - name: Tasks
+  - name: Workflows
+  - name: Users
+  - name: Groups
+  - name: Clients
+  - name: Audit
+  - name: Services
+  - name: Catalog
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login utente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Info utente corrente
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublic'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (stateless)
+      responses:
+        '200': { description: OK }
+  /auth/password:
+    post:
+      tags: [Auth]
+      summary: Cambio password utente corrente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password: { type: string }
+                new_password: { type: string }
+              required: [current_password, new_password]
+      responses:
+        '200': { description: OK }
+
+  /health:
+    get:
+      tags: [System]
+      summary: Stato API/DB (pubblico)
+      security: []
+      responses:
+        '200': { description: OK }
+  /tenant_health:
+    get:
+      tags: [System]
+      summary: Stato DB tenant (pubblico)
+      security: []
+      responses:
+        '200': { description: OK }
+  /config:
+    get:
+      tags: [System]
+      summary: Config pubblica runtime
+      responses:
+        '200': { description: OK }
+
+  /tickets:
+    get:
+      tags: [Tickets]
+      summary: Lista ticket
+      parameters:
+        - { $ref: '#/components/parameters/pStato' }
+        - { $ref: '#/components/parameters/pPriorita' }
+        - { $ref: '#/components/parameters/pAssegnatoA' }
+        - { $ref: '#/components/parameters/pCreatoDa' }
+        - { $ref: '#/components/parameters/pClienteId' }
+        - { $ref: '#/components/parameters/pSearch' }
+        - { $ref: '#/components/parameters/pMine' }
+        - { $ref: '#/components/parameters/pTeam' }
+        - { $ref: '#/components/parameters/pChiusoDal' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ticket' }
+    post:
+      tags: [Tickets]
+      summary: Crea ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketCreateRequest' }
+      responses:
+        '201': { description: Creato }
+  /tickets/{id}:
+    get:
+      tags: [Tickets]
+      summary: Dettaglio ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ticket' }
+    put:
+      tags: [Tickets]
+      summary: Aggiorna ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketUpdateRequest' }
+      responses:
+        '200': { description: OK }
+  /tickets/{id}/assign:
+    put:
+      tags: [Tickets]
+      summary: Assegna ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id: { type: integer, format: int64 }
+      responses:
+        '200': { description: OK }
+  /tickets/{id}/close:
+    put:
+      tags: [Tickets]
+      summary: Chiudi ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /tickets/{id}/reopen:
+    put:
+      tags: [Tickets]
+      summary: Riapri ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /tickets/{id}/comment:
+    get:
+      tags: [Tickets]
+      summary: Lista commenti
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TicketComment' }
+    post:
+      tags: [Tickets]
+      summary: Aggiungi commento
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messaggio: { type: string }
+              required: [messaggio]
+      responses:
+        '201': { description: Creato }
+  /tickets/{id}/comment_attach:
+    post:
+      tags: [Tickets]
+      summary: Carica allegato per commento
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                comment_id: { type: integer, format: int64 }
+                file:
+                  type: string
+                  format: binary
+              required: [comment_id, file]
+      responses:
+        '201': { description: Creato }
+  /tickets/{id}/attachments:
+    get:
+      tags: [Tickets]
+      summary: Lista allegati ticket
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TicketAttachment' }
+
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Lista task
+      parameters:
+        - name: workflow_istanza_id
+          in: query
+          schema: { type: integer }
+        - name: workflow_modello_id
+          in: query
+          schema: { type: integer }
+        - name: assegnato_a_utente_id
+          in: query
+          schema: { type: integer }
+        - name: unassigned
+          in: query
+          schema: { type: boolean }
+        - { $ref: '#/components/parameters/pSearch' }
+      responses:
+        '200': { description: OK }
+  /tasks/{id}/assign:
+    put:
+      tags: [Tasks]
+      summary: Assegna task
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id: { type: integer }
+      responses:
+        '200': { description: OK }
+  /tasks/{id}/complete:
+    put:
+      tags: [Tasks]
+      summary: Completa task
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /tasks/{id}/note:
+    get:
+      tags: [Tasks]
+      summary: Note del task
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Tasks]
+      summary: Aggiungi nota
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_utente: { type: integer }
+                nota: { type: string }
+              required: [id_utente, nota]
+      responses:
+        '201': { description: Creato }
+
+  /workflows:
+    get:
+      tags: [Workflows]
+      summary: Lista modelli
+      responses:
+        '200': { description: OK }
+  /workflows/{id}:
+    get:
+      tags: [Workflows]
+      summary: Dettaglio modello (con passi)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /workflows/{id}/start:
+    post:
+      tags: [Workflows]
+      summary: Avvia istanza workflow
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entita_collegata_tipo: { type: string }
+                entita_collegata_id: { type: string }
+                id_utente_avvio: { type: integer }
+      responses:
+        '201': { description: Creato }
+
+  /workflowistanze:
+    get:
+      tags: [Workflows]
+      summary: Lista istanze
+      responses:
+        '200': { description: OK }
+  /workflowistanze/{id}:
+    get:
+      tags: [Workflows]
+      summary: Dettaglio istanza
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+
+  /utenti:
+    get:
+      tags: [Users]
+      summary: Lista utenti
+      parameters:
+        - { $ref: '#/components/parameters/pSearch' }
+        - name: ruolo
+          in: query
+          schema: { type: string, enum: [ADMIN, SUPERVISOR, USER] }
+        - name: group_id
+          in: query
+          schema: { type: integer }
+        - name: include_inactive
+          in: query
+          schema: { type: boolean }
+        - name: with_groups
+          in: query
+          schema: { type: boolean }
+        - name: with_supervisors
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Users]
+      summary: Crea utente (solo ADMIN)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreateRequest' }
+      responses:
+        '201': { description: Creato }
+  /utenti/{id}:
+    get:
+      tags: [Users]
+      summary: Dettaglio utente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Users]
+      summary: Aggiorna utente (ruolo solo ADMIN)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateRequest' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Users]
+      summary: Disattiva/Elimina utente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /utenti/{id}/groups:
+    get:
+      tags: [Users]
+      summary: Gruppi dell'utente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /utenti/{id}/supervised:
+    get:
+      tags: [Users]
+      summary: Utenti sotto il supervisor
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /utenti/{id}/add_supervised/{userId}:
+    post:
+      tags: [Users]
+      summary: Associa utente a supervisor
+      parameters:
+        - { $ref: '#/components/parameters/pId' }
+        - name: userId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '201': { description: Creato }
+  /utenti/{id}/remove_supervised/{userId}:
+    delete:
+      tags: [Users]
+      summary: Rimuove utente dal supervisor
+      parameters:
+        - { $ref: '#/components/parameters/pId' }
+        - name: userId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+  /utenti/{id}/supervisors:
+    get:
+      tags: [Users]
+      summary: Supervisori dell'utente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /utenti/{id}/set_supervisor/{supervisorId}:
+    post:
+      tags: [Users]
+      summary: Imposta supervisor unico per l'utente
+      parameters:
+        - { $ref: '#/components/parameters/pId' }
+        - name: supervisorId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /gruppi:
+    get:
+      tags: [Groups]
+      summary: Lista gruppi
+      parameters:
+        - name: with_user_counts
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Groups]
+      summary: Crea gruppo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GroupCreateRequest' }
+      responses:
+        '201': { description: Creato }
+  /gruppi/{id}:
+    get:
+      tags: [Groups]
+      summary: Dettaglio gruppo
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Groups]
+      summary: Aggiorna gruppo
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GroupUpdateRequest' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Groups]
+      summary: Elimina/Disattiva gruppo
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+
+  /clienti:
+    get:
+      tags: [Clients]
+      summary: Lista clienti
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Clients]
+      summary: Crea cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientCreateRequest' }
+      responses:
+        '201': { description: Creato }
+  /clienti/{id}:
+    get:
+      tags: [Clients]
+      summary: Dettaglio cliente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Clients]
+      summary: Aggiorna cliente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientUpdateRequest' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Clients]
+      summary: Elimina/Disattiva cliente
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+
+  /workflowsteps:
+    get:
+      tags: [Workflows]
+      summary: Lista passi workflow
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Workflows]
+      summary: Crea passo workflow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workflow_modello_id: { type: integer }
+                nome_passo: { type: string }
+                descrizione: { type: string }
+                responsabile_utente_id: { type: integer, nullable: true }
+                responsabile_gruppo_id: { type: integer, nullable: true }
+      responses:
+        '201': { description: Creato }
+  /workflowsteps/{id}:
+    put:
+      tags: [Workflows]
+      summary: Aggiorna passo workflow
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Workflows]
+      summary: Elimina passo workflow
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+
+  /catalogo_articoli:
+    get:
+      tags: [Catalog]
+      summary: Lista/gestione articoli (hub)
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Catalog]
+      summary: Crea/aggiorna articolo
+      responses:
+        '201': { description: Creato }
+  /catalogo_varianti:
+    get:
+      tags: [Catalog]
+      summary: Lista varianti
+      responses:
+        '200': { description: OK }
+  /catalogo_prezzi:
+    get:
+      tags: [Catalog]
+      summary: Lista prezzi
+      responses:
+        '200': { description: OK }
+
+
+  /audit_roles:
+    get:
+      tags: [Audit]
+      summary: Audit cambi ruolo
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1000 }
+      responses:
+        '200': { description: OK }
+  /auth_audit:
+    get:
+      tags: [Audit]
+      summary: Audit autenticazione
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1000 }
+      responses:
+        '200': { description: OK }
+  /service_logs:
+    get:
+      tags: [Audit]
+      summary: Log servizi integrazione
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500 }
+      responses:
+        '200': { description: OK }
+
+  /services/{name}:
+    post:
+      tags: [Services]
+      summary: Invio a servizio esterno
+      description: name ∈ {whatsapp, email, order, document, payment, ticket, chat}
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { description: OK }
+  /services/status:
+    get:
+      tags: [Services]
+      summary: Stato provider configurati
+      responses:
+        '200': { description: OK }
+  /services/retry:
+    post:
+      tags: [Services]
+      summary: Retry singolo log
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: integer }
+              required: [id]
+      responses:
+        '200': { description: OK }
+  /services/retry_failed:
+    post:
+      tags: [Services]
+      summary: Retry multiplo log falliti
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit: { type: integer, minimum: 1, maximum: 50 }
+                since_hours: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: OK }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    pId:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    pStato:
+      name: stato
+      in: query
+      schema: { type: string, enum: [APERTO, IN_LAVORAZIONE, CHIUSO, ANNULLATO] }
+    pPriorita:
+      name: priorita
+      in: query
+      schema: { type: string, enum: [BASSA, MEDIA, ALTA] }
+    pAssegnatoA:
+      name: assegnato_a
+      in: query
+      schema: { type: integer }
+    pCreatoDa:
+      name: creato_da
+      in: query
+      schema: { type: integer }
+    pClienteId:
+      name: cliente_id
+      in: query
+      schema: { type: integer }
+    pSearch:
+      name: search
+      in: query
+      schema: { type: string }
+    pMine:
+      name: mine
+      in: query
+      schema: { type: boolean }
+    pTeam:
+      name: team
+      in: query
+      schema: { type: boolean }
+    pChiusoDal:
+      name: chiuso_dal
+      in: query
+      schema: { type: string, format: date-time }
+  responses:
+    Unauthorized:
+      description: Non autenticato
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+    AuthLoginRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+      required: [email, password]
+    AuthLoginResponse:
+      type: object
+      properties:
+        access_token: { type: string }
+        token_type: { type: string }
+        expires_in: { type: integer }
+        user: { $ref: '#/components/schemas/UserPublic' }
+    UserPublic:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        nome: { type: string }
+        cognome: { type: string }
+        ruolo: { type: string, enum: [ADMIN, SUPERVISOR, USER, OPERATORE] }
+    UserCreateRequest:
+      type: object
+      properties:
+        nome: { type: string }
+        cognome: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        ruolo: { type: string, enum: [ADMIN, SUPERVISOR, USER] }
+      required: [nome, cognome, email]
+    UserUpdateRequest:
+      type: object
+      properties:
+        nome: { type: string }
+        cognome: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        ruolo: { type: string, enum: [ADMIN, SUPERVISOR, USER] }
+    Ticket:
+      type: object
+      properties:
+        id: { type: integer }
+        titolo: { type: string }
+        descrizione: { type: string }
+        priorita: { type: string, enum: [BASSA, MEDIA, ALTA] }
+        stato: { type: string, enum: [APERTO, IN_LAVORAZIONE, CHIUSO] }
+        creato_da: { type: integer }
+        assegnato_a: { type: integer, nullable: true }
+        cliente_id: { type: integer, nullable: true }
+        categoria: { type: string, nullable: true }
+        creato_il: { type: string, format: date-time }
+        aggiornato_il: { type: string, format: date-time }
+        chiuso_il: { type: string, format: date-time, nullable: true }
+        creato_da_nome: { type: string, nullable: true }
+        assegnato_a_nome: { type: string, nullable: true }
+        cliente_nome: { type: string, nullable: true }
+    TicketCreateRequest:
+      type: object
+      properties:
+        titolo: { type: string }
+        descrizione: { type: string }
+        priorita: { type: string, enum: [BASSA, MEDIA, ALTA] }
+        cliente_id: { type: integer }
+        categoria: { type: string }
+      required: [titolo]
+    TicketUpdateRequest:
+      type: object
+      properties:
+        titolo: { type: string }
+        descrizione: { type: string }
+        priorita: { type: string, enum: [BASSA, MEDIA, ALTA] }
+        cliente_id: { type: integer }
+        categoria: { type: string }
+    TicketComment:
+      type: object
+      properties:
+        id: { type: integer }
+        ticket_id: { type: integer }
+        utente_id: { type: integer }
+        messaggio: { type: string }
+        creato_il: { type: string, format: date-time }
+        utente_nome: { type: string, nullable: true }
+    TicketAttachment:
+      type: object
+      properties:
+        id: { type: integer }
+        commento_id: { type: integer }
+        nome_file_originale: { type: string }
+        percorso_file: { type: string }
+        creato_il: { type: string, format: date-time }
+    GroupCreateRequest:
+      type: object
+      properties:
+        nome: { type: string }
+        descrizione: { type: string }
+      required: [nome]
+    GroupUpdateRequest:
+      type: object
+      properties:
+        nome: { type: string }
+        descrizione: { type: string }
+        attivo: { type: boolean }
+    ClientCreateRequest:
+      type: object
+      properties:
+        ragione_sociale: { type: string }
+        partita_iva: { type: string }
+        codice_fiscale: { type: string }
+        indirizzo: { type: string }
+        cap: { type: string }
+        citta: { type: string }
+        provincia: { type: string }
+        nazione: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        tipo_cliente: { type: string, enum: [AZIENDA, PRIVATO, PA] }
+        note: { type: string }
+      required: [ragione_sociale]
+    ClientUpdateRequest:
+      type: object
+      properties:
+        ragione_sociale: { type: string }
+        partita_iva: { type: string }
+        codice_fiscale: { type: string }
+        indirizzo: { type: string }
+        cap: { type: string }
+        citta: { type: string }
+        provincia: { type: string }
+        nazione: { type: string }
+        latitudine: { type: number, format: float }
+        longitudine: { type: number, format: float }
+        email: { type: string }
+        telefono: { type: string }
+        tipo_cliente: { type: string, enum: [AZIENDA, PRIVATO, PA] }
+        note: { type: string }
+
+externalDocs:
+  description: Hub Catalogo (read‑only)
+  url: ../hub_catalogo/index.php?path=articoli

@@ -28,6 +28,37 @@
     - `https://<host>/LpWF_refactor/hub_catalogo/index.php?path=articoli`
     - Filtri: `q`, `categoria`, `tenant`, `tipologia`, `visibilita`
 - API applicative (autenticate): `/api/*` (usa login per ottenere token)
+    - Ticketing (nuovo):
+        - `GET /api/tickets[?mine=1]` elenco (se non ADMIN, visibili: creati da o assegnati all'utente)
+        - `POST /api/tickets` body: `{ titolo, descrizione?, priorita? }` (creatore=utente corrente)
+        - `GET /api/tickets/{id}` dettagli
+        - `PUT /api/tickets/{id}` aggiorna campi ammessi (`titolo`, `descrizione`, `priorita`, `categoria`, `cliente_id`, `assegnato_a`)
+        - `PUT /api/tickets/{id}/assign` assegna (admin può assegnare a chiunque; utente può auto‑assegnarsi)
+        - `PUT /api/tickets/{id}/close` chiude (assegnatario o admin)
+        - `PUT /api/tickets/{id}/reopen` riapre (solo admin/supervisor)
+        - `GET /api/tickets/{id}/comment` lista commenti
+        - `POST /api/tickets/{id}/comment` body: `{ messaggio }` aggiunge commento (utente corrente)
+        - `POST /api/tickets/{id}/comment_attach` multipart form: `comment_id`, `file`
+        - `GET /api/tickets/{id}/attachments` lista allegati (per commento), campi: `commento_id`, `nome_file_originale`, `percorso_file`
+        - Filtri supportati: `stato`, `priorita`, `assegnato_a`, `creato_da`, `cliente_id`, `search`, `mine=1`, `team=1` (per ADMIN/SUPERVISOR: ticket del team) e `chiuso_dal=YYYY-MM-DD HH:MM:SS` (conteggio chiusi nel periodo)
+- Pagina test servizi (autenticata): `services_test.html`
+    - Richiede login da `login.html` per salvare base API e token.
+    - Endpoint usati: `/api/services/{whatsapp|email|order|document|payment|ticket|chat}`
+    - Configurazione (facoltativa) in `.env` per provider reali:
+        - `SERVICES_VERIFY_SSL=1`
+        - WhatsApp: `WHATSAPP_PROVIDER=twilio|meta` + credenziali Twilio/Meta
+            - Meta Cloud API: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_ID`
+            - Per avviare conversazioni (fuori finestra 24h) usa un Template approvato:
+              `META_WHATSAPP_TEMPLATE_NAME` e `META_WHATSAPP_TEMPLATE_LANG` (predef. `it`).
+              Il testo inviato sarà passato come primo parametro del body del template.
+        - Email: `EMAIL_PROVIDER=smtp|mailgun|sendgrid|mailup` + chiavi se non `smtp`
+            - MailUp (bridge): imposta `MAILUP_WEBHOOK_URL` (endpoint interno che gestisce OAuth e chiamate MailUp)
+            - MailUp (placeholder API): `MAILUP_CLIENT_ID`, `MAILUP_CLIENT_SECRET`, `MAILUP_USERNAME`, `MAILUP_PASSWORD`, `MAILUP_FROM`, `MAILUP_FROM_NAME`, `MAILUP_REPLY_TO`
+        - Stripe: `STRIPE_API_KEY`, `PAYMENT_CURRENCY=EUR`
+        - Webhook opzionali: `ORDER_WEBHOOK_URL`, `DOCUMENT_WEBHOOK_URL`, `PAYMENT_WEBHOOK_URL`, `TICKET_WEBHOOK_URL`, `CHAT_WEBHOOK_URL`
+        - Forward automatico ticket in creazione: `TICKET_FORWARD_ON_CREATE=1` (opzionale; richiede `TICKET_WEBHOOK_URL`)
+    - Retry falliti: `/api/services/retry_failed` (POST) o CLI `php tools/services_retry.php --limit=20 --since=24`
+        - Suggerito cron: ogni 5-10 minuti per riprovare errori transitori.
 
 ## Stile
 

@@ -15,6 +15,11 @@ require_once __DIR__ . '/../models/AuthAudit.php';
 require_once __DIR__ . '/../models/SupervisorUtente.php';
 require_once __DIR__ . '/../models/TaskNotaAllegato.php';
 require_once __DIR__ . '/../models/Cliente.php';
+require_once __DIR__ . '/../models/ServiceLog.php';
+require_once __DIR__ . '/../models/Ticket.php';
+require_once __DIR__ . '/../models/TicketComment.php';
+require_once __DIR__ . '/../services/ServiceDispatcher.php';
+require_once __DIR__ . '/../services/ActionExecutor.php';
 
 class ApiController
 {
@@ -32,6 +37,8 @@ class ApiController
         'audit_roles'    => 'UserRoleAudit',
         'auth_audit'     => 'AuthAudit',
         'clienti'        => 'Cliente',
+        'service_logs'   => 'ServiceLog',
+        'tickets'        => 'Ticket',
     ];
 
     public function __construct(Database $database, string $method)
@@ -110,6 +117,31 @@ class ApiController
                     } else {
                         $this->sendResponse(400, ["message" => "Metodo non valido o ID workflow mancante."]);
                     }
+                    return;
+            }
+        }
+
+        if ($resource === 'tickets') {
+            switch ($action) {
+                case 'assign':
+                    if ($this->request_method === 'PUT') { $this->handleAssignTicket($id); } else { $this->sendResponse(405); }
+                    return;
+                case 'close':
+                    if ($this->request_method === 'PUT') { $this->handleCloseTicket($id); } else { $this->sendResponse(405); }
+                    return;
+                case 'reopen':
+                    if ($this->request_method === 'PUT') { $this->handleReopenTicket($id); } else { $this->sendResponse(405); }
+                    return;
+                case 'comment':
+                    if ($this->request_method === 'GET') { $this->handleGetTicketComments($id); }
+                    else if ($this->request_method === 'POST') { $this->handleAddTicketComment($id); }
+                    else { $this->sendResponse(405); }
+                    return;
+                case 'comment_attach':
+                    if ($this->request_method === 'POST') { $this->handleAddTicketCommentAttachment($id); } else { $this->sendResponse(405); }
+                    return;
+                case 'attachments':
+                    if ($this->request_method === 'GET') { $this->handleGetTicketAttachments($id); } else { $this->sendResponse(405); }
                     return;
             }
         }
@@ -329,6 +361,23 @@ class ApiController
             return;
         }
 
+        // Tickets: se non ADMIN, mostra solo visibili all'utente corrente
+        if ($model instanceof Ticket) {
+            $currentUser = $_SERVER['AUTH_USER'] ?? null;
+            $role = strtoupper($currentUser['ruolo'] ?? '');
+            $isAdmin = in_array($role, ['ADMIN','SUPERVISOR'], true);
+            // supporta ?mine=true per forzare il filtro a utente corrente
+            $mine = isset($params['mine']) && filter_var($params['mine'], FILTER_VALIDATE_BOOLEAN);
+            if (!$isAdmin || $mine) {
+                $params['visible_for_user_id'] = (int)($currentUser['id'] ?? 0);
+            }
+            // supporta ?team=1 per supervisor/admin: mostra i ticket del team
+            $team = isset($params['team']) && filter_var($params['team'], FILTER_VALIDATE_BOOLEAN);
+            if ($team && $isAdmin) {
+                $params['team_of_supervisor_id'] = (int)($currentUser['id'] ?? 0);
+            }
+        }
+
         $results = $model->findAll($params);
         $this->sendResponse(200, $results);
     }
@@ -419,7 +468,34 @@ class ApiController
             }
         }
 
+        // Set automatismi per Ticket: utente creatore e stato default
+        if ($model instanceof Ticket) {
+            $currentUser = $_SERVER['AUTH_USER'] ?? null;
+            if ($currentUser && empty($model->creato_da)) {
+                $model->creato_da = (int)$currentUser['id'];
+            }
+            if (empty($model->stato)) { $model->stato = 'APERTO'; }
+        }
+
         if ($model->create()) {
+            // Bridge opzionale a webhook ticket
+            if ($model instanceof Ticket) {
+                try {
+                    $forward = (string)(getenv('TICKET_FORWARD_ON_CREATE') ?: '0');
+                    $hook = getenv('TICKET_WEBHOOK_URL') ?: '';
+                    if ($hook && ($forward === '1' || strtolower($forward) === 'true')) {
+                        $dispatcher = new ServiceDispatcher();
+                        $payload = [
+                            'title' => $model->titolo,
+                            'priority' => $model->priorita,
+                            'description' => $model->descrizione,
+                            'ticket_id' => (int)$model->id,
+                            'created_by' => (int)$model->creato_da,
+                        ];
+                        $dispatcher->createTicket($payload);
+                    }
+                } catch (Throwable $e) { /* ignore forward errors */ }
+            }
             $this->sendResponse(201, ["message" => "Record creato con successo.", "id" => $model->id]);
         } else {
             $this->sendResponse(503, ["message" => "Impossibile creare il record."]);
@@ -490,6 +566,23 @@ class ApiController
         $roleCurrent = strtoupper($currentUser['ruolo'] ?? '');
         if ($model instanceof Utente && isset($data['ruolo']) && $roleCurrent !== 'ADMIN') {
             $this->sendResponse(403, ["message" => "Solo ADMIN può cambiare il ruolo degli utenti."]); return;
+        }
+
+        // Ticket: permessi granulari in update
+        if ($model instanceof Ticket) {
+            $isAdmin = in_array($roleCurrent, ['ADMIN','SUPERVISOR'], true);
+            if (!$isAdmin) {
+                // Chi non è admin/supervisor può aggiornare solo se creatore o assegnatario
+                $t = new Ticket($this->db_instance);
+                if (!$t->find($id)) { $this->sendResponse(404, ["message" => "Ticket non trovato."]); return; }
+                $uid = (int)($currentUser['id'] ?? 0);
+                $isOwner = (int)$t->creato_da === $uid;
+                $isAssignee = (int)$t->assegnato_a === $uid;
+                if (!$isOwner && !$isAssignee) { $this->sendResponse(403, ["message" => "Permesso negato sul ticket."]); return; }
+                // Limita i campi aggiornabili
+                $allowed = ['descrizione','priorita','categoria'];
+                $data = array_intersect_key($data, array_flip($allowed));
+            }
         }
 
             if ($model->update($data)) {
@@ -743,6 +836,15 @@ class ApiController
             $stepModel = new WorkflowStep($this->db_instance);
             $nextSteps = $stepModel->findAll(['workflow_modello_id' => $task->workflow_modello_id, 'ordine' => $passoCorrente->ordine + 1], 'sottopasso ASC');
 
+            // Esecuzione azione automatica associata al passo (se presente)
+            $actionResult = null;
+            try {
+                $executor = new ActionExecutor($this->db_instance, $_SERVER['AUTH_USER'] ?? null);
+                $actionResult = $executor->executeForStep($passoCorrente, $task);
+            } catch (Throwable $e) {
+                $actionResult = ['status' => 'ERROR', 'message' => $e->getMessage()];
+            }
+
             if (empty($nextSteps)) {
                 $istanza = new WorkflowIstanza($this->db_instance);
                 if ($istanza->find($task->workflow_istanza_id)) {
@@ -768,7 +870,7 @@ class ApiController
             }
 
             $this->db_instance->conn->commit();
-            $this->sendResponse(200, ['message' => $message]);
+            $this->sendResponse(200, ['message' => $message, 'action' => $actionResult]);
         } catch (Exception $e) {
             $this->db_instance->conn->rollBack();
             $code = $e->getCode() > 0 ? $e->getCode() : 503;
@@ -944,6 +1046,145 @@ class ApiController
         ]);
     }
 
+    private function handleAssignTicket(int $ticketId) {
+        $data = json_decode(file_get_contents("php://input"));
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        if (!$currentUser) { $this->sendResponse(401, ["message" => "Non autenticato."]); return; }
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN','SUPERVISOR'], true);
+
+        $targetUserId = isset($data->user_id) ? (int)$data->user_id : (int)$currentUser['id'];
+        if ($targetUserId <= 0) { $this->sendResponse(400, ["message" => "'user_id' mancante o non valido."]); return; }
+
+        $t = new Ticket($this->db_instance);
+        if (!$t->find($ticketId)) { $this->sendResponse(404, ["message" => "Ticket non trovato."]); return; }
+
+        // Se non admin, consenti solo auto-assegnazione o ticket non assegnato
+        if (!$isAdmin && !empty($t->assegnato_a) && (int)$t->assegnato_a !== (int)$currentUser['id']) {
+            $this->sendResponse(403, ["message" => "Ticket già assegnato ad altro utente."]); return;
+        }
+
+        $t->assegnaUtente($targetUserId);
+        $ok = $t->update(['assegnato_a' => $t->assegnato_a, 'stato' => $t->stato]);
+        if ($ok) $this->sendResponse(200, ["message" => "Ticket assegnato."]);
+        else $this->sendResponse(503, ["message" => "Errore durante l'assegnazione."]);
+    }
+
+    private function handleCloseTicket(int $ticketId) {
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        if (!$currentUser) { $this->sendResponse(401, ["message" => "Non autenticato."]); return; }
+
+        $t = new Ticket($this->db_instance);
+        if (!$t->find($ticketId)) { $this->sendResponse(404, ["message" => "Ticket non trovato."]); return; }
+        // Consenti chiusura a assegnatario o admin/supervisor
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN','SUPERVISOR'], true);
+        $isAssignee = (int)$t->assegnato_a === (int)$currentUser['id'];
+        if (!$isAdmin && !$isAssignee) { $this->sendResponse(403, ["message" => "Permesso negato."]); return; }
+        $t->chiudi();
+        $ok = $t->update(['stato' => $t->stato, 'chiuso_il' => $t->chiuso_il]);
+        if ($ok) $this->sendResponse(200, ["message" => "Ticket chiuso."]);
+        else $this->sendResponse(503, ["message" => "Errore durante la chiusura."]);
+    }
+
+    private function handleReopenTicket(int $ticketId) {
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        if (!$currentUser) { $this->sendResponse(401, ["message" => "Non autenticato."]); return; }
+        $role = strtoupper($currentUser['ruolo'] ?? '');
+        $isAdmin = in_array($role, ['ADMIN','SUPERVISOR'], true);
+        if (!$isAdmin) { $this->sendResponse(403, ["message" => "Solo ADMIN/SUPERVISOR."]); return; }
+        $t = new Ticket($this->db_instance);
+        if (!$t->find($ticketId)) { $this->sendResponse(404, ["message" => "Ticket non trovato."]); return; }
+        $t->riapri();
+        $ok = $t->update(['stato' => $t->stato, 'chiuso_il' => $t->chiuso_il]);
+        if ($ok) $this->sendResponse(200, ["message" => "Ticket riaperto."]);
+        else $this->sendResponse(503, ["message" => "Errore durante la riapertura."]);
+    }
+
+    private function handleGetTicketComments(int $ticketId) {
+        $m = new TicketComment($this->db_instance);
+        $rows = $m->findAll(['ticket_id' => $ticketId]);
+        $this->sendResponse(200, $rows);
+    }
+
+    private function handleAddTicketComment(int $ticketId) {
+        $data = json_decode(file_get_contents("php://input"));
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        if (!$currentUser) { $this->sendResponse(401, ["message" => "Non autenticato."]); return; }
+        $msg = (string)($data->messaggio ?? $data->nota ?? '');
+        if (trim($msg) === '') { $this->sendResponse(400, ["message" => "Messaggio richiesto."]); return; }
+        $m = new TicketComment($this->db_instance);
+        $m->ticket_id = $ticketId;
+        $m->utente_id = (int)$currentUser['id'];
+        $m->messaggio = htmlspecialchars(strip_tags($msg));
+        if ($m->create()) $this->sendResponse(201, ["message" => "Commento aggiunto.", "id" => (int)$m->id]);
+        else $this->sendResponse(503, ["message" => "Errore salvataggio commento."]);
+    }
+
+    private function handleAddTicketCommentAttachment(int $ticketId) {
+        $commentId = isset($_POST['comment_id']) ? (int)$_POST['comment_id'] : 0;
+        if ($commentId <= 0 || !isset($_FILES['file'])) { $this->sendResponse(400, ["message" => "Parametri mancanti (comment_id o file)."]); return; }
+        $row = $this->db_instance->selectOne("SELECT ticket_id FROM ticket_commenti WHERE id = ?", [$commentId]);
+        if (!$row || (int)$row['ticket_id'] !== (int)$ticketId) { $this->sendResponse(404, ["message" => "Commento non trovato per questo ticket."]); return; }
+
+        $upload = $_FILES['file'];
+        $err = (int)($upload['error'] ?? UPLOAD_ERR_OK);
+        if ($err !== UPLOAD_ERR_OK) {
+            $map = [
+                UPLOAD_ERR_INI_SIZE => 'File oltre il limite del server.',
+                UPLOAD_ERR_FORM_SIZE => 'File oltre il limite consentito.',
+                UPLOAD_ERR_PARTIAL => 'Upload parziale, riprova.',
+                UPLOAD_ERR_NO_FILE => 'Nessun file inviato.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Cartella temporanea mancante.',
+                UPLOAD_ERR_CANT_WRITE => 'Impossibile scrivere su disco.',
+                UPLOAD_ERR_EXTENSION => 'Upload bloccato da estensione PHP.',
+            ];
+            $msg = $map[$err] ?? 'Errore upload.';
+            $this->sendResponse(400, ["message" => $msg]);
+            return;
+        }
+        if (!is_uploaded_file($upload['tmp_name'])) { $this->sendResponse(400, ["message" => "Upload non valido."]); return; }
+
+        $origName = $upload['name'];
+        $safeName = preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $origName);
+        $ext = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+        $maxMb = (int)(getenv('MAX_TICKET_ATTACHMENT_MB') ?: 10);
+        $maxBytes = $maxMb > 0 ? ($maxMb * 1024 * 1024) : (10 * 1024 * 1024);
+        $size = (int)($upload['size'] ?? 0);
+        if ($size <= 0) { $this->sendResponse(400, ["message" => "File vuoto o non valido."]); return; }
+        if ($size > $maxBytes) { $this->sendResponse(400, ["message" => "File troppo grande. Massimo {$maxMb} MB."]); return; }
+        $allowedExt = ['pdf','png','jpg','jpeg','gif','doc','docx','xls','xlsx','txt','csv','zip'];
+        if (!$ext || !in_array($ext, $allowedExt, true)) {
+            $this->sendResponse(400, [ 'message' => 'Estensione non consentita.' ]);
+            return;
+        }
+        $destDir = __DIR__ . '/../uploads';
+        if (!is_dir($destDir)) @mkdir($destDir, 0775, true);
+        if (!is_writable($destDir)) { @chmod($destDir, 02775); }
+        $destName = uniqid('tka_', true) . ($ext ? ('.' . $ext) : '');
+        $destPath = $destDir . '/' . $destName;
+        if (!move_uploaded_file($upload['tmp_name'], $destPath)) {
+            @chmod($destDir, 0777);
+            if (!move_uploaded_file($upload['tmp_name'], $destPath)) {
+                $this->sendResponse(500, ["message" => "Impossibile salvare il file."]); return;
+            }
+        }
+        $publicPath = 'uploads/' . $destName;
+        $sql = 'INSERT INTO ticket_allegati (commento_id, nome_file_originale, percorso_file) VALUES (?,?,?)';
+        $ok = $this->db_instance->executeStatement($sql, [$commentId, $origName, $publicPath]);
+        if ($ok === false) { $this->sendResponse(503, ["message" => "Impossibile registrare l\'allegato."]); return; }
+        $this->sendResponse(201, [ 'message' => 'Allegato caricato.', 'percorso' => $publicPath ]);
+    }
+
+    private function handleGetTicketAttachments(int $ticketId) {
+        $sql = "SELECT ta.* FROM ticket_allegati ta
+                JOIN ticket_commenti tc ON tc.id = ta.commento_id
+               WHERE tc.ticket_id = ?
+               ORDER BY ta.id ASC";
+        $rows = $this->db_instance->select($sql, [$ticketId]) ?: [];
+        $this->sendResponse(200, $rows);
+    }
+
     private function getModelInstance(string $resource_name) {
         if (isset($this->model_map[$resource_name])) {
             $class_name = $this->model_map[$resource_name];
@@ -960,3 +1201,12 @@ class ApiController
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 }
+        if ($model instanceof ServiceLog) {
+            $limit = isset($params['limit']) && is_numeric($params['limit']) ? (int)$params['limit'] : 50;
+            if ($limit < 1) { $limit = 50; }
+            if ($limit > 500) { $limit = 500; }
+            $sql = "SELECT * FROM service_logs ORDER BY created_at DESC, id DESC LIMIT $limit";
+            $rows = $this->db_instance->select($sql, []) ?: [];
+            $this->sendResponse(200, $rows);
+            return;
+        }

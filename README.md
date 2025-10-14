@@ -19,6 +19,12 @@
 - Test hub (read-only): `/hub_catalogo/index.php?path=articoli`
 - Test API (autenticate): `/api/*`
 
+## Riferimenti API e Test
+
+- Documentazione endpoint: `docs/API_REFERENCE.md`
+- Console Test API: `api_test.html`
+- Test Servizi integrazione: `services_test.html`
+
 ## Contribuire
 
 Vedi `CONTRIBUTING.md`, `docs/DEV_SETUP.md` e `docs/DEPLOY_PLESK.md`.

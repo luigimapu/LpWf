@@ -40,6 +40,7 @@ require_once __DIR__ . '/CatalogPricesController.php';
 require_once __DIR__ . '/CatalogArticleCategoriesController.php';
 require_once __DIR__ . '/CatalogRelationsController.php';
 require_once __DIR__ . '/CatalogListsController.php';
+require_once __DIR__ . '/ServiceController.php';
 require_once __DIR__ . '/CatalogCategoriesController.php';
 require_once __DIR__ . '/../services/AuthService.php';
 
@@ -239,6 +240,13 @@ try {
     exit();
 } catch (Throwable $ex) {
     sendJson(500, ['message' => 'Errore nella verifica dell\'autenticazione.']);
+    exit();
+}
+
+// Servizi integrazione (autenticati): /api/services/{azione}
+if ($resource_name === 'services') {
+    $svc = new ServiceController($database, $_SERVER['AUTH_USER'] ?? null);
+    $svc->handle($request_method, $action);
     exit();
 }
 

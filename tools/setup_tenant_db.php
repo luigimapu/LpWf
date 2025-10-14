@@ -188,6 +188,124 @@ try {
     fwrite(STDERR, "Avviso: dedup/unique fallita: " . $e->getMessage() . "\n");
 }
 
+// Log servizi integrazione (idempotente)
+try {
+    echo "Verifico tabella service_logs…\n";
+    $pdo->exec("CREATE TABLE IF NOT EXISTS service_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  service VARCHAR(64) NOT NULL,
+  action VARCHAR(64) NULL,
+  provider VARCHAR(64) NULL,
+  status VARCHAR(16) NULL,
+  http_code INT NULL,
+  request JSON NULL,
+  response JSON NULL,
+  user_id BIGINT UNSIGNED NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_service_logs_created_at (created_at),
+  INDEX idx_service_logs_service (service)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+} catch (Throwable $e) {
+    fwrite(STDERR, "Avviso: creazione service_logs fallita: " . $e->getMessage() . "\n");
+}
+
+// Ticketing (idempotente)
+try {
+    echo "Verifico tabelle ticketing…\n";
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  titolo VARCHAR(255) NOT NULL,
+  descrizione TEXT NULL,
+  priorita ENUM('BASSA','MEDIA','ALTA') NOT NULL DEFAULT 'MEDIA',
+  stato ENUM('APERTO','IN_LAVORAZIONE','CHIUSO') NOT NULL DEFAULT 'APERTO',
+  creato_da BIGINT UNSIGNED NOT NULL,
+  assegnato_a BIGINT UNSIGNED NULL,
+  cliente_id BIGINT UNSIGNED NULL,
+  categoria VARCHAR(120) NULL,
+  creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  aggiornato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  chiuso_il DATETIME NULL,
+  CONSTRAINT fk_tickets_creatore FOREIGN KEY (creato_da) REFERENCES utenti(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_tickets_assegnatario FOREIGN KEY (assegnato_a) REFERENCES utenti(id) ON DELETE SET NULL,
+  CONSTRAINT fk_tickets_cliente FOREIGN KEY (cliente_id) REFERENCES clienti(id) ON DELETE SET NULL,
+  INDEX idx_tickets_stato (stato),
+  INDEX idx_tickets_priorita (priorita)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS ticket_commenti (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ticket_id BIGINT UNSIGNED NOT NULL,
+  utente_id BIGINT UNSIGNED NOT NULL,
+  messaggio TEXT NOT NULL,
+  creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_ticket_commenti_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ticket_commenti_utente FOREIGN KEY (utente_id) REFERENCES utenti(id) ON DELETE CASCADE,
+  INDEX idx_ticket_commenti_ticket (ticket_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS ticket_allegati (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  commento_id BIGINT UNSIGNED NOT NULL,
+  nome_file_originale VARCHAR(255) NOT NULL,
+  percorso_file VARCHAR(255) NOT NULL,
+  creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_ticket_allegati_commento FOREIGN KEY (commento_id) REFERENCES ticket_commenti(id) ON DELETE CASCADE,
+  INDEX idx_ticket_allegati_commento (commento_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+} catch (Throwable $e) {
+    fwrite(STDERR, "Avviso: creazione schema ticketing fallita: " . $e->getMessage() . "\n");
+}
+
+// Azioni standard: imposta parametri_richiesti per azioni note (idempotente)
+try {
+    $defs = [
+        'CREA_ORDINE' => [
+            ['name' => 'canale', 'label' => 'Canale', 'type' => 'select', 'options' => ['INTERNO','MARKETPLACE']],
+            ['name' => 'note', 'label' => 'Note', 'type' => 'text', 'placeholder' => 'Note ordine'],
+        ],
+        'VERIFICA_SCORTE_MAGAZZINO' => [
+            ['name' => 'soglia_minima', 'label' => 'Soglia minima', 'type' => 'number', 'placeholder' => '0'],
+            ['name' => 'magazzino', 'label' => 'Magazzino', 'type' => 'text', 'placeholder' => 'WH-01'],
+        ],
+        'SUGGERISCI_RELATI' => [
+            ['name' => 'tipo', 'label' => 'Tipo relazione', 'type' => 'select', 'options' => ['UPSELL','CROSS_SELL','SERVIZIO_AUSILIARIO','SOSTITUTIVO','ADD_ON']],
+            ['name' => 'max', 'label' => 'Max suggerimenti', 'type' => 'number', 'placeholder' => '5'],
+        ],
+        'GENERA_DOCUMENTO' => [
+            ['name' => 'tipo_documento', 'label' => 'Tipo documento', 'type' => 'select', 'options' => ['FATTURA','DDT','CONTRATTO']],
+            ['name' => 'serie', 'label' => 'Serie', 'type' => 'text', 'placeholder' => 'A'],
+            ['name' => 'invia_email', 'label' => 'Invia email', 'type' => 'select', 'options' => ['SI','NO']],
+        ],
+        'RICHIEDI_PAGAMENTO_DIGITALE' => [
+            ['name' => 'gateway', 'label' => 'Gateway', 'type' => 'select', 'options' => ['STRIPE','PAYPAL']],
+            ['name' => 'importo', 'label' => 'Importo', 'type' => 'number'],
+            ['name' => 'descrizione', 'label' => 'Descrizione', 'type' => 'text'],
+        ],
+        'REGISTRA_PAGAMENTO' => [
+            ['name' => 'documento_id', 'label' => 'Documento ID', 'type' => 'number'],
+            ['name' => 'metodo', 'label' => 'Metodo', 'type' => 'select', 'options' => ['BONIFICO','CARTA','CONTANTI']],
+            ['name' => 'importo', 'label' => 'Importo', 'type' => 'number'],
+            ['name' => 'data', 'label' => 'Data', 'type' => 'date'],
+        ],
+        'CREA_TICKET' => [
+            ['name' => 'categoria', 'label' => 'Categoria', 'type' => 'text'],
+            ['name' => 'priorita', 'label' => 'Priorità', 'type' => 'select', 'options' => ['BASSA','MEDIA','ALTA']],
+        ],
+        'INVIA_SOLLECITO_EMAIL' => [
+            ['name' => 'giorni_ritardo', 'label' => 'Giorni ritardo', 'type' => 'number', 'placeholder' => '5'],
+            ['name' => 'destinatario', 'label' => 'Destinatario', 'type' => 'select', 'options' => ['CLIENTE','RESPONSABILE']],
+            ['name' => 'messaggio', 'label' => 'Messaggio', 'type' => 'text'],
+        ],
+    ];
+    $stmt = $pdo->prepare('UPDATE azioni_standard SET parametri_richiesti = :json WHERE codice = :cod AND (parametri_richiesti IS NULL OR parametri_richiesti = "")');
+    foreach ($defs as $code => $arr) {
+        $json = json_encode($arr, JSON_UNESCAPED_UNICODE);
+        $stmt->execute([':json' => $json, ':cod' => $code]);
+    }
+} catch (Throwable $e) {
+    fwrite(STDERR, "Avviso: update azioni_standard parametri fallito: " . $e->getMessage() . "\n");
+}
+
 echo "Completato.\n";
 
 // Migrazione: aggiunge colonne latitudine/longitudine se mancanti

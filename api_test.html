@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Test Console – LpWF</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 16px; }
+    .card { border: 1px solid #e6e6e6; border-radius: 8px; padding: 12px; background: #fff; }
+    .card h3 { margin: 0 0 8px 0; }
+    pre { background:#f8f8f8; border:1px solid #eee; padding:8px; overflow:auto; max-height:300px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    .muted { color:#777; }
+  </style>
+  <script src="auth.js"></script>
+  <script>
+    const storageKey = 'lpwf_api_tester';
+    function getApiBase() { return window.lpwfAuth?.getApiBase?.() || window.lpwfAuth?.ensureBaseForLocation?.() || '/api'; }
+    function getHeaders(json=true) { return window.lpwfAuth?.buildHeaders?.({}, json) || {}; }
+    function saveState(obj){ try{ localStorage.setItem(storageKey, JSON.stringify(obj)); }catch(e){} }
+    function loadState(){ try{ const r=localStorage.getItem(storageKey); return r?JSON.parse(r):{}; }catch(e){ return {}; } }
+    async function run(){
+      const method = document.getElementById('method').value;
+      const path = document.getElementById('path').value.trim().replace(/^\/+/, '');
+      const bodyEl = document.getElementById('body');
+      const outReq = document.getElementById('out-req');
+      const outRes = document.getElementById('out-res');
+      const api = getApiBase();
+      let body = null; let textBody = (bodyEl.value||'').trim();
+      if (textBody) { try { body = JSON.parse(textBody); } catch(e) { body = textBody; } }
+      const url = `${api}/${path}`;
+      const init = { method, headers: getHeaders(!!body && typeof body !== 'string'), body: body ? (typeof body==='string' ? body : JSON.stringify(body)) : undefined };
+      outReq.textContent = JSON.stringify({ url, ...init, headers: init.headers }, null, 2);
+      saveState({ method, path, body: bodyEl.value });
+      try{
+        const res = await fetch(url, init);
+        const text = await res.text();
+        try { outRes.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+        catch(e) { outRes.textContent = text; }
+      }catch(err){ outRes.textContent = err?.message || 'Errore'; }
+    }
+    function fill(path, method='GET', body=''){
+      document.getElementById('path').value = path;
+      document.getElementById('method').value = method;
+      document.getElementById('body').value = body;
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const st = loadState();
+      if (st.method) document.getElementById('method').value = st.method;
+      if (st.path) document.getElementById('path').value = st.path;
+      if (st.body) document.getElementById('body').value = st.body;
+      document.getElementById('api-base').textContent = getApiBase();
+      document.getElementById('token-present').textContent = !!window.lpwfAuth?.getToken?.() ? 'Sì' : 'No';
+    });
+  </script>
+</head>
+<body>
+  <main class="container">
+    <header class="section__header">
+      <h1>API Test Console</h1>
+      <p>Base API: <code id="api-base"></code> • Token presente: <strong id="token-present">No</strong>. Fai login da <a href="login.html">login.html</a> se serve.</p>
+    </header>
+
+    <section class="section">
+      <div class="card">
+        <h3>Esegui richiesta</h3>
+        <div class="row">
+          <label class="form-control"><span>Metodo</span>
+            <select id="method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+          </label>
+          <label class="form-control" style="flex:1 1 auto;"><span>Path</span>
+            <input id="path" type="text" placeholder="es. tickets?mine=1">
+          </label>
+        </div>
+        <label class="form-control"><span>Body (JSON)</span>
+          <textarea id="body" rows="6" placeholder='{"titolo":"..."}'></textarea>
+        </label>
+        <div class="row">
+          <button class="btn btn-primary" onclick="run()">Esegui</button>
+          <small class="muted">L'header Authorization viene impostato automaticamente</small>
+        </div>
+        <h4>Request</h4>
+        <pre id="out-req"></pre>
+        <h4>Response</h4>
+        <pre id="out-res"></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Esempi rapidi</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Diagnostica</h3>
+          <div class="row">
+            <button class="btn" onclick="fill('health','GET','')">/health</button>
+            <button class="btn" onclick="fill('tenant_health','GET','')">/tenant_health</button>
+            <button class="btn" onclick="fill('config','GET','')">/config</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Auth</h3>
+          <div class="row">
+            <button class="btn" onclick="fill('auth/login','POST','{\n  \"email\":\"utente@example.com\",\n  \"password\":\"pwd\"\n}')">/auth/login</button>
+            <button class="btn" onclick="fill('auth/me','GET','')">/auth/me</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ticket</h3>
+          <div class="row">
+            <button class="btn" onclick="fill('tickets?mine=1','GET','')">Lista (miei)</button>
+            <button class="btn" onclick="fill('tickets','POST','{\n  \"titolo\":\"Problema\",\n  \"priorita\":\"MEDIA\"\n}')">Crea</button>
+            <button class="btn" onclick="fill('tickets/1/assign','PUT','{}')">Assegna me</button>
+            <button class="btn" onclick="fill('tickets/1/close','PUT','{}')">Chiudi</button>
+            <button class="btn" onclick="fill('tickets/1/comment','POST','{\n  \"messaggio\":\"In lavorazione\"\n}')">Commenta</button>
+            <button class="btn" onclick="fill('tickets/1/attachments','GET','')">Allegati</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Tasks</h3>
+          <div class="row">
+            <button class="btn" onclick="fill('tasks?unassigned=true','GET','')">Non assegnati</button>
+            <button class="btn" onclick="fill('tasks/1/assign','PUT','{}')">Assegna me</button>
+            <button class="btn" onclick="fill('tasks/1/complete','PUT','{}')">Completa</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Utenti & Gruppi</h3>
+          <div class="row">
+            <button class="btn" onclick="fill('utenti?with_groups=true','GET','')">Utenti</button>
+            <button class="btn" onclick="fill('gruppi?with_user_counts=true','GET','')">Gruppi</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Servizi integrazione</h3>
+          <div class="row">
+            <a class="btn" href="services_test.html">Apri pagina Test Servizi</a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Hub Catalogo (read‑only)</h3>
+          <p class="muted">Questi endpoint non passano da /api e non richiedono auth.</p>
+          <div class="row">
+            <a class="btn" href="hub_catalogo/index.php?path=articoli" target="_blank" rel="noopener">articoli</a>
+            <a class="btn" href="hub_catalogo/index.php?path=categorie" target="_blank" rel="noopener">categorie</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+

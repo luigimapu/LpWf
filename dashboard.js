@@ -118,6 +118,13 @@
             mediaSrcUnsplash: document.getElementById('media-src-unsplash'),
             mediaSrcPexels: document.getElementById('media-src-pexels'),
             mediaSrcPrefer: document.getElementById('media-src-prefer'),
+            // Ticket metrics (overview)
+            metricTicketOpen: document.getElementById('metric-ticket-open'),
+            metricTicketDoing: document.getElementById('metric-ticket-doing'),
+            metricTicketClosed30: document.getElementById('metric-ticket-closed30'),
+            metricTicketOpenTeam: document.getElementById('metric-ticket-open-team'),
+            metricTicketDoingTeam: document.getElementById('metric-ticket-doing-team'),
+            metricTicketClosed30Team: document.getElementById('metric-ticket-closed30-team'),
             // Media upload controls
             uploadMediaInput: document.getElementById('input-upload-media'),
             uploadMediaAlt: document.getElementById('input-upload-alt'),
@@ -1102,7 +1109,8 @@
             workflowState.actions.forEach((action) => {
                 const option = document.createElement('option');
                 option.value = action.id;
-                option.textContent = sanitize(action.nome_azione || `Azione #${action.id}`);
+                const label = action.nome || action.nome_azione || action.codice || `Azione #${action.id}`;
+                option.textContent = sanitize(label);
                 stepActionSelect.appendChild(option);
             });
             stepActionSelect.value = current || '';
@@ -1447,7 +1455,7 @@
                                 (a) => a.id == step.tipo_azione_standard,
                             );
                             const actionName = action
-                                ? sanitize(action.nome_azione)
+                                ? sanitize(action.nome || action.nome_azione || action.codice || `Azione #${action.id}`)
                                 : step.tipo_azione_standard
                                   ? `Azione #${step.tipo_azione_standard}`
                                   : '—';
@@ -6437,6 +6445,7 @@
                             await authFetch(`catalogo_listini/${id}`, { method: 'DELETE' });
                             await renderPricelists(state.selectedProductDetail.tenant_id);
                             await loadPriceListsForArticle(state.selectedProductDetail);
+                            try { showToast('Listino eliminato', { type: 'success' }); } catch (e) {}
                         } catch (e) {
                             alert(e.message || 'Errore eliminazione listino');
                         }
@@ -6467,7 +6476,8 @@
                         return;
                     }
                     try {
-                        if (id) {
+                        const updating = !!id;
+                        if (updating) {
                             await authFetch(`catalogo_listini/${encodeURIComponent(id)}`, {
                                 method: 'PUT',
                                 json: true,
@@ -6485,9 +6495,27 @@
                             dom.pricelistFields.btnDelete.hidden = true;
                         await renderPricelists(tid);
                         await loadPriceListsForArticle(state.selectedProductDetail);
+                        try { showToast(updating ? 'Listino aggiornato' : 'Listino creato', { type: 'success' }); } catch (e) {}
                     } catch (e) {
                         alert(e.message || 'Errore salvataggio listino');
                     }
+                });
+            }
+
+            // Categories: open/manage
+            if (dom.btnManageCategories) {
+                dom.btnManageCategories.addEventListener('click', async () => {
+                    try {
+                        // Reset form state and hide delete until a category is selected
+                        if (dom.formCategory) dom.formCategory.reset();
+                        if (dom.categoryFields?.btnDelete)
+                            dom.categoryFields.btnDelete.hidden = true;
+                        await renderCategoriesList();
+                        await populateCategoryParent('');
+                    } catch (e) {
+                        /* ignore; renderers already handle errors */
+                    }
+                    openModal('modal-manage-categories');
                 });
             }
 
@@ -6508,6 +6536,7 @@
                             body: { categorie_slugs: slugs },
                         });
                         await loadProductById(state.selectedProductId);
+                        try { showToast('Categorie aggiornate', { type: 'success' }); } catch (e) {}
                     } catch (e) {
                         alert(e.message || 'Errore salvataggio categorie');
                     }
@@ -6590,6 +6619,7 @@
                             await authFetch(`catalogo_categorie/${id}`, { method: 'DELETE' });
                             await renderCategoriesList();
                             await loadProductFilters();
+                            try { showToast('Categoria eliminata', { type: 'success' }); } catch (e) {}
                         } catch (e) {
                             alert(e.message || 'Errore eliminazione categoria');
                         }
@@ -6612,7 +6642,8 @@
                         return;
                     }
                     try {
-                        if (id) {
+                        const updating = !!id;
+                        if (updating) {
                             await authFetch(`catalogo_categorie/${encodeURIComponent(id)}`, {
                                 method: 'PUT',
                                 json: true,
@@ -6630,6 +6661,11 @@
                             dom.categoryFields.btnDelete.hidden = true;
                         await renderCategoriesList();
                         await loadProductFilters();
+                        try {
+                            showToast(updating ? 'Categoria aggiornata' : 'Categoria creata', {
+                                type: 'success',
+                            });
+                        } catch (e) {}
                     } catch (e) {
                         alert(e.message || 'Errore salvataggio categoria');
                     }
@@ -6648,6 +6684,7 @@
                         dom.categoryFields.btnDelete.hidden = true;
                         await renderCategoriesList();
                         await loadProductFilters();
+                        try { showToast('Categoria eliminata', { type: 'success' }); } catch (e) {}
                     } catch (e) {
                         alert(e.message || 'Errore eliminazione categoria');
                     }
@@ -6678,6 +6715,7 @@
                             },
                         });
                         await loadProductById(state.selectedProductId);
+                        try { showToast('Relazione creata', { type: 'success' }); } catch (e) {}
                     } catch (e) {
                         alert(e.message || 'Errore creazione relazione');
                     }
@@ -6705,6 +6743,7 @@
                         try {
                             await authFetch(`catalogo_relazioni/${id}`, { method: 'DELETE' });
                             await loadProductById(state.selectedProductId);
+                            try { showToast('Relazione eliminata', { type: 'success' }); } catch (e) {}
                         } catch (e) {
                             alert(e.message || 'Errore eliminazione relazione');
                         }
@@ -6726,6 +6765,7 @@
                                 body: { priorita: prio, tipo_relazione: tipo },
                             });
                             await loadProductById(state.selectedProductId);
+                            try { showToast('Relazione aggiornata', { type: 'success' }); } catch (e) {}
                         } catch (e) {
                             alert(e.message || 'Errore aggiornamento relazione');
                         }
@@ -7289,6 +7329,28 @@
                     head.appendChild(btn);
                 }
             }
+
+            // Services panels
+            ['panel-services-status', 'panel-services-test', 'panel-services-logs'].forEach((pid) => {
+                const panel = document.getElementById(pid);
+                if (!panel) return;
+                const head = panel.querySelector('.panel__header');
+                const body = panel.querySelector('.panel__body');
+                if (head && body && !head.querySelector('.collapse-toggle')) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'collapse-toggle';
+                    btn.textContent = 'Comprimi';
+                    btn.setAttribute('aria-expanded', 'true');
+                    btn.addEventListener('click', () => {
+                        const expanded = btn.getAttribute('aria-expanded') === 'true';
+                        btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                        btn.textContent = expanded ? 'Espandi' : 'Comprimi';
+                        body.hidden = expanded;
+                    });
+                    head.appendChild(btn);
+                }
+            });
 
             // Kanban area (board + workflow grid) – costruisco un header sintetico
             const kanban = document.querySelector('#workflow .kanban-board');
@@ -8382,6 +8444,7 @@
                 await Promise.all([
                     loadTasks(),
                     loadWorkflows(),
+                    loadTicketMetrics(),
                     (async () => {
                         await loadInstances();
                         await updateInstanceAssignees();
@@ -8391,6 +8454,19 @@
                     loadProductFilters(),
                     loadProducts(),
                 ]);
+                // Se Supervisor/Admin, mostra metriche team e caricale
+                try {
+                    const role = (state.currentUserInfo?.ruolo || '').toUpperCase();
+                    if (role === 'ADMIN' || role === 'SUPERVISOR') {
+                        const open = document.getElementById('metric-card-ticket-open-team');
+                        const doing = document.getElementById('metric-card-ticket-doing-team');
+                        const closed = document.getElementById('metric-card-ticket-closed30-team');
+                        if (open) open.hidden = false;
+                        if (doing) doing.hidden = false;
+                        if (closed) closed.hidden = false;
+                        await loadTeamTicketMetrics();
+                    }
+                } catch (e) { /* ignore */ }
                 // Aggiorna i badge health in alto
                 updateHealthBadges();
                 setupMapControls();
@@ -8408,3 +8484,934 @@
         })();
     });
 })(document);
+        // Services panel DOM
+        const svc = {
+            status: document.getElementById('services-status'),
+            btnRefresh: document.getElementById('btn-services-refresh'),
+            waTo: document.getElementById('svc-wa-to'),
+            waMsg: document.getElementById('svc-wa-msg'),
+            btnWa: document.getElementById('btn-svc-wa'),
+            btnWaWeb: document.getElementById('btn-svc-wa-web'),
+            emTo: document.getElementById('svc-em-to'),
+            emSubj: document.getElementById('svc-em-subj'),
+            emBody: document.getElementById('svc-em-body'),
+            btnEm: document.getElementById('btn-svc-em'),
+            payGw: document.getElementById('svc-pay-gw'),
+            payAmt: document.getElementById('svc-pay-amount'),
+            btnPay: document.getElementById('btn-svc-pay'),
+            ordCust: document.getElementById('svc-ord-customer'),
+            ordSku: document.getElementById('svc-ord-sku'),
+            ordQty: document.getElementById('svc-ord-qty'),
+            btnOrder: document.getElementById('btn-svc-order'),
+            docType: document.getElementById('svc-doc-type'),
+            btnDoc: document.getElementById('btn-svc-doc'),
+            tkTitle: document.getElementById('svc-tk-title'),
+            tkPrio: document.getElementById('svc-tk-prio'),
+            btnTicket: document.getElementById('btn-svc-ticket'),
+            chChannel: document.getElementById('svc-ch-channel'),
+            chMsg: document.getElementById('svc-ch-msg'),
+            btnChat: document.getElementById('btn-svc-chat'),
+            out: document.getElementById('services-test-output'),
+            logs: document.getElementById('services-logs'),
+            btnRetryFailed: document.getElementById('btn-services-retry-failed'),
+            btnLoadLogs: document.getElementById('btn-services-load-logs'),
+            filterService: document.getElementById('svc-log-service'),
+            filterStatus: document.getElementById('svc-log-status'),
+            btnApplyFilters: document.getElementById('btn-services-apply-filters'),
+            filterSearch: document.getElementById('svc-log-search'),
+            btnExportCsv: document.getElementById('btn-services-export-csv'),
+            badgeOk: document.getElementById('svc-log-badge-ok'),
+            badgeErr: document.getElementById('svc-log-badge-err'),
+            autoToggle: document.getElementById('svc-autorefresh'),
+            nextLogs: document.getElementById('svc-next-logs'),
+            nextStatus: document.getElementById('svc-next-status'),
+        };
+
+        // Services panel preferences (localStorage)
+        const SVC_PREFS_KEY = 'lpwf_svc_prefs';
+        const loadSvcPrefs = () => {
+            try {
+                const raw = window.localStorage.getItem(SVC_PREFS_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        };
+        const saveSvcPrefs = (patch) => {
+            try {
+                const cur = loadSvcPrefs();
+                const next = { ...cur, ...patch };
+                window.localStorage.setItem(SVC_PREFS_KEY, JSON.stringify(next));
+            } catch (e) {}
+        };
+        const applySvcPrefsToUI = () => {
+            const prefs = loadSvcPrefs();
+            if (svc.autoToggle && typeof prefs.auto === 'boolean') svc.autoToggle.checked = !!prefs.auto;
+            if (svc.filterService && prefs.service) svc.filterService.value = prefs.service;
+            if (svc.filterStatus && prefs.status) svc.filterStatus.value = prefs.status;
+            if (svc.filterSearch && typeof prefs.q === 'string') svc.filterSearch.value = prefs.q;
+        };
+        // Apply early (before timers start)
+        applySvcPrefsToUI();
+
+        // Modal dettaglio log servizi
+        const svcDet = {
+            created: document.getElementById('svc-det-created'),
+            service: document.getElementById('svc-det-service'),
+            action: document.getElementById('svc-det-action'),
+            provider: document.getElementById('svc-det-provider'),
+            status: document.getElementById('svc-det-status'),
+            http: document.getElementById('svc-det-http'),
+            req: document.getElementById('svc-det-request'),
+            res: document.getElementById('svc-det-response'),
+            copyReq: document.getElementById('btn-svc-copy-request'),
+            copyRes: document.getElementById('btn-svc-copy-response'),
+        };
+
+        const prettyJson = (txt) => {
+            if (txt === null || txt === undefined) return '';
+            const s = String(txt);
+            try { const obj = JSON.parse(s); return JSON.stringify(obj, null, 2); } catch (e) { return s; }
+        };
+
+        function viewServiceLog(id) {
+            const idNum = Number(id);
+            if (!idNum || !Array.isArray(servicesLogsCache)) return;
+            const row = servicesLogsCache.find((r) => Number(r.id) === idNum);
+            if (!row) return;
+            if (svcDet.created) svcDet.created.textContent = row.created_at || '';
+            if (svcDet.service) svcDet.service.textContent = row.service || '';
+            if (svcDet.action) svcDet.action.textContent = row.action || '';
+            if (svcDet.provider) svcDet.provider.textContent = row.provider || '';
+            if (svcDet.status) svcDet.status.textContent = row.status || '';
+            if (svcDet.http) svcDet.http.textContent = String(row.http_code ?? '');
+            if (svcDet.req) svcDet.req.textContent = prettyJson(row.request || '');
+            if (svcDet.res) svcDet.res.textContent = prettyJson(row.response || '');
+            openModal('modal-service-log');
+        }
+
+        const callService = async (path, payload) => {
+            const res = await authFetch(`services/${path}`, { method: 'POST', json: true, body: payload });
+            return res;
+        };
+
+        async function loadServiceStatus() {
+            if (!svc.status) return;
+            try {
+                const s = await authFetch('services/status');
+                const st = s?.status || {};
+                const yes = (v) => (v ? '<span class="badge">Sì</span>' : '<span class="badge">No</span>');
+                svc.status.innerHTML = `
+                    <div class="form-grid">
+                      <div class="form-control"><span>WhatsApp provider</span><div>${sanitize(st.whatsapp?.provider || '—')}</div></div>
+                      <div class="form-control"><span>WhatsApp configurato</span><div>${st.whatsapp?.configured ? yes(true) : yes(false)}</div></div>
+                      <div class="form-control"><span>Email provider</span><div>${sanitize(st.email?.provider || 'smtp')}</div></div>
+                      <div class="form-control"><span>Email configurato</span><div>${st.email?.configured ? yes(true) : yes(false)}</div></div>
+                      <div class="form-control"><span>Email from</span><div>${sanitize(st.email?.from || '—')}</div></div>
+                      <div class="form-control"><span>Stripe</span><div>${st.payment?.stripe ? yes(true) : yes(false)}</div></div>
+                      <div class="form-control"><span>Valuta</span><div>${sanitize(st.payment?.currency || 'EUR')}</div></div>
+                    </div>`;
+            } catch (e) {
+                svc.status.innerHTML = '<p class="empty-state">Errore stato servizi.</p>';
+            }
+        }
+
+        let servicesLogsCache = [];
+        function renderServiceLogs() {
+            if (!svc.logs) return;
+            const serviceSel = (svc.filterService?.value || 'all').toLowerCase();
+            const statusSel = (svc.filterStatus?.value || 'all').toUpperCase();
+            const q = (svc.filterSearch?.value || '').toLowerCase().trim();
+            let rows = Array.isArray(servicesLogsCache) ? [...servicesLogsCache] : [];
+            if (serviceSel !== 'all') rows = rows.filter(r => String(r.service || '').toLowerCase() === serviceSel);
+            if (statusSel !== 'ALL') rows = rows.filter(r => String(r.status || '').toUpperCase() === statusSel);
+            if (q) {
+                rows = rows.filter(r => {
+                    const hay = [
+                        r.created_at, r.service, r.action, r.provider, r.status,
+                        String(r.http_code ?? ''), r.user_id,
+                        r.request, r.response,
+                    ].map(x => (x === null || x === undefined) ? '' : String(x).toLowerCase());
+                    return hay.some(s => s.includes(q));
+                });
+            }
+            // Update badges counts
+            try {
+                const ok = rows.filter(r => String(r.status||'').toUpperCase()==='OK').length;
+                const err = rows.filter(r => String(r.status||'').toUpperCase()==='ERR').length;
+                if (svc.badgeOk) svc.badgeOk.textContent = `OK: ${ok}`;
+                if (svc.badgeErr) svc.badgeErr.textContent = `ERR: ${err}`;
+            } catch (e) {}
+            if (!rows.length) { svc.logs.innerHTML = '<p class="form-hint">Nessun log.</p>'; return; }
+            const html = `<table class="table"><thead><tr><th>Data</th><th>Servizio</th><th>Azione</th><th>Provider</th><th>Stato</th><th>HTTP</th><th></th></tr></thead><tbody>` +
+                rows.map(r => {
+                    const retryBtn = String(r.status||'').toUpperCase() === 'ERR' ? `<button type=\"button\" class=\"btn\" data-action=\"svc-retry\" data-id=\"${Number(r.id)}\">Retry</button>` : '';
+                    const viewBtn = `<button type=\"button\" class=\"btn\" data-action=\"svc-view\" data-id=\"${Number(r.id)}\">Dettaglio</button>`;
+                    return `<tr><td>${sanitize(r.created_at || '')}</td><td>${sanitize(r.service || '')}</td><td>${sanitize(r.action || '')}</td><td>${sanitize(r.provider || '')}</td><td>${sanitize(r.status || '')}</td><td>${sanitize(String(r.http_code ?? ''))}</td><td>${viewBtn} ${retryBtn}</td></tr>`;
+                }).join('') +
+                '</tbody></table>';
+            svc.logs.innerHTML = `<div class="table-wrap">${html}</div>`;
+        }
+
+        async function loadServiceLogs() {
+            if (!svc.logs) return;
+            try {
+                const rows = await authFetch('service_logs?limit=200');
+                servicesLogsCache = Array.isArray(rows) ? rows : [];
+                renderServiceLogs();
+            } catch (e) {
+                svc.logs.innerHTML = '<p class="empty-state">Errore caricamento log.</p>';
+            }
+        }
+
+        async function retryFailed(limit = 20, sinceHours = 24) {
+            try {
+                await authFetch('services/retry_failed', { method: 'POST', json: true, body: { limit, since_hours: sinceHours } });
+                await loadServiceLogs();
+                try { showToast('Retry eseguito', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore retry falliti');
+            }
+        }
+
+        // Hook UI services
+        if (svc.btnRefresh) svc.btnRefresh.addEventListener('click', loadServiceStatus);
+        if (svc.btnWa) svc.btnWa.addEventListener('click', async () => {
+            const to = (svc.waTo?.value || '').trim();
+            const msg = svc.waMsg?.value || '';
+            try { const r = await callService('whatsapp', { to, message: msg }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnWaWeb) svc.btnWaWeb.addEventListener('click', async () => {
+            const to = (svc.waTo?.value || '').trim();
+            const msg = svc.waMsg?.value || '';
+            if (!to) { try { showToast('Inserisci un numero', { type: 'warning' }); } catch (e) {} return; }
+            const digits = String(to).replace(/[^\d]/g, '');
+            if (!digits) { try { showToast('Numero non valido', { type: 'danger' }); } catch (e) {} return; }
+            const base = `https://wa.me/${digits}`;
+            const url = msg ? `${base}?text=${encodeURIComponent(msg)}` : base;
+            try { window.open(url, '_blank', 'noopener'); } catch (e) { window.location.href = url; }
+            // Log manuale (non bloccante)
+            try { await authFetch('services/whatsapp_log', { method: 'POST', json: true, body: { to, message: msg, link: url } }); } catch (e) {}
+        });
+        if (svc.btnEm) svc.btnEm.addEventListener('click', async () => {
+            const to = (svc.emTo?.value || '').trim();
+            const subject = svc.emSubj?.value || '';
+            const body = svc.emBody?.value || '';
+            try { const r = await callService('email', { to, subject, body }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnPay) svc.btnPay.addEventListener('click', async () => {
+            const gateway = svc.payGw?.value || 'STRIPE';
+            const amount = Number(svc.payAmt?.value || 0);
+            try { const r = await callService('payment', { gateway, amount }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnRetryFailed) svc.btnRetryFailed.addEventListener('click', () => retryFailed(20, 24));
+        if (svc.btnLoadLogs) svc.btnLoadLogs.addEventListener('click', loadServiceLogs);
+        if (svc.btnApplyFilters) svc.btnApplyFilters.addEventListener('click', () => {
+            // Save filters
+            saveSvcPrefs({
+                service: svc.filterService?.value || 'all',
+                status: svc.filterStatus?.value || 'all',
+                q: svc.filterSearch?.value || '',
+            });
+            renderServiceLogs();
+        });
+        if (svc.filterService) svc.filterService.addEventListener('change', () => saveSvcPrefs({ service: svc.filterService.value || 'all' }));
+        if (svc.filterStatus) svc.filterStatus.addEventListener('change', () => saveSvcPrefs({ status: svc.filterStatus.value || 'all' }));
+        if (svc.filterSearch) {
+            const onSearch = () => saveSvcPrefs({ q: svc.filterSearch.value || '' });
+            try {
+                // Debounce if available
+                const _deb = (fn, ms = 300) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+                svc.filterSearch.addEventListener('input', _deb(onSearch, 400));
+            } catch (e) {
+                svc.filterSearch.addEventListener('input', onSearch);
+            }
+        }
+        if (svc.btnOrder) svc.btnOrder.addEventListener('click', async () => {
+            const customer_id = (svc.ordCust?.value || '').trim();
+            const sku = (svc.ordSku?.value || '').trim();
+            const qty = Number(svc.ordQty?.value || 1);
+            try { const r = await callService('order', { customer_id, items: [{ sku, qty }] }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnDoc) svc.btnDoc.addEventListener('click', async () => {
+            const type = (svc.docType?.value || 'FATTURA');
+            try { const r = await callService('document', { type }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnTicket) svc.btnTicket.addEventListener('click', async () => {
+            const title = (svc.tkTitle?.value || '').trim();
+            const priority = (svc.tkPrio?.value || 'MEDIA');
+            try { const r = await callService('ticket', { title, priority }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnChat) svc.btnChat.addEventListener('click', async () => {
+            const channel = (svc.chChannel?.value || 'general').trim();
+            const message = (svc.chMsg?.value || '');
+            try { const r = await callService('chat', { channel, message }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+        });
+        if (svc.btnExportCsv) svc.btnExportCsv.addEventListener('click', () => {
+            const serviceSel = (svc.filterService?.value || 'all').toLowerCase();
+            const statusSel = (svc.filterStatus?.value || 'all').toUpperCase();
+            const q = (svc.filterSearch?.value || '').toLowerCase().trim();
+            let rows = Array.isArray(servicesLogsCache) ? [...servicesLogsCache] : [];
+            if (serviceSel !== 'all') rows = rows.filter(r => String(r.service || '').toLowerCase() === serviceSel);
+            if (statusSel !== 'ALL') rows = rows.filter(r => String(r.status || '').toUpperCase() === statusSel);
+            if (q) {
+                rows = rows.filter(r => {
+                    const hay = [
+                        r.created_at, r.service, r.action, r.provider, r.status,
+                        String(r.http_code ?? ''), r.user_id,
+                        r.request, r.response,
+                    ].map(x => (x === null || x === undefined) ? '' : String(x).toLowerCase());
+                    return hay.some(s => s.includes(q));
+                });
+            }
+            if (!rows.length) { alert('Nessun dato da esportare.'); return; }
+            const cols = ['created_at','service','action','provider','status','http_code','user_id','request','response'];
+            const esc = (v) => {
+                let s = v === null || v === undefined ? '' : String(v);
+                if (s.length > 500) s = s.slice(0, 500) + '…';
+                s = s.replace(/"/g,'""');
+                return '"' + s + '"';
+            };
+            const lines = [];
+            lines.push(cols.join(','));
+            rows.forEach(r => {
+                lines.push(cols.map(k => esc(r[k])).join(','));
+            });
+            const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'service_logs.csv';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
+        });
+        if (svc.logs) {
+            svc.logs.addEventListener('click', async (ev) => {
+                const retryBtn = ev.target.closest('[data-action="svc-retry"]');
+                const viewBtn = ev.target.closest('[data-action="svc-view"]');
+                if (retryBtn) {
+                    const id = Number(retryBtn.dataset.id || '');
+                    if (!id) return;
+                    try {
+                        await authFetch('services/retry', { method: 'POST', json: true, body: { id } });
+                        await loadServiceLogs();
+                        try { showToast('Retry inviato', { type: 'success' }); } catch (e) {}
+                    } catch (e) {
+                        alert(e.message || 'Errore retry');
+                    }
+                    return;
+                }
+                if (viewBtn) {
+                    const id = Number(viewBtn.dataset.id || '');
+                    if (!id) return;
+                    viewServiceLog(id);
+                    return;
+                }
+            });
+        }
+
+        if (svcDet.copyReq) {
+            svcDet.copyReq.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(svcDet.req?.textContent || ''); showToast('Request copiata', { type: 'success' }); } catch (e) {}
+            });
+        }
+        if (svcDet.copyRes) {
+            svcDet.copyRes.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(svcDet.res?.textContent || ''); showToast('Response copiata', { type: 'success' }); } catch (e) {}
+            });
+        }
+
+        // Auto-refresh with visibility + toggle
+        let autoEnabled = true;
+        const LOGS_IVL = 30; // seconds
+        const STATUS_IVL = 60; // seconds
+        let logsNextAt = 0;
+        let statusNextAt = 0;
+        let logsTimer = null;
+        let statusTimer = null;
+        let tickTimer = null;
+
+        const canRunAuto = () => autoEnabled && !document.hidden;
+
+        const updateCountdown = () => {
+            try {
+                const now = Date.now();
+                const secLogs = Math.max(0, Math.ceil((logsNextAt - now) / 1000));
+                const secStatus = Math.max(0, Math.ceil((statusNextAt - now) / 1000));
+                if (svc.nextLogs) svc.nextLogs.textContent = canRunAuto() ? `${secLogs}s` : 'pausa';
+                if (svc.nextStatus) svc.nextStatus.textContent = canRunAuto() ? `${secStatus}s` : 'pausa';
+            } catch (e) {}
+        };
+
+        const scheduleLogs = () => {
+            if (logsTimer) clearTimeout(logsTimer);
+            logsNextAt = Date.now() + LOGS_IVL * 1000;
+            logsTimer = setTimeout(async () => {
+                if (canRunAuto()) {
+                    await loadServiceLogs();
+                }
+                scheduleLogs();
+            }, LOGS_IVL * 1000);
+        };
+        const scheduleStatus = () => {
+            if (statusTimer) clearTimeout(statusTimer);
+            statusNextAt = Date.now() + STATUS_IVL * 1000;
+            statusTimer = setTimeout(async () => {
+                if (canRunAuto()) {
+                    await loadServiceStatus();
+                }
+                scheduleStatus();
+            }, STATUS_IVL * 1000);
+        };
+        const startTick = () => {
+            if (tickTimer) clearInterval(tickTimer);
+            tickTimer = setInterval(updateCountdown, 1000);
+        };
+        const stopAllAuto = () => {
+            if (logsTimer) clearTimeout(logsTimer);
+            if (statusTimer) clearTimeout(statusTimer);
+            if (tickTimer) clearInterval(tickTimer);
+            logsTimer = statusTimer = tickTimer = null;
+        };
+        const startAuto = () => {
+            stopAllAuto();
+            scheduleLogs();
+            scheduleStatus();
+            startTick();
+            updateCountdown();
+        };
+
+        if (svc.autoToggle) {
+            autoEnabled = !!svc.autoToggle.checked;
+            svc.autoToggle.addEventListener('change', () => {
+                autoEnabled = !!svc.autoToggle.checked;
+                if (autoEnabled) startAuto(); else stopAllAuto();
+                updateCountdown();
+                saveSvcPrefs({ auto: autoEnabled });
+            });
+        }
+        document.addEventListener('visibilitychange', () => {
+            updateCountdown();
+        });
+
+        // Initialize autos
+        startAuto();
+
+        // Auto-refresh timers for Services panel
+        try {
+            setInterval(() => {
+                loadServiceLogs();
+            }, 30000);
+            setInterval(() => {
+                loadServiceStatus();
+            }, 60000);
+        } catch (e) {}
+
+        async function loadTicketMetrics() {
+            const setById = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+            try {
+                const open = await authFetch('tickets?stato=APERTO&mine=1');
+                setById('metric-ticket-open', Array.isArray(open) ? open.length : (open?.length || 0));
+            } catch (e) { setById('metric-ticket-open', '—'); }
+            try {
+                const doing = await authFetch('tickets?stato=IN_LAVORAZIONE&mine=1');
+                setById('metric-ticket-doing', Array.isArray(doing) ? doing.length : (doing?.length || 0));
+            } catch (e) { setById('metric-ticket-doing', '—'); }
+            try {
+                const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const since = `${y}-${m}-${day} 00:00:00`;
+                const closed = await authFetch(`tickets?stato=CHIUSO&mine=1&chiuso_dal=${encodeURIComponent(since)}`);
+                setById('metric-ticket-closed30', Array.isArray(closed) ? closed.length : (closed?.length || 0));
+            } catch (e) { setById('metric-ticket-closed30', '—'); }
+        }
+
+        async function loadTeamTicketMetrics() {
+            const setById = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+            try {
+                const open = await authFetch('tickets?stato=APERTO&team=1');
+                setById('metric-ticket-open-team', Array.isArray(open) ? open.length : (open?.length || 0));
+            } catch (e) { setById('metric-ticket-open-team', '—'); }
+            try {
+                const doing = await authFetch('tickets?stato=IN_LAVORAZIONE&team=1');
+                setById('metric-ticket-doing-team', Array.isArray(doing) ? doing.length : (doing?.length || 0));
+            } catch (e) { setById('metric-ticket-doing-team', '—'); }
+            try {
+                const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const since = `${y}-${m}-${day} 00:00:00`;
+                const closed = await authFetch(`tickets?stato=CHIUSO&team=1&chiuso_dal=${encodeURIComponent(since)}`);
+                setById('metric-ticket-closed30-team', Array.isArray(closed) ? closed.length : (closed?.length || 0));
+            } catch (e) { setById('metric-ticket-closed30-team', '—'); }
+        }
+
+        // ==========================
+        // Tickets panel – minimal UI
+        // ==========================
+        const tk = {
+            list: document.getElementById('tickets-list'),
+            myOnly: document.getElementById('ticket-my-only'),
+            teamWrap: document.getElementById('ticket-team-wrap'),
+            teamOnly: document.getElementById('ticket-team-only'),
+            btnRefresh: document.getElementById('btn-tickets-refresh'),
+            btnExport: document.getElementById('btn-tickets-export'),
+            btnTeamView: document.getElementById('btn-tickets-team-view'),
+            title: document.getElementById('ticket-title'),
+            desc: document.getElementById('ticket-desc'),
+            prio: document.getElementById('ticket-priority'),
+            btnCreate: document.getElementById('btn-ticket-create'),
+            stateSel: document.getElementById('ticket-state'),
+            assigneeSel: document.getElementById('ticket-assignee'),
+            assigneeLabel: document.getElementById('ticket-assignee-label'),
+            userOptions: document.getElementById('user-options-tickets'),
+            clientId: document.getElementById('ticket-client-id'),
+            clientLabel: document.getElementById('ticket-client-label'),
+            clientOptions: document.getElementById('client-options-tickets'),
+            search: document.getElementById('ticket-search'),
+            detTitle: document.getElementById('ticket-detail-title'),
+            detSubtitle: document.getElementById('ticket-detail-subtitle'),
+            detStatus: document.getElementById('ticket-detail-status'),
+            detPriority: document.getElementById('ticket-detail-priority'),
+            detAuthor: document.getElementById('ticket-detail-author'),
+            detAssignee: document.getElementById('ticket-detail-assignee'),
+            detClient: document.getElementById('ticket-detail-client'),
+            comments: document.getElementById('ticket-comments'),
+            commentText: document.getElementById('ticket-comment-text'),
+            btnComment: document.getElementById('btn-ticket-comment'),
+            file: document.getElementById('ticket-attach-file'),
+            btnAttach: document.getElementById('btn-ticket-attach'),
+            btnAssign: document.getElementById('btn-ticket-assign'),
+            btnClose: document.getElementById('btn-ticket-close'),
+            btnReopen: document.getElementById('btn-ticket-reopen'),
+        };
+
+        let selectedTicketId = null;
+
+        let ticketsFilterState = null;
+        let ticketsFilterClosedSince = null;
+
+        function currentRole() {
+            try { const me = window.lpwfAuth?.getCurrentUser?.() || {}; return String(me.ruolo || '').toUpperCase(); } catch (e) { return ''; }
+        }
+
+        function buildTicketsParams() {
+            const params = [];
+            if (tk.myOnly && tk.myOnly.checked) params.push('mine=1');
+            if (ticketsFilterState) params.push('stato=' + encodeURIComponent(ticketsFilterState));
+            if (ticketsFilterState === 'CHIUSO' && ticketsFilterClosedSince) {
+                params.push('chiuso_dal=' + encodeURIComponent(ticketsFilterClosedSince));
+            }
+            const role = currentRole();
+            if (tk.teamOnly && tk.teamOnly.checked && (role === 'ADMIN' || role === 'SUPERVISOR')) {
+                params.push('team=1');
+            }
+            if (tk.stateSel && tk.stateSel.value) {
+                const v = String(tk.stateSel.value || '').trim();
+                if (v) {
+                    ticketsFilterState = null;
+                    ticketsFilterClosedSince = null;
+                    params.push('stato=' + encodeURIComponent(v));
+                }
+            }
+            if (tk.assigneeSel && tk.assigneeSel.value) {
+                const v = String(tk.assigneeSel.value || '').trim();
+                if (v) params.push('assegnato_a=' + encodeURIComponent(v));
+            }
+            if (tk.clientId && tk.clientId.value) {
+                const v = String(tk.clientId.value || '').trim();
+                if (v) params.push('cliente_id=' + encodeURIComponent(v));
+            }
+            if (tk.search && tk.search.value) {
+                const q = tk.search.value.trim();
+                if (q) params.push('search=' + encodeURIComponent(q));
+            }
+            // Assegnatario via datalist (se presente) ha precedenza
+            if (tk.assigneeLabel && tk.assigneeLabel.value) {
+                const val = tk.assigneeLabel.value || '';
+                const m = val.match(/#(\d+)/);
+                if (m) {
+                    const id = m[1];
+                    // se presente, sostituisci o aggiungi assegnato_a
+                    const idx = params.findIndex(p => p.startsWith('assegnato_a='));
+                    if (idx >= 0) params[idx] = 'assegnato_a=' + encodeURIComponent(id);
+                    else params.push('assegnato_a=' + encodeURIComponent(id));
+                }
+            }
+            return params;
+        }
+
+        async function loadTickets() {
+            if (!tk.list) return;
+            const params = buildTicketsParams();
+            const qs = params.length ? ('?' + params.join('&')) : '';
+            try {
+                const rows = await authFetch('tickets' + qs);
+                const list = Array.isArray(rows) ? rows : [];
+                const cnt = document.getElementById('tickets-count');
+                if (cnt) cnt.textContent = String(list.length || 0);
+                renderTicketList(list);
+            } catch (e) {
+                tk.list.innerHTML = '<p class="empty-state">Errore caricamento ticket.</p>';
+                const cnt = document.getElementById('tickets-count');
+                if (cnt) cnt.textContent = '0';
+            }
+        }
+
+        function renderTicketList(rows) {
+            if (!rows.length) { tk.list.innerHTML = '<p class="form-hint">Nessun ticket.</p>'; return; }
+            tk.list.innerHTML = rows.map(r => {
+                const t = String(r.titolo || `Ticket #${r.id}`);
+                const s = String(r.stato || '');
+                const p = String(r.priorita || '');
+                const a = String(r.assegnato_a_nome || '—');
+                return `<div class="list-item" data-ticket-id="${Number(r.id)}"><strong>${sanitize(t)}</strong><br><small>Stato: ${sanitize(s)} • Prio: ${sanitize(p)} • Assegnato a: ${sanitize(a)}</small></div>`;
+            }).join('');
+        }
+
+        async function loadTicketDetail(id) {
+            selectedTicketId = id;
+            try {
+                const t = await authFetch(`tickets/${id}`);
+                if (tk.detTitle) tk.detTitle.textContent = t.titolo || `Ticket #${id}`;
+                if (tk.detSubtitle) tk.detSubtitle.textContent = t.descrizione || '';
+                if (tk.detStatus) tk.detStatus.textContent = t.stato || '';
+                if (tk.detPriority) tk.detPriority.textContent = t.priorita || '';
+                if (tk.detAuthor) tk.detAuthor.textContent = t.creato_da_nome || t.creato_da || '';
+                if (tk.detAssignee) tk.detAssignee.textContent = t.assegnato_a_nome || (t.assegnato_a ? ('#' + t.assegnato_a) : '—');
+                if (tk.detClient) tk.detClient.textContent = t.cliente_nome || (t.cliente_id ? ('#' + t.cliente_id) : '—');
+                if (tk.btnReopen) tk.btnReopen.hidden = String(t.stato||'') !== 'CHIUSO';
+                await loadTicketComments(id);
+            } catch (e) {
+                if (tk.detTitle) tk.detTitle.textContent = 'Ticket non trovato';
+            }
+        }
+
+        async function loadTicketComments(id) {
+            if (!tk.comments) return;
+            try {
+                const [list, atts] = await Promise.all([
+                    authFetch(`tickets/${id}/comment`),
+                    authFetch(`tickets/${id}/attachments`).catch(() => []),
+                ]);
+                const attachments = Array.isArray(atts) ? atts : [];
+                const byComment = attachments.reduce((acc, a) => { const k = Number(a.commento_id); (acc[k] = acc[k] || []).push(a); return acc; }, {});
+                if (!Array.isArray(list) || !list.length) { tk.comments.innerHTML = '<p class="form-hint">Nessun commento.</p>'; return; }
+                tk.comments.innerHTML = list.map(c => {
+                    const group = byComment[Number(c.id)] || [];
+                    const links = group.map(a => `<li><a href=\"${sanitize(a.percorso_file || '#')}\" target=\"_blank\" rel=\"noopener\">${sanitize(a.nome_file_originale || 'file')}</a></li>`).join('');
+                    const attHtml = group.length ? `<ul class=\"attachments\">${links}</ul>` : '';
+                    return `<div class=\"list-item\"><small>${sanitize(c.creato_il || '')} — ${sanitize(c.utente_nome || ('#'+c.utente_id))}</small><div>${sanitize(c.messaggio || '')}</div>${attHtml}</div>`;
+                }).join('');
+            } catch (e) {
+                tk.comments.innerHTML = '<p class="empty-state">Errore caricamento commenti.</p>';
+            }
+        }
+
+        async function createTicket() {
+            const titolo = (tk.title?.value || '').trim();
+            const descrizione = (tk.desc?.value || '').trim();
+            const priorita = (tk.prio?.value || 'MEDIA');
+            if (!titolo) { try { showToast('Inserisci un titolo', { type: 'warning' }); } catch (e) {} return; }
+            try {
+                await authFetch('tickets', { method: 'POST', json: true, body: { titolo, descrizione, priorita } });
+                if (tk.title) tk.title.value = '';
+                if (tk.desc) tk.desc.value = '';
+                await loadTickets();
+                try { showToast('Ticket creato', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore creazione ticket');
+            }
+        }
+
+        async function addComment() {
+            if (!selectedTicketId) return;
+            const messaggio = (tk.commentText?.value || '').trim();
+            if (!messaggio) return;
+            try {
+                await authFetch(`tickets/${selectedTicketId}/comment`, { method: 'POST', json: true, body: { messaggio } });
+                if (tk.commentText) tk.commentText.value = '';
+                await loadTicketComments(selectedTicketId);
+            } catch (e) { alert(e.message || 'Errore invio commento'); }
+        }
+
+        async function attachFile() {
+            if (!selectedTicketId) return;
+            const f = tk.file?.files && tk.file.files[0];
+            if (!f) return;
+            const fd = new FormData();
+            try {
+                // crea un commento placeholder e allega il file
+                const tmp = await authFetch(`tickets/${selectedTicketId}/comment`, { method: 'POST', json: true, body: { messaggio: `Allegato: ${f.name}` } });
+                const commentId = Number(tmp?.id || 0);
+                if (!commentId) throw new Error('Errore creazione commento');
+                fd.append('comment_id', String(commentId));
+                fd.append('file', f);
+                await authFetch(`tickets/${selectedTicketId}/comment_attach`, { method: 'POST', body: fd });
+                if (tk.file) tk.file.value = '';
+                await loadTicketComments(selectedTicketId);
+                try { showToast('Allegato caricato', { type: 'success' }); } catch (e) {}
+            } catch (e) { alert(e.message || 'Errore upload allegato'); }
+        }
+
+        async function assignMe() {
+            if (!selectedTicketId) return;
+            try { await authFetch(`tickets/${selectedTicketId}/assign`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore assegnazione'); }
+        }
+
+        async function closeTicket() {
+            if (!selectedTicketId) return;
+            try { await authFetch(`tickets/${selectedTicketId}/close`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore chiusura'); }
+        }
+        async function reopenTicket() {
+            if (!selectedTicketId) return;
+            try { await authFetch(`tickets/${selectedTicketId}/reopen`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore riapertura'); }
+        }
+
+        if (tk.btnCreate) tk.btnCreate.addEventListener('click', createTicket);
+        if (tk.btnRefresh) tk.btnRefresh.addEventListener('click', loadTickets);
+        if (tk.myOnly) tk.myOnly.addEventListener('change', loadTickets);
+        if (tk.teamOnly) tk.teamOnly.addEventListener('change', loadTickets);
+        if (tk.stateSel) tk.stateSel.addEventListener('change', loadTickets);
+        if (tk.assigneeSel) tk.assigneeSel.addEventListener('change', loadTickets);
+        if (tk.clientId) tk.clientId.addEventListener('change', loadTickets);
+        if (tk.clientLabel) tk.clientLabel.addEventListener('change', () => {
+            try {
+                const val = tk.clientLabel.value || '';
+                let id = '';
+                if (val) {
+                    // estrai id da formato "Ragione (#ID)"
+                    const m = val.match(/#(\d+)/);
+                    if (m) id = m[1];
+                }
+                if (tk.clientId) tk.clientId.value = id;
+                loadTickets();
+            } catch (e) { /* ignore */ }
+        });
+        if (tk.assigneeLabel) tk.assigneeLabel.addEventListener('change', () => {
+            try {
+                const val = tk.assigneeLabel.value || '';
+                let id = '';
+                if (val) {
+                    const m = val.match(/#(\d+)/);
+                    if (m) id = m[1];
+                }
+                if (tk.assigneeSel) tk.assigneeSel.value = id;
+                loadTickets();
+            } catch (e) { /* ignore */ }
+        });
+        if (tk.search) {
+            const deb = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+            tk.search.addEventListener('input', deb(loadTickets, 400));
+        }
+        if (tk.list) tk.list.addEventListener('click', (ev) => {
+            const el = ev.target.closest('[data-ticket-id]');
+            if (!el) return;
+            const id = Number(el.dataset.ticketId || '');
+            if (!id) return;
+            loadTicketDetail(id);
+        });
+        if (tk.btnComment) tk.btnComment.addEventListener('click', addComment);
+        if (tk.btnAttach) tk.btnAttach.addEventListener('click', attachFile);
+        if (tk.btnAssign) tk.btnAssign.addEventListener('click', assignMe);
+        if (tk.btnClose) tk.btnClose.addEventListener('click', closeTicket);
+        if (tk.btnReopen) tk.btnReopen.addEventListener('click', reopenTicket);
+
+        // Initial load if section present
+        if (tk.list) { try { 
+            // mostra toggle "Mio team" a supervisor/admin
+            const role = currentRole();
+            if (tk.teamWrap) tk.teamWrap.hidden = !(role === 'ADMIN' || role === 'SUPERVISOR');
+            if (tk.btnTeamView) tk.btnTeamView.hidden = !(role === 'ADMIN' || role === 'SUPERVISOR');
+            // Applica preferenze salvate prima di popolare/select
+            applyTicketPrefsToUI();
+            populateTicketAssignee();
+            populateTicketClient();
+            loadTickets(); 
+        } catch (e) {} }
+
+        async function exportTicketsCsv() {
+            try {
+                const params = buildTicketsParams();
+                const qs = params.length ? ('?' + params.join('&')) : '';
+                const rows = await authFetch('tickets' + qs);
+                const list = Array.isArray(rows) ? rows : [];
+                if (!list.length) { alert('Nessun dato da esportare.'); return; }
+                const cols = ['id','titolo','stato','priorita','creato_da_nome','assegnato_a_nome','cliente_nome','creato_il','chiuso_il'];
+                const esc = (v) => {
+                    let s = v === null || v === undefined ? '' : String(v);
+                    s = s.replace(/"/g,'""');
+                    return '"' + s + '"';
+                };
+                const lines = [];
+                lines.push(cols.join(','));
+                list.forEach(r => {
+                    const row = cols.map(k => esc(r[k] ?? ''));
+                    lines.push(row.join(','));
+                });
+                const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'tickets.csv';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
+            } catch (e) { alert(e.message || 'Errore export CSV'); }
+        }
+
+        if (tk.btnExport) tk.btnExport.addEventListener('click', exportTicketsCsv);
+        if (tk.btnTeamView) tk.btnTeamView.addEventListener('click', () => {
+            if (tk.teamOnly) tk.teamOnly.checked = true;
+            if (tk.myOnly) tk.myOnly.checked = false;
+            if (tk.stateSel) tk.stateSel.value = '';
+            ticketsFilterState = null; ticketsFilterClosedSince = null;
+            loadTickets();
+        });
+
+        // Ticket filters preferences (localStorage)
+        const TKT_PREFS_KEY = 'lpwf_ticket_prefs';
+        const loadTicketPrefs = () => {
+            try { const raw = window.localStorage.getItem(TKT_PREFS_KEY); return raw ? JSON.parse(raw) : {}; } catch (e) { return {}; }
+        };
+        const saveTicketPrefs = (patch) => {
+            try { const cur = loadTicketPrefs(); const next = { ...cur, ...patch }; window.localStorage.setItem(TKT_PREFS_KEY, JSON.stringify(next)); } catch (e) {}
+        };
+        const getTicketPrefsFromUI = () => ({
+            mine: !!(tk.myOnly && tk.myOnly.checked),
+            team: !!(tk.teamOnly && tk.teamOnly.checked),
+            stato: tk.stateSel ? (tk.stateSel.value || '') : '',
+            assignee: tk.assigneeSel ? (tk.assigneeSel.value || '') : '',
+            assigneeLabel: tk.assigneeLabel ? (tk.assigneeLabel.value || '') : '',
+            clientId: tk.clientId ? (tk.clientId.value || '') : '',
+            clientLabel: tk.clientLabel ? (tk.clientLabel.value || '') : '',
+            q: tk.search ? (tk.search.value || '') : '',
+        });
+        const applyTicketPrefsToUI = () => {
+            const p = loadTicketPrefs();
+            try {
+                if (tk.myOnly && typeof p.mine === 'boolean') tk.myOnly.checked = !!p.mine;
+                if (tk.teamOnly && typeof p.team === 'boolean') tk.teamOnly.checked = !!p.team;
+                if (tk.stateSel && typeof p.stato === 'string') tk.stateSel.value = p.stato || '';
+                if (tk.assigneeSel && typeof p.assignee === 'string') tk.assigneeSel.value = p.assignee || '';
+                if (tk.assigneeLabel && typeof p.assigneeLabel === 'string') tk.assigneeLabel.value = p.assigneeLabel || '';
+                if (tk.clientId && typeof p.clientId === 'string') tk.clientId.value = p.clientId || '';
+                if (tk.clientLabel && typeof p.clientLabel === 'string') tk.clientLabel.value = p.clientLabel || '';
+                if (tk.search && typeof p.q === 'string') tk.search.value = p.q || '';
+            } catch (e) { /* ignore */ }
+        };
+
+        function persistTicketFilters() { try { saveTicketPrefs(getTicketPrefsFromUI()); } catch (e) {} }
+
+        // Persist on changes
+        if (tk.myOnly) tk.myOnly.addEventListener('change', persistTicketFilters);
+        if (tk.teamOnly) tk.teamOnly.addEventListener('change', persistTicketFilters);
+        if (tk.stateSel) tk.stateSel.addEventListener('change', persistTicketFilters);
+        if (tk.assigneeSel) tk.assigneeSel.addEventListener('change', persistTicketFilters);
+        if (tk.assigneeLabel) tk.assigneeLabel.addEventListener('change', persistTicketFilters);
+        if (tk.clientId) tk.clientId.addEventListener('change', persistTicketFilters);
+        if (tk.clientLabel) tk.clientLabel.addEventListener('change', persistTicketFilters);
+        if (tk.search) tk.search.addEventListener('change', persistTicketFilters);
+
+        // Clear filters
+        if (document.getElementById('btn-tickets-clear')) {
+            document.getElementById('btn-tickets-clear').addEventListener('click', () => {
+                try {
+                    if (tk.myOnly) tk.myOnly.checked = true;
+                    if (tk.teamOnly) tk.teamOnly.checked = false;
+                    if (tk.stateSel) tk.stateSel.value = '';
+                    if (tk.assigneeSel) tk.assigneeSel.value = '';
+                    if (tk.assigneeLabel) tk.assigneeLabel.value = '';
+                    if (tk.clientId) tk.clientId.value = '';
+                    if (tk.clientLabel) tk.clientLabel.value = '';
+                    if (tk.search) tk.search.value = '';
+                    ticketsFilterState = null; ticketsFilterClosedSince = null;
+                    // wipe persisted prefs
+                    try { window.localStorage.removeItem(TKT_PREFS_KEY); } catch (e) {}
+                    loadTickets();
+                } catch (e) { /* ignore */ }
+            });
+        }
+
+        async function populateTicketAssignee() {
+            const sel = tk.assigneeSel; const dl = tk.userOptions;
+            if (dl) dl.innerHTML = '';
+            if (!sel) return;
+            const current = sel.value; sel.innerHTML = '<option value="">Tutti</option>';
+            try {
+                const usersRes = await authFetch('utenti');
+                const users = Array.isArray(usersRes?.utenti) ? usersRes.utenti : (Array.isArray(usersRes) ? usersRes : []);
+                users.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = String(u.id);
+                    opt.textContent = `${(u.nome||'').trim()} ${(u.cognome||'').trim()} (#${u.id})`;
+                    sel.appendChild(opt);
+                    if (dl) {
+                        const o2 = document.createElement('option');
+                        o2.value = `${(u.nome||'').trim()} ${(u.cognome||'').trim()} (#${u.id})`;
+                        dl.appendChild(o2);
+                    }
+                });
+                if (current) sel.value = current;
+            } catch (e) { /* ignore */ }
+        }
+
+        async function populateTicketClient() {
+            const dl = tk.clientOptions; if (!dl) return;
+            dl.innerHTML = '';
+            try {
+                const list = await authFetch('clienti');
+                const rows = Array.isArray(list) ? list : [];
+                rows.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = `${(c.ragione_sociale||'').trim()} (#${c.id})`;
+                    opt.dataset.id = String(c.id);
+                    dl.appendChild(opt);
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        // Clickable ticket metrics: jump and filter
+        function gotoTicketsWith(state, closedSince = null) {
+            try { document.querySelector('a[href="#tickets"]').click(); } catch (e) { window.location.hash = '#tickets'; }
+            ticketsFilterState = state;
+            ticketsFilterClosedSince = closedSince;
+            loadTickets();
+        }
+        const elOpen = document.getElementById('metric-ticket-open');
+        const elDoing = document.getElementById('metric-ticket-doing');
+        const elClosed30 = document.getElementById('metric-ticket-closed30');
+        if (elOpen && elOpen.parentElement) elOpen.parentElement.addEventListener('click', () => gotoTicketsWith('APERTO'));
+        if (elDoing && elDoing.parentElement) elDoing.parentElement.addEventListener('click', () => gotoTicketsWith('IN_LAVORAZIONE'));
+        if (elClosed30 && elClosed30.parentElement) elClosed30.parentElement.addEventListener('click', () => {
+            const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const since = `${y}-${m}-${day} 00:00:00`;
+            gotoTicketsWith('CHIUSO', since);
+        });
+        function gotoTeamTicketsWith(state, since = null) {
+            try { document.querySelector('a[href="#tickets"]').click(); } catch (e) { window.location.hash = '#tickets'; }
+            if (tk.teamOnly) tk.teamOnly.checked = true;
+            ticketsFilterState = state;
+            ticketsFilterClosedSince = since;
+            loadTickets();
+        }
+        const elOpenTeam = document.getElementById('metric-ticket-open-team');
+        const elDoingTeam = document.getElementById('metric-ticket-doing-team');
+        const elClosed30Team = document.getElementById('metric-ticket-closed30-team');
+        if (elOpenTeam && elOpenTeam.parentElement) elOpenTeam.parentElement.addEventListener('click', () => gotoTeamTicketsWith('APERTO'));
+        if (elDoingTeam && elDoingTeam.parentElement) elDoingTeam.parentElement.addEventListener('click', () => gotoTeamTicketsWith('IN_LAVORAZIONE'));
+        if (elClosed30Team && elClosed30Team.parentElement) elClosed30Team.parentElement.addEventListener('click', () => {
+            const d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const since = `${y}-${m}-${day} 00:00:00`;
+            gotoTeamTicketsWith('CHIUSO', since);
+        });
