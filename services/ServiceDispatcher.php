@@ -213,10 +213,15 @@ class ServiceDispatcher
                 }
                 if ($scope !== '') { $tokenPayload['scope'] = $scope; }
                 $post = http_build_query($tokenPayload);
+                // Some OAuth servers require Basic auth with client_id:client_secret
+                $basic = base64_encode($clientId . ':' . $clientSecret);
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
-                    CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/x-www-form-urlencoded',
+                        'Authorization: Basic ' . $basic,
+                    ],
                     CURLOPT_POSTFIELDS => $post,
                     CURLOPT_TIMEOUT => 25,
                 ]);
@@ -337,8 +342,6 @@ class ServiceDispatcher
         }
         return ['ok' => true, 'simulated' => true];
     }
-}
-
     /**
      * Normalizza alcune risposte MailUp per fornire un esito più leggibile.
      * Ritorna sempre lo stesso shape di base: { ok, code, provider, body, [summary], [id] }
@@ -395,3 +398,4 @@ class ServiceDispatcher
         }
         return $res;
     }
+}
