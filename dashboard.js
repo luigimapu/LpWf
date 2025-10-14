@@ -8697,11 +8697,13 @@
 
         async function retryFailed(limit = 20, sinceHours = 24) {
             try {
-                await apiFetch('services/retry_failed', { method: 'POST', json: true, body: { limit, since_hours: sinceHours } });
+                const r = await apiFetch('services/retry_failed', { method: 'POST', json: true, body: { limit, since_hours: sinceHours } });
                 await loadServiceLogs();
-                try { showToast('Retry eseguito', { type: 'success' }); } catch (e) {}
+                const cnt = Number(r?.count || 0);
+                try { showToast(`Retry falliti: ${cnt} elaborati`, { type: 'success' }); } catch (e) {}
             } catch (e) {
                 alert(e.message || 'Errore retry falliti');
+                try { showToast('Retry falliti: errore', { type: 'danger' }); } catch (e2) {}
             }
         }
 
@@ -9232,13 +9234,14 @@
             const priorita = (tk.prio?.value || 'MEDIA');
             if (!titolo) { try { showToast('Inserisci un titolo', { type: 'warning' }); } catch (e) {} return; }
             try {
-                await authFetch('tickets', { method: 'POST', json: true, body: { titolo, descrizione, priorita } });
+                const r = await authFetch('tickets', { method: 'POST', json: true, body: { titolo, descrizione, priorita } });
                 if (tk.title) tk.title.value = '';
                 if (tk.desc) tk.desc.value = '';
                 await loadTickets();
                 try { showToast('Ticket creato', { type: 'success' }); } catch (e) {}
             } catch (e) {
                 alert(e.message || 'Errore creazione ticket');
+                try { showToast('Ticket: errore creazione', { type: 'danger' }); } catch (e2) {}
             }
         }
 
@@ -9250,7 +9253,11 @@
                 await authFetch(`tickets/${selectedTicketId}/comment`, { method: 'POST', json: true, body: { messaggio } });
                 if (tk.commentText) tk.commentText.value = '';
                 await loadTicketComments(selectedTicketId);
-            } catch (e) { alert(e.message || 'Errore invio commento'); }
+                try { showToast('Ticket: commento aggiunto', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore invio commento');
+                try { showToast('Ticket: errore commento', { type: 'danger' }); } catch (e2) {}
+            }
         }
 
         async function attachFile() {
@@ -9268,22 +9275,46 @@
                 await authFetch(`tickets/${selectedTicketId}/comment_attach`, { method: 'POST', body: fd });
                 if (tk.file) tk.file.value = '';
                 await loadTicketComments(selectedTicketId);
-                try { showToast('Allegato caricato', { type: 'success' }); } catch (e) {}
-            } catch (e) { alert(e.message || 'Errore upload allegato'); }
+                try { showToast('Ticket: allegato caricato', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore upload allegato');
+                try { showToast('Ticket: errore allegato', { type: 'danger' }); } catch (e2) {}
+            }
         }
 
         async function assignMe() {
             if (!selectedTicketId) return;
-            try { await authFetch(`tickets/${selectedTicketId}/assign`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore assegnazione'); }
+            try {
+                await authFetch(`tickets/${selectedTicketId}/assign`, { method: 'PUT', json: true, body: {} });
+                await loadTicketDetail(selectedTicketId); await loadTickets();
+                try { showToast('Ticket: assegnato', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore assegnazione');
+                try { showToast('Ticket: errore assegnazione', { type: 'danger' }); } catch (e2) {}
+            }
         }
 
         async function closeTicket() {
             if (!selectedTicketId) return;
-            try { await authFetch(`tickets/${selectedTicketId}/close`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore chiusura'); }
+            try {
+                await authFetch(`tickets/${selectedTicketId}/close`, { method: 'PUT', json: true, body: {} });
+                await loadTicketDetail(selectedTicketId); await loadTickets();
+                try { showToast('Ticket: chiuso', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore chiusura');
+                try { showToast('Ticket: errore chiusura', { type: 'danger' }); } catch (e2) {}
+            }
         }
         async function reopenTicket() {
             if (!selectedTicketId) return;
-            try { await authFetch(`tickets/${selectedTicketId}/reopen`, { method: 'PUT', json: true, body: {} }); await loadTicketDetail(selectedTicketId); await loadTickets(); } catch (e) { alert(e.message || 'Errore riapertura'); }
+            try {
+                await authFetch(`tickets/${selectedTicketId}/reopen`, { method: 'PUT', json: true, body: {} });
+                await loadTicketDetail(selectedTicketId); await loadTickets();
+                try { showToast('Ticket: riaperto', { type: 'success' }); } catch (e) {}
+            } catch (e) {
+                alert(e.message || 'Errore riapertura');
+                try { showToast('Ticket: errore riapertura', { type: 'danger' }); } catch (e2) {}
+            }
         }
 
         if (tk.btnCreate) tk.btnCreate.addEventListener('click', createTicket);
