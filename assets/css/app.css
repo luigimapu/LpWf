@@ -2210,3 +2210,8 @@ article.panel[data-resource='audit-auth'] .panel__body {
     max-height: calc(min(var(--card-vh-limit), var(--card-max-height)) - 96px);
     overflow-y: auto;
 }
+/* Docs dropdown */
+.docs-menu-wrap { position: relative; }
+.dropdown-menu { position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e6e6e6; border-radius: 8px; min-width: 240px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 6px 0; z-index: 1000; }
+.dropdown-menu a { display: block; padding: 8px 12px; color: #222; text-decoration: none; font-size: 14px; }
+.dropdown-menu a:hover { background: #f5f7fa; }

@@ -40,9 +40,21 @@
                 <p>Gestisci workflow, sincronizzazioni e cataloghi da un'unica interfaccia.</p>
             </div>
             <div class="topbar__actions">
-                <div class="input-group">
+                <div class="input-group docs-menu-wrap">
                     <span>&nbsp;</span>
-                    <a class="btn" href="docs/index.html" target="_blank" rel="noopener">Docs</a>
+                    <button type="button" class="btn" id="btn-docs" aria-haspopup="true" aria-expanded="false">Docs ▾</button>
+                    <div id="docs-menu" class="dropdown-menu" hidden>
+                        <a href="docs/index.html" target="_blank" rel="noopener">Docs Hub</a>
+                        <a href="docs/api.html" target="_blank" rel="noopener">API Docs (Redoc)</a>
+                        <a href="api_test.html" target="_blank" rel="noopener">API Test Console</a>
+                        <a href="services_test.html" target="_blank" rel="noopener">Services Test</a>
+                        <a href="docs/API_REFERENCE.md" target="_blank" rel="noopener">API Reference (MD)</a>
+                        <a href="docs/openapi.yaml" target="_blank" rel="noopener">OpenAPI YAML</a>
+                        <a href="docs/postman_collection.json" target="_blank" rel="noopener">Postman Collection</a>
+                        <a href="docs/insomnia.yaml" target="_blank" rel="noopener">Insomnia Export</a>
+                        <a href="docs/DEV_SETUP.md" target="_blank" rel="noopener">Dev Setup</a>
+                        <a href="docs/DEPLOY_PLESK.md" target="_blank" rel="noopener">Deploy Plesk</a>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="user-selector">Operatore</label>

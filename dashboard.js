@@ -9273,6 +9273,28 @@
             loadTickets();
         });
 
+        // Docs dropdown
+        try {
+            const btnDocs = document.getElementById('btn-docs');
+            const docsMenu = document.getElementById('docs-menu');
+            if (btnDocs && docsMenu) {
+                btnDocs.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const isOpen = !docsMenu.hidden;
+                    docsMenu.hidden = isOpen; // toggle
+                    btnDocs.setAttribute('aria-expanded', String(!isOpen));
+                });
+                document.addEventListener('click', (ev) => {
+                    if (!docsMenu || docsMenu.hidden) return;
+                    const inside = ev.target.closest('#docs-menu') || ev.target.closest('#btn-docs');
+                    if (!inside) {
+                        docsMenu.hidden = true;
+                        btnDocs.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        } catch (e) { /* ignore */ }
+
         // Ticket filters preferences (localStorage)
         const TKT_PREFS_KEY = 'lpwf_ticket_prefs';
         const loadTicketPrefs = () => {
