@@ -8590,15 +8590,46 @@
             openModal('modal-service-log');
         }
 
+        // API fetch helper (global-friendly) for services section
+        const apiFetch = async (endpoint, options = {}) => {
+            const base = (
+                window.lpwfAuth?.getApiBase?.() ||
+                window.lpwfAuth?.ensureBaseForLocation?.() ||
+                '/api'
+            ).replace(/\/$/, '');
+            const init = {
+                method: options.method || 'GET',
+                headers: window.lpwfAuth?.buildHeaders?.(options.headers || {}, options.json === true) || {},
+            };
+            if (options.body !== undefined) {
+                init.body = options.json ? JSON.stringify(options.body) : options.body;
+            }
+            const url = `${base}/${String(endpoint || '').replace(/^\/+/, '')}`;
+            let response;
+            try { response = await fetch(url, init); } catch (e) { throw e; }
+            const text = await response.text();
+            let payload = null; if (text) { try { payload = JSON.parse(text); } catch (e) { /* ignore */ } }
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.lpwfAuth?.clearToken?.();
+                    alert((payload && payload.message) || 'Sessione scaduta. Effettua nuovamente il login.');
+                    window.location.href = 'login.html';
+                    throw new Error('Non autenticato');
+                }
+                throw new Error((payload && payload.message) || `Errore HTTP ${response.status}`);
+            }
+            return payload;
+        };
+
         const callService = async (path, payload) => {
-            const res = await authFetch(`services/${path}`, { method: 'POST', json: true, body: payload });
+            const res = await apiFetch(`services/${path}`, { method: 'POST', json: true, body: payload });
             return res;
         };
 
         async function loadServiceStatus() {
             if (!svc.status) return;
             try {
-                const s = await authFetch('services/status');
+                const s = await apiFetch('services/status');
                 const st = s?.status || {};
                 const yes = (v) => (v ? '<span class="badge">Sì</span>' : '<span class="badge">No</span>');
                 svc.status.innerHTML = `
@@ -8656,7 +8687,7 @@
         async function loadServiceLogs() {
             if (!svc.logs) return;
             try {
-                const rows = await authFetch('service_logs?limit=200');
+                const rows = await apiFetch('service_logs?limit=200');
                 servicesLogsCache = Array.isArray(rows) ? rows : [];
                 renderServiceLogs();
             } catch (e) {
@@ -8666,7 +8697,7 @@
 
         async function retryFailed(limit = 20, sinceHours = 24) {
             try {
-                await authFetch('services/retry_failed', { method: 'POST', json: true, body: { limit, since_hours: sinceHours } });
+                await apiFetch('services/retry_failed', { method: 'POST', json: true, body: { limit, since_hours: sinceHours } });
                 await loadServiceLogs();
                 try { showToast('Retry eseguito', { type: 'success' }); } catch (e) {}
             } catch (e) {
@@ -8676,6 +8707,8 @@
 
         // Hook UI services
         if (svc.btnRefresh) svc.btnRefresh.addEventListener('click', loadServiceStatus);
+        // Carica stato provider all'avvio per evitare placeholder bloccato
+        try { loadServiceStatus(); } catch (e) {}
         if (svc.btnWa) svc.btnWa.addEventListener('click', async () => {
             const to = (svc.waTo?.value || '').trim();
             const msg = svc.waMsg?.value || '';
@@ -8691,7 +8724,7 @@
             const url = msg ? `${base}?text=${encodeURIComponent(msg)}` : base;
             try { window.open(url, '_blank', 'noopener'); } catch (e) { window.location.href = url; }
             // Log manuale (non bloccante)
-            try { await authFetch('services/whatsapp_log', { method: 'POST', json: true, body: { to, message: msg, link: url } }); } catch (e) {}
+            try { await apiFetch('services/whatsapp_log', { method: 'POST', json: true, body: { to, message: msg, link: url } }); } catch (e) {}
         });
         if (svc.btnEm) svc.btnEm.addEventListener('click', async () => {
             const to = (svc.emTo?.value || '').trim();
