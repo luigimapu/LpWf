@@ -126,23 +126,26 @@ class ServiceDispatcher
     public function sendEmail(string $to, string $subject, string $body): array
     {
         $provider = strtolower((string)(getenv('EMAIL_PROVIDER') ?: 'smtp'));
+        $isHtml = (bool)preg_match('/<[^>]+>/', $body);
         if ($provider === 'mailgun') {
             $key = getenv('MAILGUN_API_KEY') ?: '';
             $domain = getenv('MAILGUN_DOMAIN') ?: '';
             $from = getenv('SMTP_FROM') ?: 'noreply@example.com';
             if ($key && $domain) {
                 $ch = curl_init("https://api.mailgun.net/v3/{$domain}/messages");
+                $fields = [
+                    'from' => $from,
+                    'to' => $to,
+                    'subject' => $subject,
+                ];
+                if ($isHtml) { $fields['html'] = $body; $fields['text'] = strip_tags($body); }
+                else { $fields['text'] = $body; }
                 curl_setopt_array($ch, [
                     CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
                     CURLOPT_USERPWD => 'api:' . $key,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
-                    CURLOPT_POSTFIELDS => [
-                        'from' => $from,
-                        'to' => $to,
-                        'subject' => $subject,
-                        'text' => $body,
-                    ],
+                    CURLOPT_POSTFIELDS => $fields,
                 ]);
                 if (!$this->verifySsl) {
                     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -164,7 +167,7 @@ class ServiceDispatcher
                     'personalizations' => [[ 'to' => [[ 'email' => $to ]] ]],
                     'from' => ['email' => $from],
                     'subject' => $subject,
-                    'content' => [[ 'type' => 'text/plain', 'value' => $body ]],
+                    'content' => [[ 'type' => ($isHtml ? 'text/html' : 'text/plain'), 'value' => $body ]],
                 ];
                 return $this->curlJson('https://api.sendgrid.com/v3/mail/send', 'POST', $payload, ["Authorization: Bearer {$key}"]);
             }
@@ -244,21 +247,48 @@ class ServiceDispatcher
                 $from = getenv('MAILUP_FROM') ?: (getenv('SMTP_FROM') ?: 'noreply@example.com');
                 $fromName = getenv('MAILUP_FROM_NAME') ?: '';
                 $replyTo = getenv('MAILUP_REPLY_TO') ?: '';
-                $payload = [
-                    'to' => $to,
-                    'subject' => $subject,
-                    'text' => $body,
-                    'html' => null,
-                    'from' => $from,
-                    'from_name' => $fromName ?: null,
-                    'reply_to' => $replyTo ?: null,
-                ];
+                $format = strtolower((string)(getenv('MAILUP_SEND_FORMAT') ?: (stripos($sendUrl, 'transactional') !== false ? 'transactional' : 'generic')));
+                if ($format === 'transactional') {
+                    // Transactional/Send API format
+                    $payload = [
+                        'To' => [[ 'Email' => $to ]],
+                        'Subject' => $subject,
+                        'From' => ['Email' => $from] + ($fromName !== '' ? ['Name' => $fromName] : []),
+                        'ReplyTo' => $replyTo !== '' ? ['Email' => $replyTo] : null,
+                        'Content' => [ 'Html' => null, 'Text' => $body ],
+                    ];
+                } else {
+                    // Generic bridge-like format
+                    $payload = [
+                        'to' => $to,
+                        'subject' => $subject,
+                        'text' => $body,
+                        'html' => null,
+                        'from' => $from,
+                        'from_name' => $fromName ?: null,
+                        'reply_to' => $replyTo ?: null,
+                    ];
+                }
                 $headers = ["Authorization: Bearer {$access}"];
                 $res = $this->curlJson($sendUrl, 'POST', $payload, $headers);
                 $res['provider'] = 'mailup';
                 return $this->normalizeMailupResponse($res);
             }
-        } else { // smtp via mail()
+        } else { // smtp (auth) oppure mail()
+            $host = getenv('SMTP_HOST') ?: '';
+            $port = (int)(getenv('SMTP_PORT') ?: 0);
+            if ($host && $port > 0) {
+                $user = getenv('SMTP_USER') ?: '';
+                $pass = getenv('SMTP_PASS') ?: '';
+                $secure = strtolower((string)(getenv('SMTP_SECURE') ?: ''));
+                $from = getenv('SMTP_FROM') ?: 'noreply@example.com';
+                $fromName = getenv('MAILUP_FROM_NAME') ?: '';
+                $replyTo = getenv('MAILUP_REPLY_TO') ?: '';
+                $isHtml = (bool)preg_match('/<[^>]+>/', $body);
+                $res = $this->smtpSend($host, $port, $user, $pass, $secure, $from, $fromName, $replyTo, $to, $subject, $body, $isHtml);
+                $res['provider'] = 'smtp';
+                return $res;
+            }
             $headers = 'From: ' . (getenv('SMTP_FROM') ?: 'noreply@example.com') . "\r\n" .
                        'MIME-Version: 1.0' . "\r\n" .
                        'Content-Type: text/plain; charset=UTF-8';
@@ -397,5 +427,66 @@ class ServiceDispatcher
             }
         }
         return $res;
+    }
+
+    private function smtpSend(string $host, int $port, string $user, string $pass, string $secure, string $from, string $fromName, string $replyTo, string $to, string $subject, string $body, bool $isHtml): array
+    {
+        $timeout = 20;
+        $remote = ($secure === 'ssl' ? 'ssl://' : '') . $host . ':' . $port;
+        $fp = @stream_socket_client($remote, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
+        if (!$fp) return ['ok' => false, 'code' => 0, 'error' => 'connect_error: ' . $errstr];
+        stream_set_timeout($fp, $timeout);
+        $read = function() use ($fp) { return fgets($fp, 8192) ?: ''; };
+        $cmd = function(string $line, array $expect) use ($fp, $read) {
+            if ($line !== '') fwrite($fp, $line . "\r\n");
+            $resp = '';
+            do { $line = $read(); $resp .= $line; } while ($line && preg_match('/^\d{3}-/', $line));
+            $code = (int)substr($resp, 0, 3);
+            return [in_array($code, $expect, true), $code, $resp];
+        };
+        $greet = $read(); if (substr($greet, 0, 3) !== '220') { fclose($fp); return ['ok' => false, 'code' => (int)substr($greet,0,3), 'error' => 'greet_failed', 'body' => $greet]; }
+        [$ok, $code, $resp] = $cmd('EHLO ' . gethostname(), [250]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'ehlo_failed', 'body' => $resp]; }
+        if ($secure === 'tls') {
+            [$ok, $code, $resp] = $cmd('STARTTLS', [220]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'starttls_failed', 'body' => $resp]; }
+            if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) { fclose($fp); return ['ok' => false, 'code' => 0, 'error' => 'tls_crypto_failed']; }
+            [$ok, $code, $resp] = $cmd('EHLO ' . gethostname(), [250]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'ehlo_after_tls_failed', 'body' => $resp]; }
+        }
+        if ($user !== '' && $pass !== '') {
+            [$ok, $code, $resp] = $cmd('AUTH LOGIN', [334, 235]);
+            if ($code === 334) {
+                [$ok, $code, $resp] = $cmd(base64_encode($user), [334]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'auth_user_failed', 'body' => $resp]; }
+                [$ok, $code, $resp] = $cmd(base64_encode($pass), [235]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'auth_pass_failed', 'body' => $resp]; }
+            } elseif ($code !== 235) {
+                fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'auth_failed', 'body' => $resp];
+            }
+        }
+        [$ok, $code, $resp] = $cmd('MAIL FROM:<' . $from . '>', [250]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'mail_from_failed', 'body' => $resp]; }
+        [$ok, $code, $resp] = $cmd('RCPT TO:<' . $to . '>', [250, 251]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'rcpt_to_failed', 'body' => $resp]; }
+        [$ok, $code, $resp] = $cmd('DATA', [354]); if (!$ok) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'data_cmd_failed', 'body' => $resp]; }
+
+        $encode = function($s) { if ($s === '') return ''; if (function_exists('mb_encode_mimeheader')) return mb_encode_mimeheader($s, 'UTF-8'); return '=?UTF-8?B?' . base64_encode($s) . '?='; };
+        $headers = [];
+        $headers[] = 'Date: ' . date(DATE_RFC2822);
+        $fromHeader = $fromName !== '' ? ($encode($fromName) . ' <' . $from . '>') : $from;
+        $headers[] = 'From: ' . $fromHeader;
+        $headers[] = 'To: <' . $to . '>';
+        $headers[] = 'Subject: ' . $encode($subject);
+        if ($replyTo !== '') $headers[] = 'Reply-To: ' . $replyTo;
+        $headers[] = 'MIME-Version: 1.0';
+        if ($isHtml) {
+            $headers[] = 'Content-Type: text/html; charset=UTF-8';
+            $message = $body;
+        } else {
+            $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+            $message = $body;
+        }
+        $data = implode("\r\n", $headers) . "\r\n\r\n" . $message . "\r\n.";
+        fwrite($fp, $data . "\r\n");
+        $resp = $read();
+        $code = (int)substr($resp, 0, 3);
+        if ($code !== 250) { fclose($fp); return ['ok' => false, 'code' => $code, 'error' => 'data_end_failed', 'body' => $resp]; }
+        $cmd('QUIT', [221]);
+        fclose($fp);
+        return ['ok' => true, 'code' => 250];
     }
 }

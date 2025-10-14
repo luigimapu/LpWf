@@ -8712,7 +8712,16 @@
         if (svc.btnWa) svc.btnWa.addEventListener('click', async () => {
             const to = (svc.waTo?.value || '').trim();
             const msg = svc.waMsg?.value || '';
-            try { const r = await callService('whatsapp', { to, message: msg }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            try {
+                const r = await callService('whatsapp', { to, message: msg });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`WhatsApp: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('WhatsApp: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
         if (svc.btnWaWeb) svc.btnWaWeb.addEventListener('click', async () => {
             const to = (svc.waTo?.value || '').trim();
@@ -8728,14 +8737,45 @@
         });
         if (svc.btnEm) svc.btnEm.addEventListener('click', async () => {
             const to = (svc.emTo?.value || '').trim();
-            const subject = svc.emSubj?.value || '';
-            const body = svc.emBody?.value || '';
-            try { const r = await callService('email', { to, subject, body }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            const subject = (svc.emSubj?.value || '').trim();
+            const isHtml = !!document.getElementById('svc-em-html')?.checked;
+            const htmlEl = document.getElementById('svc-em-body-html');
+            const body = isHtml ? (htmlEl?.value || '') : (svc.emBody?.value || '');
+            try {
+                const r = await callService('email', { to, subject, body });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Email: ${ok ? 'inviata' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Email: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
+
+        // Toggle textarea HTML visibility
+        try {
+            const wrap = document.getElementById('svc-em-body-html-wrap');
+            const chk = document.getElementById('svc-em-html');
+            if (chk && wrap) {
+                const toggle = () => { wrap.hidden = !chk.checked; };
+                toggle();
+                chk.addEventListener('change', toggle);
+            }
+        } catch (e) {}
         if (svc.btnPay) svc.btnPay.addEventListener('click', async () => {
             const gateway = svc.payGw?.value || 'STRIPE';
             const amount = Number(svc.payAmt?.value || 0);
-            try { const r = await callService('payment', { gateway, amount }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            try {
+                const r = await callService('payment', { gateway, amount });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Pagamento: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Pagamento: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
         if (svc.btnRetryFailed) svc.btnRetryFailed.addEventListener('click', () => retryFailed(20, 24));
         if (svc.btnLoadLogs) svc.btnLoadLogs.addEventListener('click', loadServiceLogs);
@@ -8764,16 +8804,57 @@
             const customer_id = (svc.ordCust?.value || '').trim();
             const sku = (svc.ordSku?.value || '').trim();
             const qty = Number(svc.ordQty?.value || 1);
-            try { const r = await callService('order', { customer_id, items: [{ sku, qty }] }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            try {
+                const r = await callService('order', { customer_id, items: [{ sku, qty }] });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Ordine: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Ordine: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
         if (svc.btnDoc) svc.btnDoc.addEventListener('click', async () => {
             const type = (svc.docType?.value || 'FATTURA');
-            try { const r = await callService('document', { type }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            try {
+                const r = await callService('document', { type });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Documento: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Documento: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
         if (svc.btnTicket) svc.btnTicket.addEventListener('click', async () => {
             const title = (svc.tkTitle?.value || '').trim();
             const priority = (svc.tkPrio?.value || 'MEDIA');
-            try { const r = await callService('ticket', { title, priority }); svc.out.textContent = JSON.stringify(r, null, 2); } catch (e) { svc.out.textContent = e.message || 'Errore'; }
+            try {
+                const r = await callService('ticket', { title, priority });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Ticket: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Ticket: errore', { type: 'danger' }); } catch (e2) {}
+            }
+        });
+        if (svc.btnChat) svc.btnChat.addEventListener('click', async () => {
+            const channel = (svc.chChannel?.value || 'general').trim();
+            const message = (svc.chMsg?.value || '');
+            try {
+                const r = await callService('chat', { channel, message });
+                svc.out.textContent = JSON.stringify(r, null, 2);
+                const ok = !!(r?.result?.ok ?? r?.ok ?? true);
+                const code = r?.result?.code ?? r?.code ?? '';
+                try { showToast(`Chat: ${ok ? 'inviato' : 'errore'}${code ? ' ('+code+')' : ''}`, { type: ok ? 'success' : 'danger' }); } catch (e) {}
+            } catch (e) {
+                svc.out.textContent = e.message || 'Errore';
+                try { showToast('Chat: errore', { type: 'danger' }); } catch (e2) {}
+            }
         });
         if (svc.btnChat) svc.btnChat.addEventListener('click', async () => {
             const channel = (svc.chChannel?.value || 'general').trim();

@@ -1002,9 +1002,19 @@
                                     <button type="button" class="btn" id="btn-svc-wa">Invia WA</button>
                                     <button type="button" class="btn" id="btn-svc-wa-web" title="Apri WhatsApp Web/App con link precompilato">Apri WhatsApp</button>
                                 </div>
-                                <label class="form-control"><span>Email →</span><input type="email" id="svc-em-to" placeholder="utente@example.com"></label>
-                                <label class="form-control"><span>Oggetto</span><input type="text" id="svc-em-subj" placeholder="Test"></label>
+                        <label class="form-control"><span>Email →</span><input type="email" id="svc-em-to" placeholder="utente@example.com"></label>
+                        <label class="form-control"><span>Oggetto</span><input type="text" id="svc-em-subj" placeholder="Test"></label>
                                 <label class="form-control"><span>Testo</span><input type="text" id="svc-em-body" placeholder="Contenuto…"></label>
+                                <div class="form-control form-control--inline"><span>Formato</span>
+                                    <label class="form-control form-control--inline" title="Invia il corpo come HTML">
+                                        <input type="checkbox" id="svc-em-html">
+                                        <span>HTML</span>
+                                    </label>
+                                </div>
+                                <label class="form-control" id="svc-em-body-html-wrap" hidden>
+                                    <span>Body HTML</span>
+                                    <textarea id="svc-em-body-html" rows="5" placeholder="<p>Contenuto HTML…</p>"></textarea>
+                                </label>
                                 <div class="form-control"><span>&nbsp;</span><button type="button" class="btn" id="btn-svc-em">Invia Email</button></div>
                                 <label class="form-control"><span>Pagamento</span>
                                     <select id="svc-pay-gw"><option value="STRIPE">STRIPE</option><option value="PAYPAL">PAYPAL</option></select>

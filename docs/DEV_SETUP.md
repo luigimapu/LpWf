@@ -59,6 +59,12 @@
                 - `MAILUP_GRANT_TYPE=password` + `MAILUP_USERNAME`, `MAILUP_PASSWORD`
                 - `MAILUP_GRANT_TYPE=client_credentials` (+ opzionale `MAILUP_SCOPE`)
               - Mittenti: `MAILUP_FROM`, `MAILUP_FROM_NAME`, `MAILUP_REPLY_TO`.
+              - Formato invio (`MAILUP_SEND_FORMAT`):
+                - `transactional` (consigliato per Send/Transactional API) → payload `{ To:[{Email}], Subject, From:{Email,Name}, ReplyTo:{Email}, Content:{Html,Text} }`
+                - `generic` (bridge semplice) → `{ to, subject, text, html, from, from_name, reply_to }`
+            - SMTP Auth (consigliato se vuoi usare SMTP MailUp):
+              - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE=none|tls|ssl`, `SMTP_FROM`
+              - L’invio utilizza un semplice client SMTP (AUTH LOGIN, STARTTLS opzionale). Se `SMTP_HOST` non è impostato, fallback a `mail()`.
               - Nota: `MAILUP_SEND_URL` varia in base al prodotto MailUp (Console API vs Send/Transactional). Adegua al tuo endpoint.
         - Stripe: `STRIPE_API_KEY`, `PAYMENT_CURRENCY=EUR`
         - Webhook opzionali: `ORDER_WEBHOOK_URL`, `DOCUMENT_WEBHOOK_URL`, `PAYMENT_WEBHOOK_URL`, `TICKET_WEBHOOK_URL`, `CHAT_WEBHOOK_URL`
