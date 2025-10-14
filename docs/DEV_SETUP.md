@@ -52,8 +52,8 @@
               `META_WHATSAPP_TEMPLATE_NAME` e `META_WHATSAPP_TEMPLATE_LANG` (predef. `it`).
               Il testo inviato sarà passato come primo parametro del body del template.
         - Email: `EMAIL_PROVIDER=smtp|mailgun|sendgrid|mailup` + chiavi se non `smtp`
-            - MailUp (bridge): imposta `MAILUP_WEBHOOK_URL` (endpoint interno che gestisce OAuth e chiamate MailUp)
-            - MailUp (placeholder API): `MAILUP_CLIENT_ID`, `MAILUP_CLIENT_SECRET`, `MAILUP_USERNAME`, `MAILUP_PASSWORD`, `MAILUP_FROM`, `MAILUP_FROM_NAME`, `MAILUP_REPLY_TO`
+            - MailUp (bridge): imposta `MAILUP_WEBHOOK_URL` (endpoint tuo che fa da ponte verso MailUp)
+            - MailUp (OAuth diretto): `MAILUP_CLIENT_ID`, `MAILUP_CLIENT_SECRET`, `MAILUP_USERNAME`, `MAILUP_PASSWORD`, `MAILUP_TOKEN_URL` (default OK) e `MAILUP_SEND_URL` (endpoint invio del prodotto MailUp adottato). Mittenti: `MAILUP_FROM`, `MAILUP_FROM_NAME`, `MAILUP_REPLY_TO`.
         - Stripe: `STRIPE_API_KEY`, `PAYMENT_CURRENCY=EUR`
         - Webhook opzionali: `ORDER_WEBHOOK_URL`, `DOCUMENT_WEBHOOK_URL`, `PAYMENT_WEBHOOK_URL`, `TICKET_WEBHOOK_URL`, `CHAT_WEBHOOK_URL`
         - Forward automatico ticket in creazione: `TICKET_FORWARD_ON_CREATE=1` (opzionale; richiede `TICKET_WEBHOOK_URL`)

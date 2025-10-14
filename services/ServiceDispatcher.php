@@ -169,8 +169,7 @@ class ServiceDispatcher
                 return $this->curlJson('https://api.sendgrid.com/v3/mail/send', 'POST', $payload, ["Authorization: Bearer {$key}"]);
             }
         } elseif ($provider === 'mailup') {
-            // Integrazione light: inoltro a webhook esterno che esegue l'invio via MailUp
-            // (es: funzione serverless che usa le API OAuth di MailUp)
+            // Opzione A: webhook bridge (consigliato)
             $hook = getenv('MAILUP_WEBHOOK_URL') ?: '';
             $from = getenv('MAILUP_FROM') ?: (getenv('SMTP_FROM') ?: 'noreply@example.com');
             $fromName = getenv('MAILUP_FROM_NAME') ?: '';
@@ -187,6 +186,64 @@ class ServiceDispatcher
                     'provider' => 'mailup',
                 ];
                 $res = $this->curlJson($hook, 'POST', $payload);
+                $res['provider'] = 'mailup';
+                return $res;
+            }
+
+            // Opzione B: integrazione diretta via OAuth MailUp (endpoint configurabile)
+            $clientId = getenv('MAILUP_CLIENT_ID') ?: '';
+            $clientSecret = getenv('MAILUP_CLIENT_SECRET') ?: '';
+            $username = getenv('MAILUP_USERNAME') ?: '';
+            $password = getenv('MAILUP_PASSWORD') ?: '';
+            $tokenUrl = getenv('MAILUP_TOKEN_URL') ?: 'https://services.mailup.com/Authorization/OAuth/Token';
+            $sendUrl = getenv('MAILUP_SEND_URL') ?: '';
+            if ($clientId && $clientSecret && $username && $password && $sendUrl) {
+                // 1) Ottieni access token (grant password)
+                $ch = curl_init($tokenUrl);
+                $post = http_build_query([
+                    'grant_type' => 'password',
+                    'client_id' => $clientId,
+                    'client_secret' => $clientSecret,
+                    'username' => $username,
+                    'password' => $password,
+                ]);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+                    CURLOPT_POSTFIELDS => $post,
+                    CURLOPT_TIMEOUT => 25,
+                ]);
+                if (!$this->verifySsl) {
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+                }
+                $tokResp = curl_exec($ch);
+                $tokErr = curl_error($ch);
+                $tokCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                if ($tokResp === false) return ['provider' => 'mailup', 'ok' => false, 'error' => $tokErr ?: 'oauth_error'];
+                $tok = json_decode($tokResp, true);
+                $access = is_array($tok) ? ($tok['access_token'] ?? '') : '';
+                if (!$access || $tokCode < 200 || $tokCode >= 300) {
+                    return ['provider' => 'mailup', 'ok' => false, 'code' => $tokCode, 'body' => $tok ?: $tokResp];
+                }
+
+                // 2) Invia verso endpoint configurato (varia a seconda del prodotto MailUp adottato)
+                $from = getenv('MAILUP_FROM') ?: (getenv('SMTP_FROM') ?: 'noreply@example.com');
+                $fromName = getenv('MAILUP_FROM_NAME') ?: '';
+                $replyTo = getenv('MAILUP_REPLY_TO') ?: '';
+                $payload = [
+                    'to' => $to,
+                    'subject' => $subject,
+                    'text' => $body,
+                    'html' => null,
+                    'from' => $from,
+                    'from_name' => $fromName ?: null,
+                    'reply_to' => $replyTo ?: null,
+                ];
+                $headers = ["Authorization: Bearer {$access}"];
+                $res = $this->curlJson($sendUrl, 'POST', $payload, $headers);
                 $res['provider'] = 'mailup';
                 return $res;
             }

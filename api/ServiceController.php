@@ -86,9 +86,14 @@ class ServiceController
                 } elseif ($emailProvider === 'sendgrid') {
                     $emailConfigured = (bool)getenv('SENDGRID_API_KEY');
                 } elseif ($emailProvider === 'mailup') {
-                    $emailConfigured = (bool)getenv('MAILUP_WEBHOOK_URL') || (
-                        getenv('MAILUP_CLIENT_ID') && getenv('MAILUP_CLIENT_SECRET') && getenv('MAILUP_USERNAME') && getenv('MAILUP_PASSWORD')
-                    );
+                    // Configurato se è presente un webhook oppure credenziali OAuth + SEND_URL
+                    $emailConfigured = (bool)getenv('MAILUP_WEBHOOK_URL');
+                    if (!$emailConfigured) {
+                        $emailConfigured = (bool)(
+                            getenv('MAILUP_CLIENT_ID') && getenv('MAILUP_CLIENT_SECRET') &&
+                            getenv('MAILUP_USERNAME') && getenv('MAILUP_PASSWORD') && getenv('MAILUP_SEND_URL')
+                        );
+                    }
                 }
                 if (!$emailConfigured) {
                     $this->respond(400, ['message' => 'Invio email non configurato per il provider selezionato', 'provider' => $emailProvider]);
@@ -225,18 +230,26 @@ class ServiceController
                 }
 
                 $emailProvider = strtolower((string)(getenv('EMAIL_PROVIDER') ?: 'smtp'));
-                $emailFrom = getenv('SMTP_FROM') ?: null;
+                $emailFrom = null;
                 $emailConfigured = false;
                 if ($emailProvider === 'smtp') {
                     $emailConfigured = true; // usa mail() di PHP
+                    $emailFrom = getenv('SMTP_FROM') ?: null;
                 } elseif ($emailProvider === 'mailgun') {
                     $emailConfigured = (bool)(getenv('MAILGUN_API_KEY') && getenv('MAILGUN_DOMAIN'));
+                    $emailFrom = getenv('SMTP_FROM') ?: null;
                 } elseif ($emailProvider === 'sendgrid') {
                     $emailConfigured = (bool)getenv('SENDGRID_API_KEY');
+                    $emailFrom = getenv('SMTP_FROM') ?: null;
                 } elseif ($emailProvider === 'mailup') {
-                    $emailConfigured = (bool)getenv('MAILUP_WEBHOOK_URL') || (
-                        getenv('MAILUP_CLIENT_ID') && getenv('MAILUP_CLIENT_SECRET') && getenv('MAILUP_USERNAME') && getenv('MAILUP_PASSWORD')
-                    );
+                    $emailConfigured = (bool)getenv('MAILUP_WEBHOOK_URL');
+                    if (!$emailConfigured) {
+                        $emailConfigured = (bool)(
+                            getenv('MAILUP_CLIENT_ID') && getenv('MAILUP_CLIENT_SECRET') &&
+                            getenv('MAILUP_USERNAME') && getenv('MAILUP_PASSWORD') && getenv('MAILUP_SEND_URL')
+                        );
+                    }
+                    $emailFrom = getenv('MAILUP_FROM') ?: (getenv('SMTP_FROM') ?: null);
                 }
 
                 $status = [
