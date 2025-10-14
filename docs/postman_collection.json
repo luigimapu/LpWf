@@ -1,0 +1,82 @@
+{
+  "info": {
+    "name": "LpWF Gestionale API",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "description": "Collection Postman per le API LpWF. Imposta {{baseUrl}} e {{token}} nell'ambiente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth / Login",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"utente@example.com\",\n  \"password\": \"pwd\"\n}" }
+      }
+    },
+    {
+      "name": "Auth / Me",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] }
+      }
+    },
+    {
+      "name": "System / Health",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] } }
+    },
+    {
+      "name": "System / Tenant Health",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tenant_health", "host": ["{{baseUrl}}"], "path": ["tenant_health"] } }
+    },
+    {
+      "name": "Tickets / List (mine)",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "{{baseUrl}}/tickets?mine=1", "host": ["{{baseUrl}}"], "path": ["tickets"], "query": [ {"key":"mine","value":"1"} ] }
+      }
+    },
+    {
+      "name": "Tickets / Create",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/tickets", "host": ["{{baseUrl}}"], "path": ["tickets"] },
+        "body": { "mode": "raw", "raw": "{\n  \"titolo\": \"Problema rete\",\n  \"priorita\": \"MEDIA\"\n}" }
+      }
+    },
+    {
+      "name": "Tickets / Assign (self)",
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+        "url": { "raw": "{{baseUrl}}/tickets/1/assign", "host": ["{{baseUrl}}"], "path": ["tickets","1","assign"] },
+        "body": { "mode": "raw", "raw": "{}" }
+      }
+    },
+    {
+      "name": "Tasks / Unassigned",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "{{baseUrl}}/tasks?unassigned=true", "host": ["{{baseUrl}}"], "path": ["tasks"], "query": [ {"key":"unassigned","value":"true"} ] }
+      }
+    },
+    {
+      "name": "Services / Status",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "{{baseUrl}}/services/status", "host": ["{{baseUrl}}"], "path": ["services","status"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost/api" },
+    { "key": "token", "value": "" }
+  ]
+}
+
