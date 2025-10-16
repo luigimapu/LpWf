@@ -3,23 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>API Docs – LpWF</title>
+    <title>Swagger UI – LpWF</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
     <style>
-      body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-      header { padding: 10px 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; gap:12px; }
-      header a { color:#0a66c2; text-decoration:none; }
-      .hint { color:#666; font-size: 0.9em; }
-      redoc { height: calc(100vh - 50px); display:block; }
+      body { margin: 0; }
+      .topbar { display:none; }
+      #swagger-ui { max-width: 1200px; margin: 0 auto; }
     </style>
-    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
   </head>
   <body>
-    <header>
-      <strong>API Docs – LpWF</strong>
-      <span class="hint">OpenAPI generata da reference</span>
+    <header style="padding:10px 16px;border-bottom:1px solid #eee;display:flex;gap:12px;align-items:center;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+      <strong>Swagger UI – LpWF</strong>
       <span style="flex:1 1 auto"></span>
       <a href="index.html">Docs Index</a>
-      <a href="swagger.html">Swagger UI</a>
+      <a href="api.html">Redoc</a>
       <a href="postman_collection.json" download>Postman Collection</a>
       <a id="openPostmanCollection" href="#">Apri in Postman</a>
       <a id="openPostmanCollectionWeb" href="#">Import Web</a>
@@ -32,12 +29,18 @@
       <a href="postman_environment.prod.json" download>Env Production</a>
       <a id="openPostmanEnvProd" href="#">Apri Env Production</a>
       <a id="openPostmanEnvProdWeb" href="#">Import Env Production</a>
-      <a href="../api_test.html">API Test Console</a>
-      <a href="../services_test.html">Services Test</a>
-      <a href="../docs/API_REFERENCE.md">Reference (MD)</a>
     </header>
-    <redoc spec-url="openapi.yaml"></redoc>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
     <script>
+      window.ui = SwaggerUIBundle({
+        url: 'openapi.yaml',
+        dom_id: '#swagger-ui',
+        docExpansion: 'list',
+        defaultModelsExpandDepth: 0,
+        presets: [SwaggerUIBundle.presets.apis],
+      });
+      // Configura deep link per import Postman con URL assoluto
       (function(){
         function absUrl(file) {
           var base = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');

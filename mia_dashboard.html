@@ -81,14 +81,25 @@
         <main id="dashboard-main" class="content-area">
             <div class="statusbar" id="statusbar">
                 <span>Utente: <strong id="status-user">—</strong></span>
-                <span>Ruolo: <strong id="status-role">—</strong></span>
+                <span>Ruolo: <strong id="status-role">—</strong> <small id="status-role-badge" class="badge">—</small></span>
                 <span>API: <strong id="status-api">—</strong></span>
                 <span>Token: <strong id="status-token">—</strong></span>
                 <span>Ultima API: <strong id="status-api-last">—</strong></span>
                 <span>API DB: <small id="status-health-api" class="badge">—</small></span>
                 <span>Tenant DB: <small id="status-health-tenant" class="badge">—</small></span>
                 <span>Maps: <small id="status-maps" class="badge">—</small></span>
+                <span>Uploads: <small id="status-uploads" class="badge">—</small></span>
+                <button type="button" class="btn" id="btn-status-login" hidden>Vai al login</button>
+                <button type="button" class="btn" id="btn-api-log-toggle">Nascondi Log</button>
+                <div id="api-log-inline" class="api-log-inline" style="flex-basis:100%; margin-top:8px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                        <strong>API Log (live)</strong>
+                        <button type="button" class="btn" id="btn-api-log-clear">Svuota</button>
+                    </div>
+                    <div id="api-log-list" class="api-log-list" aria-live="polite"></div>
+                </div>
             </div>
+
             
             <section id="overview" class="section section--card">
                 <header class="section__header">
@@ -158,7 +169,10 @@
                     <div class="section__actions" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
                         <label class="input-group" style="min-width:260px;">
                             <span>Ricerca</span>
-                            <input type="search" id="filter-tenants" placeholder="Cerca per nome o slug…">
+                            <input type="hidden" id="filter-tenants-id">
+                            <input type="search" id="filter-tenants" placeholder="Cerca per nome o slug…" list="tenant-options">
+                            <datalist id="tenant-options"></datalist>
+                            <small id="hint-tenants-filter" class="form-hint"></small>
                         </label>
                         <small id="tenants-count" class="badge" title="Totale risultati">0</small>
                         <button type="button" class="btn" id="btn-tenants-refresh">Aggiorna</button>
@@ -411,6 +425,7 @@
                                     <input type="hidden" id="instances-client-id">
                                     <input type="text" id="instances-client-label" list="client-options-instances" placeholder="Cerca cliente…">
                                     <datalist id="client-options-instances"></datalist>
+                                    <small id="hint-instances-client" class="form-hint"></small>
                                 </label>
                                 <button type="button" class="btn" id="btn-clear-client-filter">Pulisci</button>
                             </div>
@@ -767,7 +782,19 @@
                             <span>Priorità</span>
                             <select id="ticket-priority"><option value="BASSA">Bassa</option><option value="MEDIA" selected>Media</option><option value="ALTA">Alta</option></select>
                         </label>
-                        <button type="button" class="btn btn-primary" id="btn-ticket-create">+ Nuovo Ticket</button>
+                        <label class="input-group" style="min-width:260px;">
+                            <span>Assegnatario (nuovo)</span>
+                            <input type="text" id="new-ticket-assignee-label" list="new-user-options" placeholder="Digita nome…">
+                            <datalist id="new-user-options"></datalist>
+                            <small id="hint-assignee-new" class="form-hint"></small>
+                        </label>
+                        <label class="input-group" style="min-width:260px;">
+                            <span>Cliente (nuovo)</span>
+                            <input type="text" id="new-ticket-client-label" list="new-client-options" placeholder="Cerca cliente…">
+                            <datalist id="new-client-options"></datalist>
+                            <small id="hint-client-new" class="form-hint"></small>
+                        </label>
+                        <button type="button" class="btn btn-primary" id="btn-ticket-create" onclick="(window.lpwfCreateTicket||window.lpwfCreateTicketFallback||function(){})()">+ Nuovo Ticket</button>
                         <label class="form-control form-control--inline">
                             <input type="checkbox" id="ticket-my-only" checked>
                             <span>Solo i miei</span>
@@ -793,6 +820,7 @@
                             <span>Assegnatario (cerca)</span>
                             <input type="text" id="ticket-assignee-label" list="user-options-tickets" placeholder="Digita nome…">
                             <datalist id="user-options-tickets"></datalist>
+                            <small id="hint-assignee-filter" class="form-hint"></small>
                         </label>
                         <label class="input-group" style="min-width:220px;">
                             <span>Ricerca</span>
@@ -806,8 +834,9 @@
                             <span>Cliente</span>
                             <input type="text" id="ticket-client-label" list="client-options-tickets" placeholder="Cerca cliente…">
                             <datalist id="client-options-tickets"></datalist>
+                            <small id="hint-client-filter" class="form-hint"></small>
                         </label>
-                        <button type="button" class="btn" id="btn-tickets-refresh">Aggiorna</button>
+                        <button type="button" class="btn" id="btn-tickets-refresh" onclick="(window.lpwfLoadTickets||window.lpwfLoadTicketsFallback||function(){})()">Aggiorna</button>
                         <small id="tickets-count" class="badge" title="Totale risultati">0</small>
                         <button type="button" class="btn" id="btn-tickets-clear">Pulisci filtri</button>
                         <button type="button" class="btn" id="btn-tickets-export">Esporta CSV</button>
@@ -1405,10 +1434,7 @@
             </section>
         </main>
     </div>
-</div>
-
-<script src="auth.js" defer></script>
-<script src="dashboard.js" defer></script>
+ </div>
 
 <!-- Toast container -->
 <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
@@ -1465,6 +1491,7 @@
                         <input type="hidden" id="group-user-id">
                         <input type="text" id="group-user-label" list="user-options-admin" placeholder="Cerca utente...">
                         <datalist id="user-options-admin"></datalist>
+                        <small id="hint-group-user" class="form-hint"></small>
                     </label>
                     <div class="form-control">
                         <span>&nbsp;</span>
@@ -1560,6 +1587,7 @@
                         <input type="hidden" id="user-group-id">
                         <input type="text" id="user-group-label" list="group-options-admin" placeholder="Cerca gruppo...">
                         <datalist id="group-options-admin"></datalist>
+                        <small id="hint-user-group" class="form-hint"></small>
                     </label>
                     <div class="form-control">
                         <span>&nbsp;</span>
@@ -1694,6 +1722,7 @@
                 <input type="hidden" id="start-customer-id">
                 <input type="text" id="start-customer-label" list="client-options" placeholder="Digita per cercare cliente…">
                 <datalist id="client-options"></datalist>
+                <small id="hint-start-customer" class="form-hint"></small>
                 <p class="form-hint">Seleziona un cliente: imposteremo automaticamente l'entità collegata come CLIENTE con l'ID selezionato.</p>
             </label>
             <details class="form-control">
@@ -1844,12 +1873,14 @@
                 <input type="text" name="responsabile_gruppo_label" data-role="group-picker" list="workflow-group-options" placeholder="Digita per cercare un gruppo">
             </label>
             <datalist id="workflow-group-options"></datalist>
+            <small id="hint-workflow-group" class="form-hint"></small>
             <label class="form-control">
                 <span>Utente responsabile</span>
                 <input type="hidden" name="responsabile_utente_id">
                 <input type="text" name="responsabile_utente_label" data-role="user-picker" list="workflow-user-options" placeholder="Digita per cercare un utente">
             </label>
             <datalist id="workflow-user-options"></datalist>
+            <small id="hint-workflow-user" class="form-hint"></small>
             <footer class="modal__footer">
                 <button type="button" class="btn btn-secondary" data-modal-close>Annulla</button>
                 <button type="submit" class="btn btn-primary">Aggiungi passo</button>
@@ -1857,5 +1888,8 @@
         </form>
     </div>
 </div>
+    <script src="auth.js" defer></script>
+    <script src="fallback.js" defer></script>
+    <script src="dashboard.js" defer></script>
 </body>
 </html>

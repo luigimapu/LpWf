@@ -118,7 +118,16 @@
                 showMessage('success', 'Login riuscito. Reindirizzamento in corso...');
                 setToken(data.access_token, data.user || null);
                 setTimeout(() => {
-                    window.location.href = 'mia_dashboard.html';
+                    try {
+                        const role = String((data.user||{}).ruolo || '').toUpperCase();
+                        if (role === 'TENANT') {
+                            window.location.href = 'tenant_portal.html';
+                        } else {
+                            window.location.href = 'mia_dashboard.html';
+                        }
+                    } catch (e) {
+                        window.location.href = 'mia_dashboard.html';
+                    }
                 }, 600);
             } catch (error) {
                 showMessage('error', error.message);

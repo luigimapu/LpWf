@@ -72,6 +72,20 @@
     - Retry falliti: `/api/services/retry_failed` (POST) o CLI `php tools/services_retry.php --limit=20 --since=24`
         - Suggerito cron: ogni 5-10 minuti per riprovare errori transitori.
 
+### Documentazione API
+
+- OpenAPI aggiornata: `docs/openapi.yaml` (copre Auth, System, Tickets, Tasks incl. `note_attach`, Users/Groups incl. add/remove, Clients, Workflows, Audit, Services, Catalogo hub, Media, Enrichment, Hub Tenants).
+- Postman collection completa con esempi: `docs/postman_collection.json`.
+  - Imposta `{{baseUrl}}` (es. `http://localhost/api`) e `{{token}}` nel tuo ambiente.
+  - Per gli upload, seleziona un file locale nei request di tipo `form-data`.
+
+Variabili `.env` aggiunte/rilevanti:
+
+- `MAX_NOTE_ATTACHMENT_MB` (default 10) – limite upload allegati note task.
+- `AUDIT_ROLE_LIMIT` e `AUDIT_AUTH_DEFAULT_LIMIT` – limiti viste Audit.
+- `SERVICES_LOG` (default 1) – abilita log su tabella `service_logs`.
+- `SERVICES_WHATSAPP_WEBHOOK` – webhook alternativo per invio WhatsApp (se non si usa Twilio/Meta).
+
 ## Stile
 
 - JS/HTML/CSS: 2 spazi; PHP: 4 spazi (`.editorconfig`).

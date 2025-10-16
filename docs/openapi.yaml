@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
   title: LpWF Gestionale API
-  version: 1.0.0
+  version: 1.1.0
   description: |
     API REST del gestionale LpWF e servizi correlati.
 
-    Autenticazione con JWT Bearer. Alcuni endpoint (health, tenant_health, hub_catalogo) sono pubblici.
+    Autenticazione con JWT Bearer sul prefisso `/api`. Endpoint pubblici senza auth: `/api/health`, `/api/tenant_health` e lo script esterno `hub_catalogo` (read‑only).
   contact:
     name: LpWF Team
 servers:
@@ -27,6 +27,9 @@ tags:
   - name: Audit
   - name: Services
   - name: Catalog
+  - name: Media
+  - name: Enrichment
+  - name: Hub
 security:
   - bearerAuth: []
 
@@ -41,6 +44,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthLoginRequest'
+            example:
+              email: utente@example.com
+              password: pwd
       responses:
         '200':
           description: OK
@@ -81,6 +87,28 @@ paths:
                 current_password: { type: string }
                 new_password: { type: string }
               required: [current_password, new_password]
+            example:
+              current_password: oldpwd
+              new_password: NewPwd!2025
+      responses:
+        '200': { description: OK }
+  /auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Reset password (solo ADMIN/SUPERVISOR)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id: { type: integer }
+                new_password: { type: string }
+              required: [user_id, new_password]
+            example:
+              user_id: 12
+              new_password: Temp2025!
       responses:
         '200': { description: OK }
 
@@ -135,6 +163,10 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TicketCreateRequest' }
+            example:
+              titolo: Problema rete
+              priorita: MEDIA
+              descrizione: Il wifi non funziona da stamattina
       responses:
         '201': { description: Creato }
   /tickets/{id}:
@@ -212,6 +244,8 @@ paths:
               properties:
                 messaggio: { type: string }
               required: [messaggio]
+            example:
+              messaggio: Sto verificando con il reparto tecnico.
       responses:
         '201': { description: Creato }
   /tickets/{id}/comment_attach:
@@ -308,6 +342,28 @@ paths:
                 id_utente: { type: integer }
                 nota: { type: string }
               required: [id_utente, nota]
+            example:
+              id_utente: 5
+              nota: Verificato con il cliente, in attesa feedback.
+      responses:
+        '201': { description: Creato }
+  /tasks/{id}/note_attach:
+    post:
+      tags: [Tasks]
+      summary: Carica allegato per nota task
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                note_id: { type: integer }
+                file:
+                  type: string
+                  format: binary
+              required: [note_id, file]
       responses:
         '201': { description: Creato }
 
@@ -386,6 +442,12 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/UserCreateRequest' }
+            example:
+              nome: Mario
+              cognome: Rossi
+              email: mario.rossi@example.com
+              password: ChangeMe1!
+              ruolo: USER
       responses:
         '201': { description: Creato }
   /utenti/{id}:
@@ -431,10 +493,7 @@ paths:
       summary: Associa utente a supervisor
       parameters:
         - { $ref: '#/components/parameters/pId' }
-        - name: userId
-          in: path
-          required: true
-          schema: { type: integer }
+        - { $ref: '#/components/parameters/pUserId' }
       responses:
         '201': { description: Creato }
   /utenti/{id}/remove_supervised/{userId}:
@@ -443,10 +502,7 @@ paths:
       summary: Rimuove utente dal supervisor
       parameters:
         - { $ref: '#/components/parameters/pId' }
-        - name: userId
-          in: path
-          required: true
-          schema: { type: integer }
+        - { $ref: '#/components/parameters/pUserId' }
       responses:
         '200': { description: OK }
   /utenti/{id}/supervisors:
@@ -487,6 +543,9 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/GroupCreateRequest' }
+            example:
+              nome: Supporto N1
+              descrizione: Team helpdesk di primo livello
       responses:
         '201': { description: Creato }
   /gruppi/{id}:
@@ -512,6 +571,24 @@ paths:
       parameters: [ { $ref: '#/components/parameters/pId' } ]
       responses:
         '200': { description: OK }
+  /gruppi/{id}/add/{userId}:
+    post:
+      tags: [Groups]
+      summary: Aggiunge un utente al gruppo
+      parameters:
+        - { $ref: '#/components/parameters/pId' }
+        - { $ref: '#/components/parameters/pUserId' }
+      responses:
+        '201': { description: Creato }
+  /gruppi/{id}/remove/{userId}:
+    delete:
+      tags: [Groups]
+      summary: Rimuove un utente dal gruppo
+      parameters:
+        - { $ref: '#/components/parameters/pId' }
+        - { $ref: '#/components/parameters/pUserId' }
+      responses:
+        '200': { description: OK }
 
   /clienti:
     get:
@@ -533,6 +610,10 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/ClientCreateRequest' }
+            example:
+              ragione_sociale: Rossi Srl
+              partita_iva: IT12345678901
+              email: info@rossi.example
       responses:
         '201':
           description: Creato
@@ -611,29 +692,391 @@ paths:
         '200': { description: OK }
 
   /catalogo_articoli:
-    get:
-      tags: [Catalog]
-      summary: Lista/gestione articoli (hub)
-      responses:
-        '200': { description: OK }
     post:
       tags: [Catalog]
-      summary: Crea/aggiorna articolo
+      summary: Crea articolo (hub)
+      description: Crea un articolo sul DB hub e genera SKU globale sequenziale.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titolo: { type: string }
+                tipologia: { type: string, enum: [FISICO, SERVIZIO] }
+                visibilita: { type: string, enum: [PRIVATO, PUBBLICO] }
+                sottotitolo: { type: string }
+                descrizione: { type: string }
+                marca: { type: string }
+                modello: { type: string }
+                versione: { type: string }
+                codice_tenant: { type: string }
+                tenant_id: { type: integer }
+              required: [titolo]
+            example:
+              titolo: Corso Excel Base
+              tipologia: SERVIZIO
+              visibilita: PUBBLICO
+              descrizione: Lezioni base di Excel.
       responses:
         '201': { description: Creato }
-  /catalogo_varianti:
-    get:
+  /catalogo_articoli/{id}:
+    put:
       tags: [Catalog]
-      summary: Lista varianti
+      summary: Aggiorna articolo (hub)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              titolo: Corso Excel Intermedio
+      responses:
+        '200': { description: OK }
+  /catalogo_varianti:
+    post:
+      tags: [Catalog]
+      summary: Crea variante articolo (hub)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articolo_id: { type: integer }
+                sku: { type: string }
+                nome: { type: string }
+                stato: { type: string, enum: [ATTIVO, DISATTIVO] }
+              required: [articolo_id, sku, nome]
+            example:
+              articolo_id: 10
+              sku: VAR-001
+              nome: Pacchetto 10 ore
+              stato: ATTIVO
+      responses:
+        '201': { description: Creato }
+  /catalogo_varianti/{id}:
+    put:
+      tags: [Catalog]
+      summary: Aggiorna variante
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object }
+            example:
+              nome: Pacchetto 5 ore
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Catalog]
+      summary: Elimina variante
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
       responses:
         '200': { description: OK }
   /catalogo_prezzi:
     get:
       tags: [Catalog]
-      summary: Lista prezzi
+      summary: Prezzo variante
+      parameters:
+        - name: variante_id
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: listino_codice
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Catalog]
+      summary: Imposta prezzo su listino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variante_id: { type: integer }
+                prezzo: { type: number, format: float }
+                prezzo_confronto: { type: number, format: float }
+                quantita_minima: { type: number, format: float }
+                listino_codice: { type: string }
+                valuta: { type: string }
+                listino_nome: { type: string }
+              required: [variante_id, prezzo]
+            example:
+              variante_id: 21
+              prezzo: 99.9
+              listino_codice: DEFAULT
+              valuta: EUR
+      responses:
+        '200': { description: OK }
+  /catalogo_articoli_categorie/{articoloId}:
+    put:
+      tags: [Catalog]
+      summary: Imposta le categorie per un articolo
+      parameters:
+        - name: articoloId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categorie_slugs:
+                  type: array
+                  items: { type: string }
+              required: [categorie_slugs]
+            example:
+              categorie_slugs: ["software", "formazione"]
+      responses:
+        '200': { description: OK }
+  /catalogo_relazioni:
+    post:
+      tags: [Catalog]
+      summary: Crea relazione articoli
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articolo_sorgente_id: { type: integer }
+                articolo_correlato_id: { type: integer }
+                tipo_relazione: { type: string, enum: [UPSELL, CROSSSELL, ACCESSORIO] }
+                priorita: { type: integer }
+              required: [articolo_sorgente_id, articolo_correlato_id]
+            example:
+              articolo_sorgente_id: 10
+              articolo_correlato_id: 12
+              tipo_relazione: UPSELL
+      responses:
+        '201': { description: Creato }
+  /catalogo_relazioni/{id}:
+    put:
+      tags: [Catalog]
+      summary: Aggiorna relazione
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Catalog]
+      summary: Elimina relazione
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /catalogo_listini:
+    get:
+      tags: [Catalog]
+      summary: Elenco listini per tenant
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Catalog]
+      summary: Crea listino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+            example:
+              tenant_id: 1
+              codice: DEFAULT
+              nome: Listino base
+              valuta: EUR
+      responses:
+        '201': { description: Creato }
+  /catalogo_listini/{id}:
+    get:
+      tags: [Catalog]
+      summary: Dettaglio listino
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Catalog]
+      summary: Aggiorna listino
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Catalog]
+      summary: Elimina listino
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /catalogo_categorie:
+    get:
+      tags: [Catalog]
+      summary: Elenco categorie
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Catalog]
+      summary: Crea categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+            example:
+              nome: Informatica
+              slug: informatica
+      responses:
+        '201': { description: Creato }
+  /catalogo_categorie/{id}:
+    get:
+      tags: [Catalog]
+      summary: Dettaglio categoria
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Catalog]
+      summary: Aggiorna categoria
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Catalog]
+      summary: Elimina categoria
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
       responses:
         '200': { description: OK }
 
+  /catalog_media:
+    post:
+      tags: [Media]
+      summary: Collega media esistente ad articolo
+      description: Azione default `attach`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articolo_id: { type: integer }
+                url: { type: string }
+                tipologia: { type: string, enum: [IMMAGINE, DOCUMENTO, VIDEO] }
+                testo_alternativo: { type: string }
+              required: [articolo_id, url]
+            example:
+              articolo_id: 10
+              url: https://example.com/img.jpg
+              tipologia: IMMAGINE
+              testo_alternativo: Foto prodotto
+      responses:
+        '201': { description: Creato }
+  /catalog_media/upload:
+    post:
+      tags: [Media]
+      summary: Carica file e collega ad articolo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                articolo_id: { type: integer }
+                file: { type: string, format: binary }
+                testo_alternativo: { type: string }
+                tipologia: { type: string }
+              required: [articolo_id, file]
+      responses:
+        '201': { description: Creato }
+  /catalog_media/reorder:
+    post:
+      tags: [Media]
+      summary: Riordina media di un articolo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articolo_id: { type: integer }
+                ordered_ids:
+                  type: array
+                  items: { type: integer }
+              required: [articolo_id, ordered_ids]
+      responses:
+        '200': { description: OK }
+  /catalog_media/{id}/move:
+    post:
+      tags: [Media]
+      summary: Sposta media su/giù
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articolo_id: { type: integer }
+                to: { type: string, enum: [up, down] }
+              required: [articolo_id, to]
+      responses:
+        '200': { description: OK }
+  /catalog_media/{id}/cover:
+    post:
+      tags: [Media]
+      summary: Imposta media come copertina (posizione 1)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+  /catalog_media/{id}:
+    put:
+      tags: [Media]
+      summary: Aggiorna media
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Media]
+      summary: Rimuove media
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
 
   /audit_roles:
     get:
@@ -682,6 +1125,20 @@ paths:
           application/json:
             schema:
               type: object
+            examples:
+              whatsapp:
+                value:
+                  to: "+39333111222"
+                  message: "Ciao!"
+              email:
+                value:
+                  to: user@example.com
+                  subject: Benvenuto
+                  body: Ciao e benvenuto!
+              payment:
+                value:
+                  gateway: stripe
+                  amount: 19.9
       responses:
         '200': { description: OK }
   /services/status:
@@ -719,6 +1176,76 @@ paths:
       responses:
         '200': { description: OK }
 
+  /enrichment/media:
+    get:
+      tags: [Enrichment]
+      summary: Suggerimenti media (immagini) da provider pubblici
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50 }
+        - name: lang
+          in: query
+          schema: { type: string }
+        - name: providers
+          in: query
+          description: CSV tra wikimedia, unsplash, pexels
+          schema: { type: string }
+        - name: prefer
+          in: query
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /hub_tenants:
+    get:
+      tags: [Hub]
+      summary: Lista tenants (hub)
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Hub]
+      summary: Crea tenant su Hub (solo Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ragione_sociale: { type: string }
+                slug: { type: string }
+                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
+              required: [ragione_sociale, slug]
+      responses:
+        '201': { description: Creato }
+  /hub_tenants/{id}:
+    get:
+      tags: [Hub]
+      summary: Dettaglio tenant (hub)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Hub]
+      summary: Aggiorna tenant su Hub (solo Admin)
+      parameters: [ { $ref: '#/components/parameters/pId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ragione_sociale: { type: string }
+                slug: { type: string }
+                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
+      responses:
+        '200': { description: OK }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -731,6 +1258,11 @@ components:
       in: path
       required: true
       schema: { type: integer, format: int64 }
+    pUserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: integer }
     pStato:
       name: stato
       in: query
@@ -917,47 +1449,4 @@ components:
 externalDocs:
   description: Hub Catalogo (read‑only)
   url: ../hub_catalogo/index.php?path=articoli
-  /hub_tenants:
-    get:
-      tags: [System]
-      summary: Lista tenants (hub)
-      responses:
-        '200': { description: OK }
-    post:
-      tags: [System]
-      summary: Crea tenant su Hub (solo Admin)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ragione_sociale: { type: string }
-                slug: { type: string }
-                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
-              required: [ragione_sociale, slug]
-      responses:
-        '201': { description: Creato }
-  /hub_tenants/{id}:
-    get:
-      tags: [System]
-      summary: Dettaglio tenant (hub)
-      parameters: [ { $ref: '#/components/parameters/pId' } ]
-      responses:
-        '200': { description: OK }
-    put:
-      tags: [System]
-      summary: Aggiorna tenant su Hub (solo Admin)
-      parameters: [ { $ref: '#/components/parameters/pId' } ]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ragione_sociale: { type: string }
-                slug: { type: string }
-                stato: { type: string, enum: [ATTIVO, SOSPESO, IN_ONBOARDING] }
-      responses:
-        '200': { description: OK }
+

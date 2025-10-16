@@ -369,6 +369,8 @@
         };
         const groupOptions = document.getElementById('workflow-group-options');
         const userOptions = document.getElementById('workflow-user-options');
+        const wfGroupHint = document.getElementById('hint-workflow-group');
+        const wfUserHint = document.getElementById('hint-workflow-user');
         const adminUserOptions = document.getElementById('user-options-admin');
         const groupLabelInput = formCreateStep
             ? formCreateStep.querySelector('[data-role="group-picker"]')
@@ -385,6 +387,21 @@
 
         attachPickerListeners(groupLabelInput, groupHiddenInput, groupOptions);
         attachPickerListeners(userLabelInput, userHiddenInput, userOptions);
+        // Suggerimenti dinamici: Workflow pickers
+        try {
+            if (groupLabelInput && groupOptions) {
+                const handler = () => updateGroupDatalist(groupLabelInput.value, groupOptions, wfGroupHint);
+                groupLabelInput.addEventListener('input', debounce(handler, 300));
+                groupLabelInput.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) {}
+        try {
+            if (userLabelInput && userOptions) {
+                const handler = () => updateUserDatalist(userLabelInput.value, userOptions, wfUserHint);
+                userLabelInput.addEventListener('input', debounce(handler, 300));
+                userLabelInput.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) {}
 
         // Modals: group/user management
         const unusedModalGroup = document.getElementById('modal-manage-group');
@@ -406,16 +423,43 @@
         const btnDeleteUser = document.getElementById('btn-delete-user');
 
         attachPickerListeners(groupUserLabel, groupUserIdHidden, adminUserOptions);
+        // Admin: aggiungi utente al gruppo – suggerimenti utenti
+        try {
+            if (groupUserLabel && adminUserOptions) {
+                const hint = document.getElementById('hint-group-user');
+                const handler = () => updateUserDatalist(groupUserLabel.value, adminUserOptions, hint);
+                groupUserLabel.addEventListener('input', debounce(handler, 300));
+                groupUserLabel.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) {}
         const adminGroupOptions = document.getElementById('group-options-admin');
         // Roles & audit UI refs (usiamo quelli in `dom`)
         attachPickerListeners(userGroupLabel, userGroupIdHidden, adminGroupOptions);
+        // Admin: aggiungi gruppo all'utente – suggerimenti gruppi (client-side)
+        try {
+            if (userGroupLabel && adminGroupOptions) {
+                const hint = document.getElementById('hint-user-group');
+                const handler = () => updateGroupDatalist(userGroupLabel.value, adminGroupOptions, hint);
+                userGroupLabel.addEventListener('input', debounce(handler, 300));
+                userGroupLabel.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) {}
 
         if (!window.lpwfAuth || !window.lpwfAuth.getToken()) {
+            // Fallback UX: disabilita azioni ticket e reindirizza al login al click
+            try {
+                const needLogin = (e) => {
+                    e?.preventDefault?.();
+                    alert('Sessione non attiva. Effettua il login per proseguire.');
+                    window.location.href = 'login.html';
+                };
+                ['btn-ticket-create','btn-ticket-comment','btn-ticket-attach','btn-ticket-assign','btn-ticket-close','btn-ticket-reopen','btn-tickets-refresh']
+                    .forEach((id) => { const b = document.getElementById(id); if (b) { b.addEventListener('click', needLogin); } });
+            } catch (e) {}
             if (dom.main) {
-                dom.main.innerHTML =
-                    '<p>Autenticazione richiesta. Effettua il login da <a href="login.html">login.html</a>.</p>';
+                dom.main.insertAdjacentHTML('afterbegin', '<div class="alert alert--warn">Autenticazione richiesta. Accedi da <a href="login.html">login.html</a>.</div>');
             }
-            return;
+            // Non usciamo: inizializziamo comunque i listener così il click genera 401 e reindirizza al login
         }
 
         const state = {
@@ -768,6 +812,7 @@
             const elRole = document.getElementById('status-role');
             const elApi = document.getElementById('status-api');
             const elTok = document.getElementById('status-token');
+            const btnLogin = document.getElementById('btn-status-login');
             const me = state.currentUserInfo || window.lpwfAuth?.getCurrentUser?.() || {};
             const fullname =
                 [me.nome, me.cognome].filter(Boolean).join(' ') ||
@@ -783,9 +828,58 @@
             const tokenOk = !!window.lpwfAuth?.getToken?.();
             if (elUser) elUser.textContent = fullname;
             if (elRole) elRole.textContent = role;
+            try {
+                const roleBadge = document.getElementById('status-role-badge');
+                if (roleBadge) {
+                    roleBadge.textContent = role;
+                    roleBadge.classList.remove('badge--admin','badge--supervisor','badge--user');
+                    if (role === 'ADMIN') roleBadge.classList.add('badge--admin');
+                    else if (role === 'SUPERVISOR') roleBadge.classList.add('badge--supervisor');
+                    else roleBadge.classList.add('badge--user');
+                }
+            } catch (e) { /* ignore */ }
             if (elApi) elApi.textContent = apiBase;
             if (elTok) elTok.textContent = tokenOk ? 'OK' : 'MANCANTE';
+            if (btnLogin) {
+                btnLogin.hidden = !!tokenOk;
+                if (!btnLogin.dataset.bound) {
+                    btnLogin.addEventListener('click', () => { window.location.href = 'login.html'; });
+                    btnLogin.dataset.bound = '1';
+                }
+            }
+            // Toggle API Log visibility (unificato nella statusbar)
+            try {
+                const ap = document.getElementById('api-log-inline');
+                const btnToggle = document.getElementById('btn-api-log-toggle');
+                if (ap && btnToggle) {
+                    const key = 'lpwf_api_log_visible';
+                    const stored = (() => { try { return window.localStorage.getItem(key); } catch (e) { return null; } })();
+                    let visible = stored === null ? true : stored === '1';
+                    ap.hidden = !visible;
+                    btnToggle.textContent = visible ? 'Nascondi Log' : 'Mostra Log';
+                    if (!btnToggle.dataset.bound) {
+                        btnToggle.addEventListener('click', () => {
+                            const cur = !ap.hidden;
+                            ap.hidden = cur;
+                            const next = !cur;
+                            btnToggle.textContent = next ? 'Nascondi Log' : 'Mostra Log';
+                            try { window.localStorage.setItem(key, next ? '1' : '0'); } catch (e) {}
+                        });
+                        btnToggle.dataset.bound = '1';
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            // Nessun pannello separato: log è dentro la statusbar
         };
+
+        // Aggiorna sticky offset su resize
+        try {
+            let tSticky;
+            window.addEventListener('resize', () => {
+                clearTimeout(tSticky);
+                tSticky = setTimeout(() => renderStatusBar(), 100);
+            });
+        } catch (e) { /* ignore */ }
 
         // Aggiorna badge health rapidi (API DB + Tenant DB)
         const updateHealthBadges = async () => {
@@ -797,6 +891,7 @@
             const elApi = document.getElementById('status-health-api');
             const elTen = document.getElementById('status-health-tenant');
             const elMaps = document.getElementById('status-maps');
+            const elUploads = document.getElementById('status-uploads');
             const setBadge = (el, ok) => {
                 if (!el) return;
                 el.textContent = ok ? 'OK' : 'KO';
@@ -807,15 +902,27 @@
                 const r = await fetch(`${api}/health`);
                 const h = await r.json();
                 setBadge(elApi, !!h?.db_ok);
+                try {
+                    const up = h?.uploads || null;
+                    const ok = !!(up && up.exists && up.writable);
+                    setBadge(elUploads, ok);
+                } catch (e) { /* ignore */ }
             } catch (e) {
                 setBadge(elApi, false);
+                setBadge(elUploads, false);
             }
             try {
                 const r2 = await fetch(`${api}/tenant_health`);
                 const h2 = await r2.json();
                 setBadge(elTen, !!h2?.db_ok);
+                try {
+                    const up2 = h2?.uploads || null;
+                    const ok2 = !!(up2 && up2.exists && up2.writable);
+                    setBadge(elUploads, ok2);
+                } catch (e) { /* ignore */ }
             } catch (e) {
                 setBadge(elTen, false);
+                setBadge(elUploads, false);
             }
             try {
                 const cfg = await authFetch('config');
@@ -855,6 +962,7 @@
             if (value === null || value === undefined) return '';
             return String(value);
         };
+        try { window.sanitize = sanitize; } catch (e) { /* ignore */ }
 
         const serializeForm = (form) => {
             const data = {};
@@ -879,26 +987,79 @@
             return data;
         };
 
+        // Utilità: debounce globale per gestire input con suggerimenti
+        const debounce = (fn, ms = 300) => {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), ms);
+            };
+        };
+
         const authFetch = async (endpoint, options = {}) => {
             const t0 = performance.now();
             const url = `${apiBase}/${endpoint.replace(/^\/+/, '')}`;
-            const init = {
-                method: options.method || 'GET',
-                headers: window.lpwfAuth.buildHeaders(options.headers || {}, options.json === true),
-            };
+            // Costruisci headers in modo resiliente anche se auth.js non è caricato
+            let headers = {};
+            try {
+                if (window.lpwfAuth && typeof window.lpwfAuth.buildHeaders === 'function') {
+                    headers = window.lpwfAuth.buildHeaders(options.headers || {}, options.json === true);
+                } else {
+                    headers = { ...(options.headers || {}) };
+                    if (options.json === true) headers['Content-Type'] = 'application/json';
+                }
+            } catch (e) {
+                headers = { ...(options.headers || {}) };
+                if (options.json === true) headers['Content-Type'] = 'application/json';
+            }
+            const init = { method: options.method || 'GET', headers };
             if (options.body !== undefined) {
                 init.body = options.json ? JSON.stringify(options.body) : options.body;
             }
 
             let response;
+            // Aggiorna subito 'Ultima API' con intento richiesta e log nel pannello
+            try {
+                const lastEl0 = document.getElementById('status-api-last');
+                if (lastEl0) lastEl0.textContent = `${init.method} ${endpoint} …`;
+                try { if (typeof pushApiLog === 'function') pushApiLog(init.method, endpoint, null, null, '…'); } catch (e2) {}
+            } catch (e) {}
             try {
                 response = await fetch(url, init);
             } catch (networkErr) {
-                const t1 = performance.now();
-                const lastEl = document.getElementById('status-api-last');
-                if (lastEl)
-                    lastEl.textContent = `${init.method} ${endpoint} → NETWORK ERR (${Math.round(t1 - t0)}ms)`;
-                throw networkErr;
+                // Fallback XHR per compatibilità estrema / debug
+                try {
+                    const xhrResp = await (async () => {
+                        return await new Promise((resolve, reject) => {
+                            try {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open(init.method || 'GET', url, true);
+                                // Set headers
+                                try { Object.entries(init.headers || {}).forEach(([k,v]) => xhr.setRequestHeader(k, v)); } catch (e) {}
+                                xhr.onreadystatechange = function() {
+                                    if (xhr.readyState === 4) {
+                                        // Costruisce oggetto simile a Response
+                                        resolve({
+                                            ok: xhr.status >= 200 && xhr.status < 300,
+                                            status: xhr.status,
+                                            text: async () => xhr.responseText || ''
+                                        });
+                                    }
+                                };
+                                xhr.onerror = function() { reject(new Error('XHR error')); };
+                                xhr.send(init.body || null);
+                            } catch (e) { reject(e); }
+                        });
+                    })();
+                    response = xhrResp;
+                } catch (e2) {
+                    const t1 = performance.now();
+                    const lastEl = document.getElementById('status-api-last');
+                    if (lastEl)
+                        lastEl.textContent = `${init.method} ${endpoint} → NETWORK ERR (${Math.round(t1 - t0)}ms)`;
+                    try { if (typeof pushApiLog === 'function') pushApiLog(init.method, endpoint, 'NETWORK ERR', false); } catch (e3) {}
+                    throw networkErr;
+                }
             }
             const text = await response.text();
             let payload = null;
@@ -921,29 +1082,67 @@
                     window.location.href = 'login.html';
                     const t1 = performance.now();
                     const lastEl = document.getElementById('status-api-last');
-                    if (lastEl)
-                        lastEl.textContent = `${init.method} ${endpoint} → 401 (scaduta) (${Math.round(t1 - t0)}ms)`;
-                    return Promise.reject(new Error('Non autenticato'));
-                }
-                const message =
-                    payload && payload.message ? payload.message : `Errore HTTP ${response.status}`;
-                const t1 = performance.now();
-                const lastEl = document.getElementById('status-api-last');
                 if (lastEl)
-                    lastEl.textContent = `${init.method} ${endpoint} → ${response.status} (${Math.round(t1 - t0)}ms)`;
-                return Promise.reject(new Error(message));
+                    lastEl.textContent = `${init.method} ${endpoint} → 401 (scaduta) (${Math.round(t1 - t0)}ms)`;
+                try { if (typeof pushApiLog === 'function') pushApiLog(init.method, endpoint, 401, false); } catch (e2) {}
+                return Promise.reject(new Error('Non autenticato'));
             }
+            const message =
+                payload && payload.message ? payload.message : `Errore HTTP ${response.status}`;
             const t1 = performance.now();
             const lastEl = document.getElementById('status-api-last');
             if (lastEl)
-                lastEl.textContent = `${init.method} ${endpoint} → ${response.status} OK (${Math.round(t1 - t0)}ms)`;
-            return payload;
+                lastEl.textContent = `${init.method} ${endpoint} → ${response.status} (${Math.round(t1 - t0)}ms)`;
+            try { if (typeof pushApiLog === 'function') pushApiLog(init.method, endpoint, response.status, false); } catch (e2) {}
+            return Promise.reject(new Error(message));
+        }
+        const t1 = performance.now();
+        const lastEl = document.getElementById('status-api-last');
+        if (lastEl)
+            lastEl.textContent = `${init.method} ${endpoint} → ${response.status} OK (${Math.round(t1 - t0)}ms)`;
+        try { if (typeof pushApiLog === 'function') pushApiLog(init.method, endpoint, response.status, true); } catch (e2) {}
+        return payload;
         };
+        try { window.authFetch = authFetch; } catch (e) { /* ignore */ }
 
         const renderMessage = (container, text) => {
             if (!container) return;
             container.innerHTML = `<p>${sanitize(text)}</p>`;
         };
+
+        // API Log helpers (define if missing)
+        if (typeof window.pushApiLog !== 'function') {
+            (function(){
+                const el = document.getElementById('api-log-list');
+                const btnClear = document.getElementById('btn-api-log-clear');
+                const max = 5;
+                const fmtTime = () => {
+                    const d = new Date();
+                    const h = String(d.getHours()).padStart(2, '0');
+                    const m = String(d.getMinutes()).padStart(2, '0');
+                    const s = String(d.getSeconds()).padStart(2, '0');
+                    const ms = String(d.getMilliseconds()).padStart(3, '0');
+                    return `${h}:${m}:${s}.${ms}`;
+                };
+                window.pushApiLog = (method, endpoint, status = null, ok = null, note = null) => {
+                    if (!el) return;
+                    try {
+                        const item = document.createElement('div');
+                        item.className = 'api-log-item';
+                        const time = document.createElement('span'); time.className = 'api-log-time'; time.textContent = fmtTime();
+                        const met = document.createElement('span'); met.className = 'api-log-met'; met.textContent = String(method||'').toUpperCase();
+                        const url = document.createElement('span'); url.className = 'api-log-url'; url.textContent = String(endpoint||'');
+                        const sta = document.createElement('span'); sta.className = 'api-log-sta';
+                        if (status !== null) { sta.textContent = `→ ${status}`; sta.classList.add(ok ? 'ok' : 'err'); } else if (note) { sta.textContent = note; }
+                        item.appendChild(time); item.appendChild(met); item.appendChild(url); item.appendChild(sta);
+                        el.insertBefore(item, el.firstChild);
+                        // trim to max 5
+                        while (el.children.length > max) el.removeChild(el.lastChild);
+                    } catch (e) { /* ignore */ }
+                };
+                if (btnClear) btnClear.addEventListener('click', () => { el.innerHTML = ''; });
+            })();
+        }
 
         // Render elenco Tenants (hub read-only)
         const renderTenantsList = async () => {
@@ -953,12 +1152,19 @@
             try {
                 const tenants = await hubFetch('tenants');
                 const q = (dom.tenantsSearch?.value || '').toLowerCase().trim();
-                const arr = (Array.isArray(tenants) ? tenants : []).filter((t) => {
-                    if (!q) return true;
-                    const name = String(t.ragione_sociale || '').toLowerCase();
-                    const slug = String(t.slug || '').toLowerCase();
-                    return name.includes(q) || slug.includes(q);
-                });
+                const selIdEl = document.getElementById('filter-tenants-id');
+                const selId = selIdEl ? parseInt(selIdEl.value || '0', 10) : 0;
+                let arr = Array.isArray(tenants) ? tenants : [];
+                if (selId > 0) {
+                    arr = arr.filter(t => Number(t.id) === selId);
+                } else {
+                    arr = arr.filter((t) => {
+                        if (!q) return true;
+                        const name = String(t.ragione_sociale || '').toLowerCase();
+                        const slug = String(t.slug || '').toLowerCase();
+                        return name.includes(q) || slug.includes(q);
+                    });
+                }
                 if (badge) badge.textContent = String(arr.length);
                 if (!arr.length) {
                     renderMessage(listEl, 'Nessun tenant trovato.');
@@ -978,6 +1184,28 @@
                 renderMessage(listEl, 'Errore caricamento tenants.');
             }
         };
+
+        // Suggerimenti dinamici per Tenants (filtro), basati su hub_tenants via API
+        async function updateTenantDatalist(q, datalistEl, hintEl) {
+            if (!datalistEl) return;
+            datalistEl.innerHTML = '';
+            const qq = String(q || '').trim().toLowerCase();
+            if (hintEl) { hintEl.textContent = qq.length < 2 ? 'Digita almeno 2 caratteri' : 'Caricamento…'; try { hintEl.classList.toggle('hint--loading', qq.length >= 2); } catch (e) {} }
+            if (qq.length < 2) return;
+            try {
+                const rows = await authFetch(`hub_tenants?search=${encodeURIComponent(qq)}&limit=40`);
+                const list = Array.isArray(rows) ? rows : [];
+                list.slice(0,40).forEach(t => {
+                    const o = document.createElement('option');
+                    o.value = `${(t.ragione_sociale||'').trim()} [${t.slug||''}] (#${t.id})`.trim();
+                    o.dataset.id = String(t.id);
+                    datalistEl.appendChild(o);
+                });
+                if (hintEl) { hintEl.textContent = list.length ? `Trovati ${list.length}` : 'Nessun risultato'; try { hintEl.classList.remove('hint--loading'); } catch (e) {} }
+            } catch (e) {
+                if (hintEl) { hintEl.textContent = 'Errore suggerimenti'; try { hintEl.classList.remove('hint--loading'); } catch (e2) {} }
+            }
+        }
 
         // Hub Catalogo fetch (read-only)
         const siteRoot = apiBase.replace(/\/api$/, '');
@@ -1007,6 +1235,47 @@
             }
             return await res.json();
         };
+
+        // Hook suggerimenti Tenants combobox
+        try {
+            const tenInput = document.getElementById('filter-tenants');
+            const tenOptions = document.getElementById('tenant-options');
+            const tenHint = document.getElementById('hint-tenants-filter');
+            const tenHidden = document.getElementById('filter-tenants-id');
+            if (tenInput && tenOptions) {
+                const handler = () => {
+                    const v = String(tenInput.value||'').trim();
+                    if (v === '') {
+                        try {
+                            if (tenHint) { tenHint.textContent = ''; tenHint.classList.remove('hint--loading'); }
+                            if (tenOptions) tenOptions.innerHTML = '';
+                            if (tenHidden) tenHidden.value = '';
+                        } catch (e) {}
+                        try { renderTenantsList(); } catch (e) {}
+                        return;
+                    }
+                    updateTenantDatalist(tenInput.value, tenOptions, tenHint);
+                };
+                tenInput.addEventListener('input', debounce(handler, 300));
+                tenInput.addEventListener('keyup', debounce(handler, 300));
+                // Auto-mappatura ID selezionato
+                const syncTenantHidden = () => {
+                    try {
+                        const val = String(tenInput.value || '');
+                        const opt = (function find() {
+                            const opts = tenOptions ? tenOptions.querySelectorAll('option') : [];
+                            for (const o of opts) { if (o.value === val) return o; }
+                            return null;
+                        })();
+                        if (tenHidden) tenHidden.value = opt ? (opt.dataset.id || '') : '';
+                        // Rirenderizza la lista in base al tenant selezionato
+                        try { renderTenantsList(); } catch (e) {}
+                    } catch (e) {}
+                };
+                tenInput.addEventListener('change', syncTenantHidden);
+                tenInput.addEventListener('blur', syncTenantHidden);
+            }
+        } catch (e) { /* ignore */ }
 
         const renderTaskColumn = (container, tasks, emptyMsg) => {
             if (!container) return;
@@ -5001,13 +5270,6 @@
         };
 
         const setupFilters = () => {
-            const debounce = (fn, ms = 300) => {
-                let t;
-                return (...args) => {
-                    clearTimeout(t);
-                    t = setTimeout(() => fn(...args), ms);
-                };
-            };
             if (dom.filterUsers) {
                 dom.filterUsers.addEventListener(
                     'input',
@@ -5220,6 +5482,7 @@
             const instClientLabel = document.getElementById('instances-client-label');
             const instClientId = document.getElementById('instances-client-id');
             const instClientOptions = document.getElementById('client-options-instances');
+            const instClientHint = document.getElementById('hint-instances-client');
             const fetchClients2 = async (term) => {
                 try {
                     const qs = term ? `?search=${encodeURIComponent(term)}` : '';
@@ -5253,12 +5516,36 @@
                     debounce(async () => {
                         if (!instClientLabel.value || instClientLabel.value.length < 2) {
                             populateClientOptions2([]);
+                            try { if (instClientHint) { instClientHint.textContent = 'Digita almeno 2 caratteri'; instClientHint.classList.remove('hint--loading'); } } catch (e) {}
                             return;
                         }
+                        try { if (instClientHint) { instClientHint.textContent = 'Caricamento…'; instClientHint.classList.add('hint--loading'); } } catch (e) {}
                         const list = await fetchClients2(instClientLabel.value.trim());
                         populateClientOptions2(list);
+                        try {
+                            if (instClientHint) {
+                                instClientHint.textContent = (Array.isArray(list) && list.length) ? `Trovati ${list.length}` : 'Nessun risultato';
+                                instClientHint.classList.remove('hint--loading');
+                            }
+                        } catch (e) {}
                     }, 250),
                 );
+                instClientLabel.addEventListener('keyup', debounce(async () => {
+                    if (!instClientLabel.value || instClientLabel.value.length < 2) {
+                        populateClientOptions2([]);
+                        try { if (instClientHint) { instClientHint.textContent = 'Digita almeno 2 caratteri'; instClientHint.classList.remove('hint--loading'); } } catch (e) {}
+                        return;
+                    }
+                    try { if (instClientHint) { instClientHint.textContent = 'Caricamento…'; instClientHint.classList.add('hint--loading'); } } catch (e) {}
+                    const list = await fetchClients2(instClientLabel.value.trim());
+                    populateClientOptions2(list);
+                    try {
+                        if (instClientHint) {
+                            instClientHint.textContent = (Array.isArray(list) && list.length) ? `Trovati ${list.length}` : 'Nessun risultato';
+                            instClientHint.classList.remove('hint--loading');
+                        }
+                    } catch (e) {}
+                }, 250));
                 instClientLabel.addEventListener('change', () => {
                     const opt = findClientOption2(instClientLabel.value);
                     if (instClientId) instClientId.value = opt ? opt.dataset.id || '' : '';
@@ -5272,6 +5559,11 @@
                     if (instClientLabel) instClientLabel.value = '';
                     if (instClientId) instClientId.value = '';
                     state.filters.instancesClientId = '';
+                    // reset hint/spinner e datalist
+                    try {
+                        if (instClientHint) { instClientHint.textContent = ''; instClientHint.classList.remove('hint--loading'); }
+                        if (instClientOptions) instClientOptions.innerHTML = '';
+                    } catch (e) { /* ignore */ }
                     renderInstanceList();
                 });
             }
@@ -7462,6 +7754,7 @@
                 modal.classList.add('is-open');
             }
         };
+        try { window.openModal = openModal; } catch (e) { /* ignore */ }
 
         const setupTabsUI = () => {
             /* tabs disabilitati: sezioni separate Modelli/Operatività */
@@ -7877,13 +8170,7 @@
         const clientOptions = document.getElementById('client-options');
         const startCustLabel = document.getElementById('start-customer-label');
         const startCustId = document.getElementById('start-customer-id');
-        const debounce = (fn, ms = 300) => {
-            let t;
-            return (...args) => {
-                clearTimeout(t);
-                t = setTimeout(() => fn(...args), ms);
-            };
-        };
+        const startCustHint = document.getElementById('hint-start-customer');
         const populateClientOptions = (items) => {
             if (!clientOptions) return;
             clientOptions.innerHTML = '';
@@ -7917,12 +8204,36 @@
                 debounce(async () => {
                     if (!startCustLabel.value || startCustLabel.value.length < 2) {
                         populateClientOptions([]);
+                        try { if (startCustHint) { startCustHint.textContent = 'Digita almeno 2 caratteri'; startCustHint.classList.remove('hint--loading'); } } catch (e) {}
                         return;
                     }
+                    try { if (startCustHint) { startCustHint.textContent = 'Caricamento…'; startCustHint.classList.add('hint--loading'); } } catch (e) {}
                     const list = await fetchClients(startCustLabel.value.trim());
                     populateClientOptions(list);
+                    try {
+                        if (startCustHint) {
+                            startCustHint.textContent = (Array.isArray(list) && list.length) ? `Trovati ${list.length}` : 'Nessun risultato';
+                            startCustHint.classList.remove('hint--loading');
+                        }
+                    } catch (e) {}
                 }, 250),
             );
+            startCustLabel.addEventListener('keyup', debounce(async () => {
+                if (!startCustLabel.value || startCustLabel.value.length < 2) {
+                    populateClientOptions([]);
+                    try { if (startCustHint) { startCustHint.textContent = 'Digita almeno 2 caratteri'; startCustHint.classList.remove('hint--loading'); } } catch (e) {}
+                    return;
+                }
+                try { if (startCustHint) { startCustHint.textContent = 'Caricamento…'; startCustHint.classList.add('hint--loading'); } } catch (e) {}
+                const list = await fetchClients(startCustLabel.value.trim());
+                populateClientOptions(list);
+                try {
+                    if (startCustHint) {
+                        startCustHint.textContent = (Array.isArray(list) && list.length) ? `Trovati ${list.length}` : 'Nessun risultato';
+                        startCustHint.classList.remove('hint--loading');
+                    }
+                } catch (e) {}
+            }, 250));
             startCustLabel.addEventListener('change', () => {
                 const opt = findClientOption(startCustLabel.value);
                 if (startCustId) startCustId.value = opt ? opt.dataset.id || '' : '';
@@ -8449,6 +8760,7 @@
                 /* ignore */
             }
         };
+        try { window.showToast = showToast; } catch (e) { /* ignore */ }
 
         const runDiagnostics = async () => {
             if (!dom.diagResults) return;
@@ -8667,6 +8979,8 @@
         })();
     });
 })(document);
+
+ 
         // Services panel DOM
         const svc = {
             status: document.getElementById('services-status'),
@@ -9262,6 +9576,12 @@
             title: document.getElementById('ticket-title'),
             desc: document.getElementById('ticket-desc'),
             prio: document.getElementById('ticket-priority'),
+            newAssigneeLabel: document.getElementById('new-ticket-assignee-label'),
+            newUserOptions: document.getElementById('new-user-options'),
+            newClientLabel: document.getElementById('new-ticket-client-label'),
+            newClientOptions: document.getElementById('new-client-options'),
+            hintAssigneeNew: document.getElementById('hint-assignee-new'),
+            hintClientNew: document.getElementById('hint-client-new'),
             btnCreate: document.getElementById('btn-ticket-create'),
             stateSel: document.getElementById('ticket-state'),
             assigneeSel: document.getElementById('ticket-assignee'),
@@ -9270,6 +9590,8 @@
             clientId: document.getElementById('ticket-client-id'),
             clientLabel: document.getElementById('ticket-client-label'),
             clientOptions: document.getElementById('client-options-tickets'),
+            hintAssigneeFilter: document.getElementById('hint-assignee-filter'),
+            hintClientFilter: document.getElementById('hint-client-filter'),
             search: document.getElementById('ticket-search'),
             detTitle: document.getElementById('ticket-detail-title'),
             detSubtitle: document.getElementById('ticket-detail-subtitle'),
@@ -9354,7 +9676,8 @@
                 if (cnt) cnt.textContent = String(list.length || 0);
                 renderTicketList(list);
             } catch (e) {
-                tk.list.innerHTML = '<p class="empty-state">Errore caricamento ticket.</p>';
+                const msg = (e && e.message) ? e.message : 'Errore caricamento ticket.';
+                tk.list.innerHTML = `<p class="empty-state">${sanitize(msg)}</p>`;
                 const cnt = document.getElementById('tickets-count');
                 if (cnt) cnt.textContent = '0';
             }
@@ -9415,16 +9738,92 @@
             const descrizione = (tk.desc?.value || '').trim();
             const priorita = (tk.prio?.value || 'MEDIA');
             if (!titolo) { try { showToast('Inserisci un titolo', { type: 'warn' }); } catch (e) {} return; }
+            // Anti-doppio click
+            let btn = tk.btnCreate; let btnTxt;
+            try { if (btn) { btnTxt = btn.textContent; if (btn.disabled) return; btn.disabled = true; btn.textContent = 'Creazione…'; } } catch (e) {}
             try {
-                const r = await authFetch('tickets', { method: 'POST', json: true, body: { titolo, descrizione, priorita } });
+                const body = { titolo, descrizione, priorita };
+                // opzionale: assignee
+                try {
+                    const val = (tk.newAssigneeLabel?.value || '').trim();
+                    const m = val.match(/#(\d+)/);
+                    if (m) body.assegnato_a = parseInt(m[1], 10);
+                } catch (e) {}
+                // opzionale: cliente
+                try {
+                    const val = (tk.newClientLabel?.value || '').trim();
+                    const m = val.match(/#(\d+)/);
+                    if (m) body.cliente_id = parseInt(m[1], 10);
+                } catch (e) {}
+                await authFetch('tickets', { method: 'POST', json: true, body });
                 if (tk.title) tk.title.value = '';
                 if (tk.desc) tk.desc.value = '';
+                if (tk.newAssigneeLabel) tk.newAssigneeLabel.value = '';
+                if (tk.newClientLabel) tk.newClientLabel.value = '';
+                // reset hint/spinner e suggerimenti delle combobox "nuovo"
+                try {
+                    if (tk.hintAssigneeNew) { tk.hintAssigneeNew.textContent = ''; tk.hintAssigneeNew.classList.remove('hint--loading'); }
+                    if (tk.hintClientNew) { tk.hintClientNew.textContent = ''; tk.hintClientNew.classList.remove('hint--loading'); }
+                    if (tk.newUserOptions) tk.newUserOptions.innerHTML = '';
+                    if (tk.newClientOptions) tk.newClientOptions.innerHTML = '';
+                } catch (e) { /* ignore */ }
                 await loadTickets();
                 try { showToast('Ticket creato', { type: 'success' }); } catch (e) {}
+                // Aggiorna Panoramica
+                try { await loadTicketMetrics(); } catch (e) {}
+                try {
+                    const role = currentRole();
+                    if (role === 'ADMIN' || role === 'SUPERVISOR') await loadTeamTicketMetrics();
+                } catch (e) {}
             } catch (e) {
                 try { showToast(e.message || 'Errore creazione ticket', { type: 'error' }); } catch (e2) {}
+            } finally {
+                try {
+                    if (btn) { btn.disabled = false; btn.textContent = btnTxt || '+ Nuovo Ticket'; }
+                    // assicurati che gli spinner degli hint siano spenti anche in caso di errore
+                    if (tk.hintAssigneeNew) tk.hintAssigneeNew.classList.remove('hint--loading');
+                    if (tk.hintClientNew) tk.hintClientNew.classList.remove('hint--loading');
+                } catch (e) {}
             }
         }
+
+        // Fallback: esponi funzioni su window per onClick inline
+        try {
+            window.lpwfLoadTickets = () => { try { loadTickets(); } catch (e) {} };
+            window.lpwfCreateTicket = () => { try { createTicket(); } catch (e) {} };
+        } catch (e) { /* ignore */ }
+
+        // Delegated click handler (cattura) per assicurare i click anche in condizioni anomale
+        (function installDelegatedClick() {
+            const setLast = (msg) => { try { const el = document.getElementById('status-api-last'); if (el) el.textContent = msg; } catch (e) {} };
+            const map = {
+                'btn-tickets-refresh': () => { setLast('[CLICK] Aggiorna'); try { authFetch('health').catch(()=>{}); } catch(e){} (window.lpwfLoadTickets||loadTickets)(); },
+                'btn-ticket-create': () => { setLast('[CLICK] Nuovo Ticket'); (window.lpwfCreateTicket||createTicket)(); },
+                'btn-ticket-comment': () => { setLast('[CLICK] Commento'); addComment(); },
+                'btn-ticket-attach': () => { setLast('[CLICK] Allegato'); attachFile(); },
+                'btn-ticket-assign': () => { setLast('[CLICK] Assegna'); assignMe(); },
+                'btn-ticket-close': () => { setLast('[CLICK] Chiudi'); closeTicket(); },
+                'btn-ticket-reopen': () => { setLast('[CLICK] Riapri'); reopenTicket(); },
+            };
+            document.addEventListener('click', (ev) => {
+                try {
+                    const target = ev.target;
+                    if (!target) return;
+                    const id = target.id || (target.closest ? (target.closest('[id]')?.id || '') : '');
+                    if (id && map[id]) {
+                        // Evita doppie esecuzioni: se il bottone ha un handler diretto o inline, salta il delegato
+                        try {
+                            const el = document.getElementById(id);
+                            if (el && ((el.dataset && el.dataset.bound === '1') || el.getAttribute('onclick'))) {
+                                return;
+                            }
+                        } catch (e) { /* ignore */ }
+                        ev.preventDefault();
+                        map[id]();
+                    }
+                } catch (e) { /* ignore */ }
+            }, true);
+        })();
 
         async function addComment() {
         if (!selectedTicketId) return;
@@ -9452,6 +9851,9 @@
             }
             const fd = new FormData();
             try {
+                // anti-doppio click: disabilita bottone durante upload
+                let b = tk.btnAttach; let old;
+                try { if (b) { old = b.textContent; if (b.disabled) return; b.disabled = true; b.textContent = 'Caricamento…'; } } catch (e) {}
                 // crea un commento placeholder e allega il file
                 const tmp = await authFetch(`tickets/${selectedTicketId}/comment`, { method: 'POST', json: true, body: { messaggio: `Allegato: ${f.name}` } });
                 const commentId = Number(tmp?.id || 0);
@@ -9462,8 +9864,10 @@
                 if (tk.file) tk.file.value = '';
                 await loadTicketComments(selectedTicketId);
                 try { showToast('Ticket: allegato caricato', { type: 'success' }); } catch (e) {}
+                try { if (b) { b.disabled = false; b.textContent = old || 'Carica'; } } catch (e) {}
             } catch (e) {
                 try { showToast(e.message || 'Errore upload allegato', { type: 'error' }); } catch (e2) {}
+                try { let b = tk.btnAttach; if (b) { b.disabled = false; b.textContent = 'Carica'; } } catch (e3) {}
             }
         }
 
@@ -9484,6 +9888,8 @@
                 await authFetch(`tickets/${selectedTicketId}/close`, { method: 'PUT', json: true, body: {} });
                 await loadTicketDetail(selectedTicketId); await loadTickets();
                 try { showToast('Ticket: chiuso', { type: 'success' }); } catch (e) {}
+                try { await loadTicketMetrics(); } catch (e) {}
+                try { const role = currentRole(); if (role === 'ADMIN' || role === 'SUPERVISOR') await loadTeamTicketMetrics(); } catch (e) {}
             } catch (e) {
                 try { showToast(e.message || 'Errore chiusura', { type: 'error' }); } catch (e2) {}
             }
@@ -9494,17 +9900,28 @@
                 await authFetch(`tickets/${selectedTicketId}/reopen`, { method: 'PUT', json: true, body: {} });
                 await loadTicketDetail(selectedTicketId); await loadTickets();
                 try { showToast('Ticket: riaperto', { type: 'success' }); } catch (e) {}
+                try { await loadTicketMetrics(); } catch (e) {}
+                try { const role = currentRole(); if (role === 'ADMIN' || role === 'SUPERVISOR') await loadTeamTicketMetrics(); } catch (e) {}
             } catch (e) {
                 try { showToast(e.message || 'Errore riapertura', { type: 'error' }); } catch (e2) {}
             }
         }
 
-        if (tk.btnCreate) tk.btnCreate.addEventListener('click', createTicket);
-        if (tk.btnRefresh) tk.btnRefresh.addEventListener('click', loadTickets);
+        if (tk.btnCreate && !tk.btnCreate.getAttribute('onclick')) { tk.btnCreate.addEventListener('click', createTicket); try { tk.btnCreate.dataset.bound = '1'; } catch (e) {} }
+        if (tk.btnRefresh && !tk.btnRefresh.getAttribute('onclick')) { tk.btnRefresh.addEventListener('click', loadTickets); try { tk.btnRefresh.dataset.bound = '1'; } catch (e) {} }
         if (tk.myOnly) tk.myOnly.addEventListener('change', loadTickets);
         if (tk.teamOnly) tk.teamOnly.addEventListener('change', loadTickets);
         if (tk.stateSel) tk.stateSel.addEventListener('change', loadTickets);
         if (tk.assigneeSel) tk.assigneeSel.addEventListener('change', loadTickets);
+        // Lazy load dell'elenco assegnatari quando il select riceve focus/click
+        if (tk.assigneeSel) {
+            const ensureAssigneeLoaded = () => {
+                try { if (tk.assigneeSel.dataset.loaded === '1' || tk.assigneeSel.dataset.loading === '1') return; } catch (e) {}
+                populateTicketAssignee();
+            };
+            try { tk.assigneeSel.addEventListener('focus', ensureAssigneeLoaded, { once: true }); } catch (e) { /* ignore */ }
+            try { tk.assigneeSel.addEventListener('mousedown', ensureAssigneeLoaded, { once: true }); } catch (e) { /* ignore */ }
+        }
         if (tk.clientId) tk.clientId.addEventListener('change', loadTickets);
         if (tk.clientLabel) tk.clientLabel.addEventListener('change', () => {
             try {
@@ -9519,6 +9936,21 @@
                 loadTickets();
             } catch (e) { /* ignore */ }
         });
+        // Suggerimenti dinamici filtri: utenti/clienti
+        try {
+            if (tk.assigneeLabel && tk.userOptions) {
+                const handler = () => updateUserDatalist(tk.assigneeLabel.value, tk.userOptions, tk.hintAssigneeFilter);
+                tk.assigneeLabel.addEventListener('input', debounce(handler, 300));
+                tk.assigneeLabel.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) { /* ignore */ }
+        try {
+            if (tk.clientLabel && tk.clientOptions) {
+                const handler = () => updateClientDatalist(tk.clientLabel.value, tk.clientOptions, tk.hintClientFilter);
+                tk.clientLabel.addEventListener('input', debounce(handler, 300));
+                tk.clientLabel.addEventListener('keyup', debounce(handler, 300));
+            }
+        } catch (e) { /* ignore */ }
         if (tk.assigneeLabel) tk.assigneeLabel.addEventListener('change', () => {
             try {
                 const val = tk.assigneeLabel.value || '';
@@ -9542,11 +9974,11 @@
             if (!id) return;
             loadTicketDetail(id);
         });
-        if (tk.btnComment) tk.btnComment.addEventListener('click', addComment);
-        if (tk.btnAttach) tk.btnAttach.addEventListener('click', attachFile);
-        if (tk.btnAssign) tk.btnAssign.addEventListener('click', assignMe);
-        if (tk.btnClose) tk.btnClose.addEventListener('click', closeTicket);
-        if (tk.btnReopen) tk.btnReopen.addEventListener('click', reopenTicket);
+        if (tk.btnComment) { tk.btnComment.addEventListener('click', addComment); try { tk.btnComment.dataset.bound = '1'; } catch (e) {} }
+        if (tk.btnAttach) { tk.btnAttach.addEventListener('click', attachFile); try { tk.btnAttach.dataset.bound = '1'; } catch (e) {} }
+        if (tk.btnAssign) { tk.btnAssign.addEventListener('click', assignMe); try { tk.btnAssign.dataset.bound = '1'; } catch (e) {} }
+        if (tk.btnClose) { tk.btnClose.addEventListener('click', closeTicket); try { tk.btnClose.dataset.bound = '1'; } catch (e) {} }
+        if (tk.btnReopen) { tk.btnReopen.addEventListener('click', reopenTicket); try { tk.btnReopen.dataset.bound = '1'; } catch (e) {} }
 
         // Initial load if section present
         if (tk.list) { try { 
@@ -9554,10 +9986,34 @@
             const role = currentRole();
             if (tk.teamWrap) tk.teamWrap.hidden = !(role === 'ADMIN' || role === 'SUPERVISOR');
             if (tk.btnTeamView) tk.btnTeamView.hidden = !(role === 'ADMIN' || role === 'SUPERVISOR');
-            // Applica preferenze salvate prima di popolare/select
+            // Applica preferenze salvate
             applyTicketPrefsToUI();
-            populateTicketAssignee();
-            populateTicketClient();
+            // Assignee select: lazy al primo focus
+            // Client datalist (filtro): lazy su input, non pre-caricare
+            // populateNewTicketAssignee() reso lazy: carica suggerimenti solo su digitazione
+            // populateNewTicketClient() reso lazy: carica suggerimenti solo su digitazione
+            // Prime lazy suggestions once user starts typing
+            try {
+                if (tk.newAssigneeLabel && tk.newUserOptions) {
+                    const handler = () => updateUserDatalist(tk.newAssigneeLabel.value, tk.newUserOptions, tk.hintAssigneeNew);
+                    tk.newAssigneeLabel.addEventListener('input', debounce(handler, 300));
+                    tk.newAssigneeLabel.addEventListener('keyup', debounce(handler, 300));
+                }
+            } catch (e) { /* ignore */ }
+            try {
+                if (tk.newClientLabel && tk.newClientOptions) {
+                    const handler = () => updateClientDatalist(tk.newClientLabel.value, tk.newClientOptions, tk.hintClientNew);
+                    tk.newClientLabel.addEventListener('input', debounce(handler, 300));
+                    tk.newClientLabel.addEventListener('keyup', debounce(handler, 300));
+                }
+            } catch (e) { /* ignore */ }
+            // Prefetch su focus se l'utente ha già digitato >=2 char
+            try {
+                if (tk.newAssigneeLabel && tk.newUserOptions) tk.newAssigneeLabel.addEventListener('focus', () => updateUserDatalist(tk.newAssigneeLabel.value, tk.newUserOptions, tk.hintAssigneeNew));
+            } catch (e) { /* ignore */ }
+            try {
+                if (tk.newClientLabel && tk.newClientOptions) tk.newClientLabel.addEventListener('focus', () => updateClientDatalist(tk.newClientLabel.value, tk.newClientOptions, tk.hintClientNew));
+            } catch (e) { /* ignore */ }
             loadTickets(); 
         } catch (e) {} }
 
@@ -9643,7 +10099,15 @@
         const applyTicketPrefsToUI = () => {
             const p = loadTicketPrefs();
             try {
-                if (tk.myOnly && typeof p.mine === 'boolean') tk.myOnly.checked = !!p.mine;
+                // Default: per ADMIN/SUPERVISOR mostra tutti i ticket (myOnly=false) se preferenza assente
+                if (tk.myOnly) {
+                    if (typeof p.mine === 'boolean') {
+                        tk.myOnly.checked = !!p.mine;
+                    } else {
+                        const role = currentRole();
+                        tk.myOnly.checked = !(role === 'ADMIN' || role === 'SUPERVISOR');
+                    }
+                }
                 if (tk.teamOnly && typeof p.team === 'boolean') tk.teamOnly.checked = !!p.team;
                 if (tk.stateSel && typeof p.stato === 'string') tk.stateSel.value = p.stato || '';
                 if (tk.assigneeSel && typeof p.assignee === 'string') tk.assigneeSel.value = p.assignee || '';
@@ -9678,6 +10142,13 @@
                     if (tk.clientId) tk.clientId.value = '';
                     if (tk.clientLabel) tk.clientLabel.value = '';
                     if (tk.search) tk.search.value = '';
+                    // reset hint/spinner e suggerimenti dei filtri combobox
+                    try {
+                        if (tk.hintAssigneeFilter) { tk.hintAssigneeFilter.textContent = ''; tk.hintAssigneeFilter.classList.remove('hint--loading'); }
+                        if (tk.hintClientFilter) { tk.hintClientFilter.textContent = ''; tk.hintClientFilter.classList.remove('hint--loading'); }
+                        if (tk.userOptions) tk.userOptions.innerHTML = '';
+                        if (tk.clientOptions) tk.clientOptions.innerHTML = '';
+                    } catch (e) { /* ignore */ }
                     ticketsFilterState = null; ticketsFilterClosedSince = null;
                     // wipe persisted prefs
                     try { window.localStorage.removeItem(TKT_PREFS_KEY); } catch (e) {}
@@ -9724,6 +10195,94 @@
             } catch (e) { /* ignore */ }
         }
 
+        async function populateNewTicketAssignee() {
+            const dl = tk.newUserOptions; if (!dl) return;
+            dl.innerHTML = '';
+            try {
+                const usersRes = await authFetch('utenti');
+                const users = Array.isArray(usersRes?.utenti) ? usersRes.utenti : (Array.isArray(usersRes) ? usersRes : []);
+                users.forEach(u => {
+                    const o = document.createElement('option');
+                    o.value = `${(u.nome||'').trim()} ${(u.cognome||'').trim()} (#${u.id})`;
+                    dl.appendChild(o);
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        async function populateNewTicketClient() {
+            const dl = tk.newClientOptions; if (!dl) return;
+            dl.innerHTML = '';
+            try {
+                const list = await authFetch('clienti');
+                const rows = Array.isArray(list) ? list : [];
+                rows.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = `${(c.ragione_sociale||'').trim()} (#${c.id})`;
+                    dl.appendChild(o);
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        // Suggerimenti dinamici (lazy) per datalist utenti/clienti/gruppi
+
+        const updateUserDatalist = async (q, datalistEl, hintEl = null) => {
+            if (!datalistEl) return;
+            datalistEl.innerHTML = '';
+            const qq = String(q || '').trim();
+            if (hintEl) { hintEl.textContent = qq.length < 2 ? 'Digita almeno 2 caratteri' : 'Caricamento…'; try { hintEl.classList.toggle('hint--loading', qq.length >= 2); } catch (e) {} }
+            if (qq.length < 2) return;
+            try {
+                const usersRes = await authFetch(`utenti?search=${encodeURIComponent(qq)}&limit=40`);
+                const users = Array.isArray(usersRes?.utenti) ? usersRes.utenti : (Array.isArray(usersRes) ? usersRes : []);
+                if (!users.length) { if (hintEl) { hintEl.textContent = 'Nessun risultato'; try { hintEl.classList.remove('hint--loading'); } catch (e) {} } return; }
+                users.slice(0, 40).forEach(u => {
+                    const o = document.createElement('option');
+                    o.value = `${(u.nome||'').trim()} ${(u.cognome||'').trim()} (#${u.id})`;
+                    datalistEl.appendChild(o);
+                });
+                if (hintEl) { hintEl.textContent = `Trovati ${users.length}`; try { hintEl.classList.remove('hint--loading'); } catch (e) {} }
+            } catch (e) { if (hintEl) { hintEl.textContent = 'Errore suggerimenti'; try { hintEl.classList.remove('hint--loading'); } catch (e2) {} } }
+        };
+
+        const updateClientDatalist = async (q, datalistEl, hintEl = null) => {
+            if (!datalistEl) return;
+            datalistEl.innerHTML = '';
+            const qq = String(q || '').trim();
+            if (hintEl) { hintEl.textContent = qq.length < 2 ? 'Digita almeno 2 caratteri' : 'Caricamento…'; try { hintEl.classList.toggle('hint--loading', qq.length >= 2); } catch (e) {} }
+            if (qq.length < 2) return;
+            try {
+                const list = await authFetch(`clienti?search=${encodeURIComponent(qq)}&limit=40`);
+                const rows = Array.isArray(list) ? list : [];
+                if (!rows.length) { if (hintEl) { hintEl.textContent = 'Nessun risultato'; try { hintEl.classList.remove('hint--loading'); } catch (e) {} } return; }
+                rows.slice(0, 40).forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = `${(c.ragione_sociale||'').trim()} (#${c.id})`;
+                    datalistEl.appendChild(o);
+                });
+                if (hintEl) { hintEl.textContent = `Trovati ${rows.length}`; try { hintEl.classList.remove('hint--loading'); } catch (e) {} }
+            } catch (e) { if (hintEl) { hintEl.textContent = 'Errore suggerimenti'; try { hintEl.classList.remove('hint--loading'); } catch (e2) {} } }
+        };
+
+        const updateGroupDatalist = async (q, datalistEl, hintEl = null) => {
+            if (!datalistEl) return;
+            datalistEl.innerHTML = '';
+            const qq = String(q || '').trim();
+            if (hintEl) { hintEl.textContent = qq.length < 2 ? 'Digita almeno 2 caratteri' : 'Caricamento…'; try { hintEl.classList.toggle('hint--loading', qq.length >= 2); } catch (e) {} }
+            if (qq.length < 2) return;
+            try {
+                const list = await authFetch(`gruppi?search=${encodeURIComponent(qq)}&limit=40`);
+                const rows = Array.isArray(list) ? list : [];
+                if (!rows.length) { if (hintEl) { hintEl.textContent = 'Nessun risultato'; try { hintEl.classList.remove('hint--loading'); } catch (e) {} } return; }
+                rows.slice(0, 40).forEach(g => {
+                    const o = document.createElement('option');
+                    o.value = buildGroupLabel(g);
+                    o.dataset.id = String(g.id);
+                    datalistEl.appendChild(o);
+                });
+                if (hintEl) { hintEl.textContent = `Trovati ${rows.length}`; try { hintEl.classList.remove('hint--loading'); } catch (e) {} }
+            } catch (e) { if (hintEl) { hintEl.textContent = 'Errore suggerimenti'; try { hintEl.classList.remove('hint--loading'); } catch (e2) {} } }
+        };
+
         // Clickable ticket metrics: jump and filter
         function gotoTicketsWith(state, closedSince = null) {
             try { document.querySelector('a[href="#tickets"]').click(); } catch (e) { window.location.hash = '#tickets'; }
@@ -9764,3 +10323,5 @@
             const since = `${y}-${m}-${day} 00:00:00`;
             gotoTeamTicketsWith('CHIUSO', since);
         });
+
+        // Fine DOMContentLoaded (chiuso altrove)

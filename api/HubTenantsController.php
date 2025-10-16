@@ -50,9 +50,41 @@ class HubTenantsController
             $row = $this->hub->selectOne('SELECT id, ragione_sociale, slug, stato, creato_il, aggiornato_il FROM tenants WHERE id = ?', [$id]);
             if (!$row) { $this->respond(404, ['message' => 'Tenant non trovato']); }
             $this->respond(200, $row);
-        } else {
-            $rows = $this->hub->select('SELECT id, ragione_sociale, slug, stato FROM tenants ORDER BY ragione_sociale');
-            $this->respond(200, $rows ?: []);
+            return;
+        }
+        // Elenco: supporta ricerca e limit opzionali (backwards compatible)
+        // Se ruolo TENANT, mostra solo il tenant collegato all'utente
+        try {
+            $u = $_SERVER['AUTH_USER'] ?? null;
+            $role = strtoupper($u['ruolo'] ?? '');
+            if ($role === 'TENANT') {
+                $tid = (int)($u['tenant_id'] ?? 0);
+                if ($tid > 0) {
+                    $row = $this->hub->selectOne('SELECT id, ragione_sociale, slug, stato FROM tenants WHERE id = ? LIMIT 1', [$tid]);
+                    $this->respond(200, $row ? [$row] : []);
+                    return;
+                }
+                $this->respond(200, []);
+                return;
+            }
+        } catch (Throwable $e) { /* ignore */ }
+        $search = isset($_GET['search']) ? trim((string)$_GET['search']) : '';
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 0;
+        $limit = $limit > 0 ? min(200, max(1, $limit)) : 0;
+        $sql = 'SELECT id, ragione_sociale, slug, stato FROM tenants';
+        $params = [];
+        if ($search !== '') {
+            $sql .= ' WHERE (ragione_sociale LIKE ? OR slug LIKE ?)';
+            $term = '%' . $search . '%';
+            $params[] = $term; $params[] = $term;
+        }
+        $sql .= ' ORDER BY ragione_sociale';
+        if ($limit > 0) { $sql .= ' LIMIT ' . $limit; }
+        try {
+            $rows = $this->hub->select($sql, $params) ?: [];
+            $this->respond(200, $rows);
+        } catch (Throwable $e) {
+            $this->respond(500, ['message' => 'Errore durante la lettura tenants']);
         }
     }
 
@@ -112,4 +144,3 @@ class HubTenantsController
         }
     }
 }
-

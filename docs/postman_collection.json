@@ -1,77 +1,173 @@
 {
   "info": {
     "name": "LpWF Gestionale API",
-    "_postman_id": "00000000-0000-0000-0000-000000000000",
-    "description": "Collection Postman per le API LpWF. Imposta {{baseUrl}} e {{token}} nell'ambiente.",
+    "_postman_id": "00000000-0000-0000-0000-000000000001",
+    "description": "Collection Postman per le API LpWF. Imposta {{baseUrl}} e {{token}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Auth / Login",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"utente@example.com\",\n  \"password\": \"pwd\"\n}" }
-      }
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"utente@example.com\",\n  \"password\": \"pwd\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.access_token) { pm.environment.set('token', data.access_token); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth","logout"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/password", "host": ["{{baseUrl}}"], "path": ["auth","password"] },
+            "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"oldpwd\",\n  \"new_password\": \"NewPwd!2025\"\n}" }
+          }
+        },
+        {
+          "name": "Password Reset (admin)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/password-reset", "host": ["{{baseUrl}}"], "path": ["auth","password-reset"] },
+            "body": { "mode": "raw", "raw": "{\n  \"user_id\": 12,\n  \"new_password\": \"Temp2025!\"\n}" }
+          }
+        }
+      ]
     },
     {
-      "name": "Auth / Me",
-      "request": {
-        "method": "GET",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
-        "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] }
-      }
+      "name": "System",
+      "item": [
+        { "name": "Health", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] } } },
+        { "name": "Tenant Health", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tenant_health", "host": ["{{baseUrl}}"], "path": ["tenant_health"] } } },
+        { "name": "Config", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/config", "host": ["{{baseUrl}}"], "path": ["config"] } } }
+      ]
     },
     {
-      "name": "System / Health",
-      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] } }
+      "name": "Tickets",
+      "item": [
+        { "name": "List (mine)", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets?mine=1", "host": ["{{baseUrl}}"], "path": ["tickets"], "query": [ {"key":"mine","value":"1"} ] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tickets", "host": ["{{baseUrl}}"], "path": ["tickets"] }, "body": { "mode": "raw", "raw": "{\n  \"titolo\": \"Problema rete\",\n  \"priorita\": \"MEDIA\",\n  \"descrizione\": \"Il wifi non funziona\"\n}" } } },
+        { "name": "Detail", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1", "host": ["{{baseUrl}}"], "path": ["tickets","1"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tickets/1", "host": ["{{baseUrl}}"], "path": ["tickets","1"] }, "body": { "mode": "raw", "raw": "{\n  \"priorita\": \"ALTA\"\n}" } } },
+        { "name": "Assign (self)", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tickets/1/assign", "host": ["{{baseUrl}}"], "path": ["tickets","1","assign"] }, "body": { "mode": "raw", "raw": "{}" } } },
+        { "name": "Close", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1/close", "host": ["{{baseUrl}}"], "path": ["tickets","1","close"] } } },
+        { "name": "Reopen", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1/reopen", "host": ["{{baseUrl}}"], "path": ["tickets","1","reopen"] } } },
+        { "name": "Comments / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1/comment", "host": ["{{baseUrl}}"], "path": ["tickets","1","comment"] } } },
+        { "name": "Comments / Add", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tickets/1/comment", "host": ["{{baseUrl}}"], "path": ["tickets","1","comment"] }, "body": { "mode": "raw", "raw": "{\n  \"messaggio\": \"Sto verificando.\"\n}" } } },
+        { "name": "Comment / Attach", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1/comment_attach", "host": ["{{baseUrl}}"], "path": ["tickets","1","comment_attach"] }, "body": { "mode": "formdata", "formdata": [ { "key": "comment_id", "value": "1", "type": "text" }, { "key": "file", "type": "file", "src": "" } ] } } },
+        { "name": "Attachments", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tickets/1/attachments", "host": ["{{baseUrl}}"], "path": ["tickets","1","attachments"] } } }
+      ]
     },
     {
-      "name": "System / Tenant Health",
-      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tenant_health", "host": ["{{baseUrl}}"], "path": ["tenant_health"] } }
+      "name": "Tasks",
+      "item": [
+        { "name": "List (unassigned)", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tasks?unassigned=true", "host": ["{{baseUrl}}"], "path": ["tasks"], "query": [ {"key":"unassigned","value":"true"} ] } } },
+        { "name": "Assign (self)", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tasks/1/assign", "host": ["{{baseUrl}}"], "path": ["tasks","1","assign"] }, "body": { "mode": "raw", "raw": "{}" } } },
+        { "name": "Complete", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tasks/1/complete", "host": ["{{baseUrl}}"], "path": ["tasks","1","complete"] } } },
+        { "name": "Notes / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tasks/1/note", "host": ["{{baseUrl}}"], "path": ["tasks","1","note"] } } },
+        { "name": "Notes / Add", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/tasks/1/note", "host": ["{{baseUrl}}"], "path": ["tasks","1","note"] }, "body": { "mode": "raw", "raw": "{\n  \"id_utente\": 1,\n  \"nota\": \"Nota esempio\"\n}" } } },
+        { "name": "Notes / Attach", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/tasks/1/note_attach", "host": ["{{baseUrl}}"], "path": ["tasks","1","note_attach"] }, "body": { "mode": "formdata", "formdata": [ { "key": "note_id", "value": "1", "type": "text" }, { "key": "file", "type": "file", "src": "" } ] } } }
+      ]
     },
     {
-      "name": "Tickets / List (mine)",
-      "request": {
-        "method": "GET",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
-        "url": { "raw": "{{baseUrl}}/tickets?mine=1", "host": ["{{baseUrl}}"], "path": ["tickets"], "query": [ {"key":"mine","value":"1"} ] }
-      }
+      "name": "Users & Groups",
+      "item": [
+        { "name": "Users / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti?with_groups=1&with_supervisors=1", "host": ["{{baseUrl}}"], "path": ["utenti"], "query": [ {"key":"with_groups","value":"1"}, {"key":"with_supervisors","value":"1"} ] } } },
+        { "name": "Users / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/utenti", "host": ["{{baseUrl}}"], "path": ["utenti"] }, "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Mario\",\n  \"cognome\": \"Rossi\",\n  \"email\": \"mario.rossi@example.com\",\n  \"password\": \"ChangeMe1!\",\n  \"ruolo\": \"USER\"\n}" } } },
+        { "name": "Users / Detail", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1", "host": ["{{baseUrl}}"], "path": ["utenti","1"] } } },
+        { "name": "Users / Update", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/utenti/1", "host": ["{{baseUrl}}"], "path": ["utenti","1"] }, "body": { "mode": "raw", "raw": "{\n  \"ruolo\": \"SUPERVISOR\"\n}" } } },
+        { "name": "Users / Delete", "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1", "host": ["{{baseUrl}}"], "path": ["utenti","1"] } } },
+        { "name": "Groups / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/gruppi", "host": ["{{baseUrl}}"], "path": ["gruppi"] } } },
+        { "name": "Groups / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/gruppi", "host": ["{{baseUrl}}"], "path": ["gruppi"] }, "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Supporto N1\"\n}" } } },
+        { "name": "Group / Add User", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/gruppi/1/add/2", "host": ["{{baseUrl}}"], "path": ["gruppi","1","add","2"] } } },
+        { "name": "Group / Remove User", "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/gruppi/1/remove/2", "host": ["{{baseUrl}}"], "path": ["gruppi","1","remove","2"] } } },
+        { "name": "User / Groups", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1/groups", "host": ["{{baseUrl}}"], "path": ["utenti","1","groups"] } } },
+        { "name": "Supervisor / Users", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1/supervised", "host": ["{{baseUrl}}"], "path": ["utenti","1","supervised"] } } },
+        { "name": "Supervisor / Add", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1/add_supervised/2", "host": ["{{baseUrl}}"], "path": ["utenti","1","add_supervised","2"] } } },
+        { "name": "Supervisor / Remove", "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/1/remove_supervised/2", "host": ["{{baseUrl}}"], "path": ["utenti","1","remove_supervised","2"] } } },
+        { "name": "User / Supervisors", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/2/supervisors", "host": ["{{baseUrl}}"], "path": ["utenti","2","supervisors"] } } },
+        { "name": "User / Set Supervisor", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/utenti/2/set_supervisor/1", "host": ["{{baseUrl}}"], "path": ["utenti","2","set_supervisor","1"] } } }
+      ]
     },
     {
-      "name": "Tickets / Create",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
-        "url": { "raw": "{{baseUrl}}/tickets", "host": ["{{baseUrl}}"], "path": ["tickets"] },
-        "body": { "mode": "raw", "raw": "{\n  \"titolo\": \"Problema rete\",\n  \"priorita\": \"MEDIA\"\n}" }
-      }
+      "name": "Clients",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/clienti", "host": ["{{baseUrl}}"], "path": ["clienti"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/clienti", "host": ["{{baseUrl}}"], "path": ["clienti"] }, "body": { "mode": "raw", "raw": "{\n  \"ragione_sociale\": \"Rossi Srl\",\n  \"partita_iva\": \"IT12345678901\"\n}" } } },
+        { "name": "Detail", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/clienti/1", "host": ["{{baseUrl}}"], "path": ["clienti","1"] } } }
+      ]
     },
     {
-      "name": "Tickets / Assign (self)",
-      "request": {
-        "method": "PUT",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
-        "url": { "raw": "{{baseUrl}}/tickets/1/assign", "host": ["{{baseUrl}}"], "path": ["tickets","1","assign"] },
-        "body": { "mode": "raw", "raw": "{}" }
-      }
+      "name": "Services",
+      "item": [
+        { "name": "Status", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/services/status", "host": ["{{baseUrl}}"], "path": ["services","status"] } } },
+        { "name": "WhatsApp", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/services/whatsapp", "host": ["{{baseUrl}}"], "path": ["services","whatsapp"] }, "body": { "mode": "raw", "raw": "{\n  \"to\": \"+39333111222\",\n  \"message\": \"Ciao!\"\n}" } } },
+        { "name": "Email", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/services/email", "host": ["{{baseUrl}}"], "path": ["services","email"] }, "body": { "mode": "raw", "raw": "{\n  \"to\": \"user@example.com\",\n  \"subject\": \"Benvenuto\",\n  \"body\": \"Ciao e benvenuto!\"\n}" } } },
+        { "name": "Payment (Stripe)", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/services/payment", "host": ["{{baseUrl}}"], "path": ["services","payment"] }, "body": { "mode": "raw", "raw": "{\n  \"gateway\": \"stripe\",\n  \"amount\": 19.9\n}" } } },
+        { "name": "Retry", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/services/retry", "host": ["{{baseUrl}}"], "path": ["services","retry"] }, "body": { "mode": "raw", "raw": "{\n  \"id\": 1\n}" } } },
+        { "name": "Retry Failed", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/services/retry_failed", "host": ["{{baseUrl}}"], "path": ["services","retry_failed"] }, "body": { "mode": "raw", "raw": "{\n  \"limit\": 10,\n  \"since_hours\": 24\n}" } } }
+      ]
     },
     {
-      "name": "Tasks / Unassigned",
-      "request": {
-        "method": "GET",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
-        "url": { "raw": "{{baseUrl}}/tasks?unassigned=true", "host": ["{{baseUrl}}"], "path": ["tasks"], "query": [ {"key":"unassigned","value":"true"} ] }
-      }
+      "name": "Enrichment",
+      "item": [
+        { "name": "Media Search", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/enrichment/media?q=computer&limit=5", "host": ["{{baseUrl}}"], "path": ["enrichment","media"], "query": [ {"key":"q","value":"computer"}, {"key":"limit","value":"5"} ] } } }
+      ]
     },
     {
-      "name": "Services / Status",
-      "request": {
-        "method": "GET",
-        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
-        "url": { "raw": "{{baseUrl}}/services/status", "host": ["{{baseUrl}}"], "path": ["services","status"] }
-      }
+      "name": "Catalog (Hub)",
+      "item": [
+        { "name": "Articoli / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_articoli", "host": ["{{baseUrl}}"], "path": ["catalogo_articoli"] }, "body": { "mode": "raw", "raw": "{\n  \"titolo\": \"Corso Excel Base\",\n  \"tipologia\": \"SERVIZIO\"\n}" } } },
+        { "name": "Articoli / Update", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_articoli/1", "host": ["{{baseUrl}}"], "path": ["catalogo_articoli","1"] }, "body": { "mode": "raw", "raw": "{\n  \"titolo\": \"Corso Excel Intermedio\"\n}" } } },
+        { "name": "Varianti / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_varianti", "host": ["{{baseUrl}}"], "path": ["catalogo_varianti"] }, "body": { "mode": "raw", "raw": "{\n  \"articolo_id\": 1,\n  \"sku\": \"VAR-001\",\n  \"nome\": \"Pacchetto 10 ore\"\n}" } } },
+        { "name": "Prezzi / Set", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_prezzi", "host": ["{{baseUrl}}"], "path": ["catalogo_prezzi"] }, "body": { "mode": "raw", "raw": "{\n  \"variante_id\": 1,\n  \"prezzo\": 99.9,\n  \"listino_codice\": \"DEFAULT\"\n}" } } },
+        { "name": "Prezzi / Get", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/catalogo_prezzi?variante_id=1&listino_codice=DEFAULT", "host": ["{{baseUrl}}"], "path": ["catalogo_prezzi"], "query": [ {"key":"variante_id","value":"1"}, {"key":"listino_codice","value":"DEFAULT"} ] } } },
+        { "name": "Articolo / Categorie (set)", "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_articoli_categorie/1", "host": ["{{baseUrl}}"], "path": ["catalogo_articoli_categorie","1"] }, "body": { "mode": "raw", "raw": "{\n  \"categorie_slugs\": [\"software\", \"formazione\"]\n}" } } },
+        { "name": "Relazioni / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalogo_relazioni", "host": ["{{baseUrl}}"], "path": ["catalogo_relazioni"] }, "body": { "mode": "raw", "raw": "{\n  \"articolo_sorgente_id\": 1,\n  \"articolo_correlato_id\": 2,\n  \"tipo_relazione\": \"UPSELL\"\n}" } } },
+        { "name": "Listini / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/catalogo_listini?tenant_id=1", "host": ["{{baseUrl}}"], "path": ["catalogo_listini"], "query": [ {"key":"tenant_id","value":"1"} ] } } },
+        { "name": "Categorie / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/catalogo_categorie?q=soft", "host": ["{{baseUrl}}"], "path": ["catalogo_categorie"], "query": [ {"key":"q","value":"soft"} ] } } },
+        { "name": "Media / Attach", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/catalog_media", "host": ["{{baseUrl}}"], "path": ["catalog_media"] }, "body": { "mode": "raw", "raw": "{\n  \"articolo_id\": 1,\n  \"url\": \"https://example.com/img.jpg\"\n}" } } },
+        { "name": "Media / Upload", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/catalog_media/upload", "host": ["{{baseUrl}}"], "path": ["catalog_media","upload"] }, "body": { "mode": "formdata", "formdata": [ { "key": "articolo_id", "value": "1", "type": "text" }, { "key": "file", "type": "file", "src": "" } ] } } }
+      ]
+    },
+    {
+      "name": "Hub",
+      "item": [
+        { "name": "Tenants / List", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/hub_tenants", "host": ["{{baseUrl}}"], "path": ["hub_tenants"] } } },
+        { "name": "Tenants / Create", "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": { "raw": "{{baseUrl}}/hub_tenants", "host": ["{{baseUrl}}"], "path": ["hub_tenants"] }, "body": { "mode": "raw", "raw": "{\n  \"ragione_sociale\": \"Acme Spa\",\n  \"slug\": \"acme\"\n}" } } }
+      ]
     }
   ],
   "variable": [

@@ -16,6 +16,7 @@ require_once __DIR__ . '/../models/SupervisorUtente.php';
 require_once __DIR__ . '/../models/TaskNotaAllegato.php';
 require_once __DIR__ . '/../models/Cliente.php';
 require_once __DIR__ . '/../models/ServiceLog.php';
+require_once __DIR__ . '/../models/Documento.php';
 require_once __DIR__ . '/../models/Ticket.php';
 require_once __DIR__ . '/../models/TicketComment.php';
 require_once __DIR__ . '/../services/ServiceDispatcher.php';
@@ -39,6 +40,7 @@ class ApiController
         'auth_audit'     => 'AuthAudit',
         'clienti'        => 'Cliente',
         'service_logs'   => 'ServiceLog',
+        'documenti'      => 'Documento',
         'tickets'        => 'Ticket',
     ];
 
@@ -50,6 +52,13 @@ class ApiController
 
     public function processRequest(?string $resource_name, ?int $id, ?string $action = null, ?int $extra_id = null)
     {
+        // Regola generale: utenti non ADMIN/SUPERVISOR (es. TENANT) hanno accesso in sola lettura
+        $currentUser = $_SERVER['AUTH_USER'] ?? null;
+        $roleCurrent = strtoupper($currentUser['ruolo'] ?? '');
+        if ($this->request_method !== 'GET' && !in_array($roleCurrent, ['ADMIN','SUPERVISOR'], true)) {
+            $this->sendResponse(403, ["message" => "Permesso negato: accesso consentito solo in lettura."]);
+            return;
+        }
         if ($action) {
             $this->handleAction($resource_name, $id, $action, $extra_id);
             return;
@@ -315,8 +324,8 @@ class ApiController
 
         // Gruppi: opzionale conteggio utenti per filtro client
         if ($model instanceof Gruppo) {
-            // Ignora i parametri query non di colonna (es. with_user_counts) per evitare WHERE non validi
-            $results = $model->findAll();
+            // Supporta ricerca e limit server-side tramite $params
+            $results = $model->findAll($params);
             $withCounts = isset($params['with_user_counts']) && filter_var($params['with_user_counts'], FILTER_VALIDATE_BOOLEAN);
             if ($withCounts && count($results) > 0) {
                 $ids = array_map(fn($g) => (int)$g['id'], $results);

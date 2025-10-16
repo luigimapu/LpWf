@@ -20,6 +20,68 @@
     function getHeaders(json=true) { return window.lpwfAuth?.buildHeaders?.({}, json) || {}; }
     function saveState(obj){ try{ localStorage.setItem(storageKey, JSON.stringify(obj)); }catch(e){} }
     function loadState(){ try{ const r=localStorage.getItem(storageKey); return r?JSON.parse(r):{}; }catch(e){ return {}; } }
+    async function q(path, init={}){
+      const api = getApiBase();
+      const res = await fetch(`${api}/${path.replace(/^\/+/, '')}`, { headers: getHeaders(init.json!==false), ...init, body: init.body && init.json!==false ? JSON.stringify(init.body) : init.body });
+      const text = await res.text();
+      let payload = null; try { payload = text ? JSON.parse(text) : null; } catch(e) {}
+      if (!res.ok) { throw new Error(payload?.message || `HTTP ${res.status}`); }
+      return payload;
+    }
+    async function tstSearchUsers(){
+      const qv = (document.getElementById('tst-user-q').value||'').trim();
+      const out = document.getElementById('tst-user-out'); out.textContent = 'Caricamento…';
+      try{ const r = await q(`utenti?search=${encodeURIComponent(qv)}&limit=40`, { json:false }); out.textContent = JSON.stringify(r, null, 2); }catch(e){ out.textContent = e.message; }
+    }
+    async function tstSearchClients(){
+      const qv = (document.getElementById('tst-client-q').value||'').trim();
+      const out = document.getElementById('tst-client-out'); out.textContent = 'Caricamento…';
+      try{ const r = await q(`clienti?search=${encodeURIComponent(qv)}&limit=40`, { json:false }); out.textContent = JSON.stringify(r, null, 2); }catch(e){ out.textContent = e.message; }
+    }
+    function parseIdFromLabel(v){ const m = String(v||'').match(/#(\d+)/); return m ? parseInt(m[1],10) : null; }
+    async function populateUsersDatalist(){
+      const el = document.getElementById('tst-users'); const qv = (document.getElementById('tst-tk-assignee').value||'').trim();
+      el.innerHTML=''; if (qv.length<2) return; try{ const r = await q(`utenti?search=${encodeURIComponent(qv)}&limit=40`, { json:false }); const arr = Array.isArray(r?.utenti)?r.utenti:(Array.isArray(r)?r:[]); arr.forEach(u=>{ const o=document.createElement('option'); o.value = `${(u.nome||'').trim()} ${(u.cognome||'').trim()} (#${u.id})`; el.appendChild(o); }); }catch(e){}
+    }
+    async function populateClientsDatalist(){
+      const el = document.getElementById('tst-clients'); const qv = (document.getElementById('tst-tk-client').value||'').trim();
+      el.innerHTML=''; if (qv.length<2) return; try{ const r = await q(`clienti?search=${encodeURIComponent(qv)}&limit=40`, { json:false }); const arr = Array.isArray(r)?r:[]; arr.forEach(c=>{ const o=document.createElement('option'); o.value = `${(c.ragione_sociale||'').trim()} (#${c.id})`; el.appendChild(o); }); }catch(e){}
+    }
+    async function tstCreateTicket(){
+      const out = document.getElementById('tst-tk-out'); out.textContent = 'Creazione…';
+      const titolo = document.getElementById('tst-tk-title').value.trim();
+      const descrizione = document.getElementById('tst-tk-desc').value.trim();
+      const priorita = document.getElementById('tst-tk-prio').value;
+      const assLbl = document.getElementById('tst-tk-assignee').value;
+      const cliLbl = document.getElementById('tst-tk-client').value;
+      const body = { titolo, descrizione, priorita };
+      const aid = parseIdFromLabel(assLbl); if (aid) body.assegnato_a = aid;
+      const cid = parseIdFromLabel(cliLbl); if (cid) body.cliente_id = cid;
+      try{ const r = await q('tickets', { method:'POST', body }); out.textContent = JSON.stringify(r, null, 2); }
+      catch(e){ out.textContent = e.message; }
+    }
+    async function tstAssignMe(){ const id = parseInt(document.getElementById('tst-tk-id').value,10)||0; const out=document.getElementById('tst-tk-act-out'); out.textContent='Assegno…'; try{ const r=await q(`tickets/${id}/assign`,{method:'PUT',body:{}}); out.textContent=JSON.stringify(r,null,2);}catch(e){out.textContent=e.message;} }
+    async function tstClose(){ const id = parseInt(document.getElementById('tst-tk-id').value,10)||0; const out=document.getElementById('tst-tk-act-out'); out.textContent='Chiudo…'; try{ const r=await q(`tickets/${id}/close`,{method:'PUT',body:{}}); out.textContent=JSON.stringify(r,null,2);}catch(e){out.textContent=e.message;} }
+    async function tstReopen(){ const id = parseInt(document.getElementById('tst-tk-id').value,10)||0; const out=document.getElementById('tst-tk-act-out'); out.textContent='Riapro…'; try{ const r=await q(`tickets/${id}/reopen`,{method:'PUT',body:{}}); out.textContent=JSON.stringify(r,null,2);}catch(e){out.textContent=e.message;} }
+    async function tstAddComment(){ const id = parseInt(document.getElementById('tst-tk-id').value,10)||0; const msg=(document.getElementById('tst-tk-comment').value||'').trim(); const out=document.getElementById('tst-tk-act-out'); out.textContent='Commento…'; try{ const r=await q(`tickets/${id}/comment`,{method:'POST',body:{messaggio:msg}}); out.textContent=JSON.stringify(r,null,2);}catch(e){out.textContent=e.message;} }
+    async function tstAttach(){
+      const id = parseInt(document.getElementById('tst-tk-id').value,10)||0; const f = document.getElementById('tst-tk-file').files[0]; const out=document.getElementById('tst-tk-act-out');
+      if(!f){ out.textContent='Seleziona un file'; return; }
+      out.textContent='Upload…';
+      try{
+        const c = await q(`tickets/${id}/comment`, { method:'POST', body:{ messaggio:`Allegato: ${f.name}` } });
+        const form = new FormData(); form.append('comment_id', String(c?.id||'')); form.append('file', f);
+        const api = getApiBase(); const res = await fetch(`${api}/tickets/${id}/comment_attach`, { method:'POST', headers: getHeaders(false), body: form });
+        const t = await res.text(); let p = null; try{ p = t?JSON.parse(t):null; }catch(e){}
+        if(!res.ok) throw new Error(p?.message || `HTTP ${res.status}`);
+        out.textContent = JSON.stringify(p, null, 2);
+      }catch(e){ out.textContent = e.message; }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const ua = document.getElementById('tst-tk-assignee'); const uc = document.getElementById('tst-tk-client');
+      if (ua) ua.addEventListener('input', ()=>{ if ((ua.value||'').trim().length>=2) populateUsersDatalist(); });
+      if (uc) uc.addEventListener('input', ()=>{ if ((uc.value||'').trim().length>=2) populateClientsDatalist(); });
+    });
     async function run(){
       const method = document.getElementById('method').value;
       const path = document.getElementById('path').value.trim().replace(/^\/+/, '');
@@ -53,6 +115,19 @@
       document.getElementById('api-base').textContent = getApiBase();
       document.getElementById('token-present').textContent = !!window.lpwfAuth?.getToken?.() ? 'Sì' : 'No';
     });
+
+    async function q(path, init={}){
+      const api = getApiBase();
+      const res = await fetch(`${api}/${path.replace(/^\/+/, '')}`, { headers: getHeaders(init.json!==false), ...init, body: init.body && init.json!==false ? JSON.stringify(init.body) : init.body });
+      const text = await res.text();
+      let payload = null; try { payload = text ? JSON.parse(text) : null; } catch(e) {}
+      if (!res.ok) { throw new Error(payload?.message || `HTTP ${res.status}`); }
+      return payload;
+    }
+    async function tstListTenants(){ const out=document.getElementById('tst-ten-out'); out.textContent='Caricamento…'; try{ const r=await q('hub_tenants',{json:false}); out.textContent=JSON.stringify(r,null,2);}catch(e){ out.textContent=e.message; } }
+    async function tstGetTenant(){ const id=parseInt(document.getElementById('tst-ten-id').value,10)||0; const out=document.getElementById('tst-ten-out'); out.textContent='Caricamento…'; try{ const r=await q(`hub_tenants/${id}`,{json:false}); out.textContent=JSON.stringify(r,null,2);}catch(e){ out.textContent=e.message; } }
+    async function tstCreateTenant(){ const out=document.getElementById('tst-ten-out'); out.textContent='Creazione…'; const name=document.getElementById('tst-ten-name').value.trim(); const slug=document.getElementById('tst-ten-slug').value.trim(); const stato=document.getElementById('tst-ten-stato').value; try{ const r=await q('hub_tenants',{method:'POST',body:{ ragione_sociale:name, slug, stato }}); out.textContent=JSON.stringify(r,null,2);}catch(e){ out.textContent=e.message; } }
+    async function tstUpdateTenant(){ const out=document.getElementById('tst-ten-out'); out.textContent='Aggiornamento…'; const id=parseInt(document.getElementById('tst-ten-id').value,10)||0; const name=document.getElementById('tst-ten-name').value.trim(); const slug=document.getElementById('tst-ten-slug').value.trim(); const stato=document.getElementById('tst-ten-stato').value; const body={}; if(name) body.ragione_sociale=name; if(slug) body.slug=slug; if(stato) body.stato=stato; try{ const r=await q(`hub_tenants/${id}`,{method:'PUT',body}); out.textContent=JSON.stringify(r,null,2);}catch(e){ out.textContent=e.message; } }
   </script>
 </head>
 <body>
@@ -87,6 +162,83 @@
       </div>
     </section>
 
+    <section class="section">
+      <h2>Nuove funzionalità – Test rapido</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Suggerimenti dinamici – Utenti</h3>
+          <div class="row">
+            <label class="form-control" style="flex:1 1 auto;"><span>Query</span>
+              <input id="tst-user-q" type="text" placeholder="min 2 caratteri">
+            </label>
+            <button class="btn" onclick="tstSearchUsers()">Cerca</button>
+          </div>
+          <pre id="tst-user-out" class="muted"></pre>
+        </div>
+        <div class="card">
+          <h3>Suggerimenti dinamici – Clienti</h3>
+          <div class="row">
+            <label class="form-control" style="flex:1 1 auto;"><span>Query</span>
+              <input id="tst-client-q" type="text" placeholder="min 2 caratteri">
+            </label>
+            <button class="btn" onclick="tstSearchClients()">Cerca</button>
+          </div>
+          <pre id="tst-client-out" class="muted"></pre>
+        </div>
+        <div class="card">
+          <h3>Crea Ticket (cliente/assegnatario opzionali)</h3>
+          <div class="row">
+            <label class="form-control" style="flex:1 1 auto;"><span>Titolo</span>
+              <input id="tst-tk-title" type="text" placeholder="Breve descrizione">
+            </label>
+            <label class="form-control" style="flex:1 1 auto;"><span>Descrizione</span>
+              <input id="tst-tk-desc" type="text" placeholder="Dettagli">
+            </label>
+            <label class="form-control"><span>Priorità</span>
+              <select id="tst-tk-prio"><option>BASSA</option><option selected>MEDIA</option><option>ALTA</option></select>
+            </label>
+          </div>
+          <div class="row">
+            <label class="form-control" style="flex:1 1 auto;"><span>Assegnatario (datalist)</span>
+              <input id="tst-tk-assignee" list="tst-users" placeholder="Mario Rossi (#12)">
+              <datalist id="tst-users"></datalist>
+            </label>
+            <label class="form-control" style="flex:1 1 auto;"><span>Cliente (datalist)</span>
+              <input id="tst-tk-client" list="tst-clients" placeholder="Azienda Srl (#34)">
+              <datalist id="tst-clients"></datalist>
+            </label>
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" onclick="tstCreateTicket()">Crea</button>
+          </div>
+          <pre id="tst-tk-out" class="muted"></pre>
+        </div>
+        <div class="card">
+          <h3>Azioni Ticket</h3>
+          <div class="row">
+            <label class="form-control"><span>ID Ticket</span>
+              <input id="tst-tk-id" type="number" min="1" placeholder="#">
+            </label>
+            <label class="form-control" style="flex:1 1 auto;"><span>Commento</span>
+              <input id="tst-tk-comment" type="text" placeholder="Testo commento">
+            </label>
+          </div>
+          <div class="row">
+            <button class="btn" onclick="tstAssignMe()">Assegna me</button>
+            <button class="btn" onclick="tstClose()">Chiudi</button>
+            <button class="btn" onclick="tstReopen()">Riapri</button>
+            <button class="btn" onclick="tstAddComment()">Commenta</button>
+          </div>
+          <div class="row">
+            <label class="form-control"><span>Allegato</span>
+              <input id="tst-tk-file" type="file">
+            </label>
+            <button class="btn" onclick="tstAttach()">Carica allegato</button>
+          </div>
+          <pre id="tst-tk-act-out" class="muted"></pre>
+        </div>
+      </div>
+    </section>
     <section class="section">
       <h2>Esempi rapidi</h2>
       <div class="grid">
@@ -138,6 +290,32 @@
           </div>
         </div>
         <div class="card">
+          <h3>Tenants (Hub)</h3>
+          <div class="row">
+            <button class="btn" onclick="tstListTenants()">Elenco hub_tenants</button>
+            <label class="form-control"><span>ID</span>
+              <input id="tst-ten-id" type="number" min="1" placeholder="#">
+            </label>
+            <button class="btn" onclick="tstGetTenant()">Dettaglio</button>
+          </div>
+          <div class="row">
+            <label class="form-control" style="flex:1 1 auto;"><span>Ragione sociale</span>
+              <input id="tst-ten-name" type="text" placeholder="Azienda Srl">
+            </label>
+            <label class="form-control" style="flex:1 1 auto;"><span>Slug</span>
+              <input id="tst-ten-slug" type="text" placeholder="azienda-srl">
+            </label>
+            <label class="form-control"><span>Stato</span>
+              <select id="tst-ten-stato"><option>IN_ONBOARDING</option><option>ATTIVO</option><option>SOSPESO</option></select>
+            </label>
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" onclick="tstCreateTenant()">Crea tenant</button>
+            <button class="btn" onclick="tstUpdateTenant()">Aggiorna tenant</button>
+          </div>
+          <pre id="tst-ten-out" class="muted"></pre>
+        </div>
+        <div class="card">
           <h3>Hub Catalogo (read‑only)</h3>
           <p class="muted">Questi endpoint non passano da /api e non richiedono auth.</p>
           <div class="row">
@@ -150,4 +328,3 @@
   </main>
 </body>
 </html>
-
