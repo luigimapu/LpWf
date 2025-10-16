@@ -5,13 +5,14 @@ class Cliente extends CrudBaseAbstract
 {
     protected $table_name = 'clienti';
     protected $fillable_fields = [
-        'ragione_sociale','partita_iva','codice_fiscale','email','telefono',
+        'hub_cliente_id','ragione_sociale','partita_iva','codice_fiscale','email','telefono',
         'indirizzo','cap','citta','provincia','nazione','latitudine','longitudine',
         'tipo_cliente','note','creato_il','aggiornato_il','deleted_il'
     ];
 
     public $id;
     public $ragione_sociale;
+    public $hub_cliente_id;
     public $partita_iva;
     public $codice_fiscale;
     public $email;
@@ -48,6 +49,8 @@ class Cliente extends CrudBaseAbstract
             'id', 'ragione_sociale', 'partita_iva', 'codice_fiscale', 'email', 'telefono',
             'indirizzo', 'cap', 'citta', 'provincia', 'nazione',
         ];
+        // Mostra hub_cliente_id se presente (link verso Hub)
+        if ($this->columnExists('hub_cliente_id')) { $selectCols[] = 'hub_cliente_id'; }
         // Aggiungi lat/long solo se esistono nel DB
         if ($this->columnExists('latitudine')) { $selectCols[] = 'latitudine'; }
         if ($this->columnExists('longitudine')) { $selectCols[] = 'longitudine'; }

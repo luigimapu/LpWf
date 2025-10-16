@@ -28,6 +28,63 @@
     - `https://<host>/LpWF_refactor/hub_catalogo/index.php?path=articoli`
     - Filtri: `q`, `categoria`, `tenant`, `tipologia`, `visibilita`
 - API applicative (autenticate): `/api/*` (usa login per ottenere token)
+    - Ticketing (nuovo):
+        - `GET /api/tickets[?mine=1]` elenco (se non ADMIN, visibili: creati da o assegnati all'utente)
+        - `POST /api/tickets` body: `{ titolo, descrizione?, priorita? }` (creatore=utente corrente)
+        - `GET /api/tickets/{id}` dettagli
+        - `PUT /api/tickets/{id}` aggiorna campi ammessi (`titolo`, `descrizione`, `priorita`, `categoria`, `cliente_id`, `assegnato_a`)
+        - `PUT /api/tickets/{id}/assign` assegna (admin può assegnare a chiunque; utente può auto‑assegnarsi)
+        - `PUT /api/tickets/{id}/close` chiude (assegnatario o admin)
+        - `PUT /api/tickets/{id}/reopen` riapre (solo admin/supervisor)
+        - `GET /api/tickets/{id}/comment` lista commenti
+        - `POST /api/tickets/{id}/comment` body: `{ messaggio }` aggiunge commento (utente corrente)
+        - `POST /api/tickets/{id}/comment_attach` multipart form: `comment_id`, `file`
+        - `GET /api/tickets/{id}/attachments` lista allegati (per commento), campi: `commento_id`, `nome_file_originale`, `percorso_file`
+        - Filtri supportati: `stato`, `priorita`, `assegnato_a`, `creato_da`, `cliente_id`, `search`, `mine=1`, `team=1` (per ADMIN/SUPERVISOR: ticket del team) e `chiuso_dal=YYYY-MM-DD HH:MM:SS` (conteggio chiusi nel periodo)
+- Pagina test servizi (autenticata): `services_test.html`
+    - Richiede login da `login.html` per salvare base API e token.
+    - Endpoint usati: `/api/services/{whatsapp|email|order|document|payment|ticket|chat}`
+    - Configurazione (facoltativa) in `.env` per provider reali:
+        - `SERVICES_VERIFY_SSL=1`
+        - WhatsApp: `WHATSAPP_PROVIDER=twilio|meta` + credenziali Twilio/Meta
+            - Meta Cloud API: `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_ID`
+            - Per avviare conversazioni (fuori finestra 24h) usa un Template approvato:
+              `META_WHATSAPP_TEMPLATE_NAME` e `META_WHATSAPP_TEMPLATE_LANG` (predef. `it`).
+              Il testo inviato sarà passato come primo parametro del body del template.
+        - Email: `EMAIL_PROVIDER=smtp|mailgun|sendgrid|mailup` + chiavi se non `smtp`
+            - MailUp (bridge): imposta `MAILUP_WEBHOOK_URL` (endpoint tuo che fa da ponte verso MailUp)
+            - MailUp (OAuth diretto):
+              - Obbligatori: `MAILUP_CLIENT_ID`, `MAILUP_CLIENT_SECRET`, `MAILUP_TOKEN_URL` (default OK), `MAILUP_SEND_URL`.
+              - Grant type (scegli uno):
+                - `MAILUP_GRANT_TYPE=password` + `MAILUP_USERNAME`, `MAILUP_PASSWORD`
+                - `MAILUP_GRANT_TYPE=client_credentials` (+ opzionale `MAILUP_SCOPE`)
+              - Mittenti: `MAILUP_FROM`, `MAILUP_FROM_NAME`, `MAILUP_REPLY_TO`.
+              - Formato invio (`MAILUP_SEND_FORMAT`):
+                - `transactional` (consigliato per Send/Transactional API) → payload `{ To:[{Email}], Subject, From:{Email,Name}, ReplyTo:{Email}, Content:{Html,Text} }`
+                - `generic` (bridge semplice) → `{ to, subject, text, html, from, from_name, reply_to }`
+            - SMTP Auth (consigliato se vuoi usare SMTP MailUp):
+              - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE=none|tls|ssl`, `SMTP_FROM`
+              - L’invio utilizza un semplice client SMTP (AUTH LOGIN, STARTTLS opzionale). Se `SMTP_HOST` non è impostato, fallback a `mail()`.
+              - Nota: `MAILUP_SEND_URL` varia in base al prodotto MailUp (Console API vs Send/Transactional). Adegua al tuo endpoint.
+        - Stripe: `STRIPE_API_KEY`, `PAYMENT_CURRENCY=EUR`
+        - Webhook opzionali: `ORDER_WEBHOOK_URL`, `DOCUMENT_WEBHOOK_URL`, `PAYMENT_WEBHOOK_URL`, `TICKET_WEBHOOK_URL`, `CHAT_WEBHOOK_URL`
+        - Forward automatico ticket in creazione: `TICKET_FORWARD_ON_CREATE=1` (opzionale; richiede `TICKET_WEBHOOK_URL`)
+    - Retry falliti: `/api/services/retry_failed` (POST) o CLI `php tools/services_retry.php --limit=20 --since=24`
+        - Suggerito cron: ogni 5-10 minuti per riprovare errori transitori.
+
+### Documentazione API
+
+- OpenAPI aggiornata: `docs/openapi.yaml` (copre Auth, System, Tickets, Tasks incl. `note_attach`, Users/Groups incl. add/remove, Clients, Workflows, Audit, Services, Catalogo hub, Media, Enrichment, Hub Tenants).
+- Postman collection completa con esempi: `docs/postman_collection.json`.
+  - Imposta `{{baseUrl}}` (es. `http://localhost/api`) e `{{token}}` nel tuo ambiente.
+  - Per gli upload, seleziona un file locale nei request di tipo `form-data`.
+
+Variabili `.env` aggiunte/rilevanti:
+
+- `MAX_NOTE_ATTACHMENT_MB` (default 10) – limite upload allegati note task.
+- `AUDIT_ROLE_LIMIT` e `AUDIT_AUTH_DEFAULT_LIMIT` – limiti viste Audit.
+- `SERVICES_LOG` (default 1) – abilita log su tabella `service_logs`.
+- `SERVICES_WHATSAPP_WEBHOOK` – webhook alternativo per invio WhatsApp (se non si usa Twilio/Meta).
 
 ## Stile
 
@@ -70,6 +127,14 @@ Trigger workflow
 Post-deploy
 
 - Esegue: `${PHP_BIN} tools/setup_hub_db.php` e `${PHP_BIN} tools/setup_tenant_db.php`.
+
+### Clienti centralizzati (dedup su hub)
+
+- Configura nel `.env` le variabili dell'hub: `HUB_DB_HOST`, `HUB_DB_NAME`, `HUB_DB_USER`, `HUB_DB_PASS` e `TENANT_ID`.
+- Lo script `tools/setup_hub_db.php` crea le tabelle `clienti` (anagrafica centralizzata) e `clienti_tenant_map` (mappature).
+- Su tenant, lo script `tools/setup_tenant_db.php` aggiunge automaticamente la colonna `hub_cliente_id` a `clienti` (se assente).
+- L'endpoint `POST /api/clienti` esegue lookup su hub per `partita_iva/codice_fiscale`, precompila e collega la scheda locale.
+  - Facoltativo: abilita dedup "soft" via `HUB_CLIENTI_SOFT_DEDUP=1` per tentare match esatto su `email`/`telefono` quando mancano P.IVA/CF; in caso di ambiguità l'aggancio non avviene automaticamente.
 
 Troubleshooting rapido
 

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Area Riservata Tenant</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <style>
+    .portal-container { max-width: 980px; margin: 24px auto; padding: 16px; }
+    .portal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; }
+    .portal-cards { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 12px; }
+    .card { border:1px solid #e5e7eb; border-radius: 10px; background:#fff; padding:12px; box-shadow: var(--shadow-soft); }
+    .muted { color: var(--color-neutral-500); }
+    .row { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  </style>
+  <script src="auth.js" defer></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      const portal = document.getElementById('portal');
+      const info = document.getElementById('tenant-info');
+      const userBox = document.getElementById('user-info');
+      const btnLogout = document.getElementById('btn-logout');
+      const pwdCur = document.getElementById('pwd-current');
+      const pwdNew = document.getElementById('pwd-new');
+      const pwdBtn = document.getElementById('btn-change-pwd');
+      const out = document.getElementById('portal-out');
+      const ticketsList = document.getElementById('my-tickets-list');
+      const ticketsCount = document.getElementById('my-tickets-count');
+      const btnTkRefresh = document.getElementById('btn-my-tickets-refresh');
+      const instList = document.getElementById('my-instances-list');
+      const instCount = document.getElementById('my-instances-count');
+      const btnInstRefresh = document.getElementById('btn-my-instances-refresh');
+      const docsList = document.getElementById('my-docs-list');
+      const docsCount = document.getElementById('my-docs-count');
+      const btnDocsRefresh = document.getElementById('btn-my-docs-refresh');
+      const docTypeInput = document.getElementById('doc-type-filter');
+      const docTypeOptions = document.getElementById('doc-type-options');
+      const docStatusInput = document.getElementById('doc-status-filter');
+      const docStatusOptions = document.getElementById('doc-status-options');
+      const btnDocsClear = document.getElementById('btn-my-docs-clear');
+
+      function getApiBase() { return window.lpwfAuth?.getApiBase?.() || window.lpwfAuth?.ensureBaseForLocation?.() || '/api'; }
+      async function q(path, init={}){
+        const api = getApiBase();
+        const headers = window.lpwfAuth?.buildHeaders?.({}, (init.json!==false)) || {};
+        const res = await fetch(`${api}/${path.replace(/^\/+/, '')}`, { ...init, headers, body: init.body && init.json!==false ? JSON.stringify(init.body) : init.body });
+        const text = await res.text(); let payload=null; try{ payload = text? JSON.parse(text): null; }catch(e){}
+        if (!res.ok) throw new Error(payload?.message || `HTTP ${res.status}`);
+        return payload;
+      }
+
+      async function loadMyTickets() {
+        if (!ticketsList) return;
+        try {
+          ticketsList.innerHTML = '<p class="form-hint">Caricamento…</p>';
+          const rows = await q('tickets?mine=1', { json:false });
+          const list = Array.isArray(rows) ? rows : [];
+          if (ticketsCount) ticketsCount.textContent = String(list.length || 0);
+          if (!list.length) { ticketsList.innerHTML = '<p class="form-hint">Nessun ticket trovato.</p>'; return; }
+          ticketsList.innerHTML = list.map(t => {
+            const title = (t.titolo || (`Ticket #${t.id}`));
+            const stato = (t.stato || '');
+            const when = (t.creato_il || '');
+            return `<div class="list-item"><strong>${title}</strong><br><small>${stato} • ${when}</small></div>`;
+          }).join('');
+        } catch (e) {
+          ticketsList.innerHTML = `<p class="form-hint">Errore caricamento: ${e.message || '—'}</p>`;
+          if (ticketsCount) ticketsCount.textContent = '—';
+        }
+      }
+
+      async function loadMyInstances() {
+        if (!instList) return;
+        try {
+          instList.innerHTML = '<p class="form-hint">Caricamento…</p>';
+          const resp = await q('workflowistanze', { json:false });
+          const list = Array.isArray(resp) ? resp : (Array.isArray(resp?.records) ? resp.records : (Array.isArray(resp?.items) ? resp.items : []));
+          if (instCount) instCount.textContent = String(list.length || 0);
+          if (!list.length) { instList.innerHTML = '<p class="form-hint">Nessuna istanza trovata.</p>'; return; }
+          instList.innerHTML = list.map(i => {
+            const name = (i.nome_workflow || i.workflow_nome || i.workflow || `Istanza #${i.id}`);
+            const stato = (i.stato || i.status || '');
+            const when = (i.creato_il || i.created_at || '');
+            return `<div class="list-item"><strong>${name}</strong><br><small>${stato} • ${when}</small></div>`;
+          }).join('');
+        } catch (e) {
+          instList.innerHTML = `<p class="form-hint">Errore caricamento: ${e.message || '—'}</p>`;
+          if (instCount) instCount.textContent = '—';
+        }
+      }
+
+      async function loadMyDocs() {
+        if (!docsList) return;
+        try {
+          docsList.innerHTML = '<p class="form-hint">Caricamento…</p>';
+          const tipo = (docTypeInput?.value || '').trim();
+          const stato = (docStatusInput?.value || '').trim();
+          const qp = [];
+          qp.push('limit=50');
+          if (tipo) qp.push('tipo=' + encodeURIComponent(tipo));
+          if (stato) qp.push('stato=' + encodeURIComponent(stato));
+          const resp = await q('documenti' + (qp.length ? ('?' + qp.join('&')) : ''), { json:false });
+          const list = Array.isArray(resp)
+            ? resp
+            : (Array.isArray(resp?.records) ? resp.records : (Array.isArray(resp?.items) ? resp.items : []));
+          if (docsCount) docsCount.textContent = String(list.length || 0);
+          if (!list.length) { docsList.innerHTML = '<p class="form-hint">Nessun documento trovato.</p>'; return; }
+          // Popola suggerimenti tipo/stato
+          try {
+            const types = new Set(); const states = new Set();
+            list.forEach(d => { if (d && d.tipo_documento) types.add(String(d.tipo_documento)); if (d && d.stato) states.add(String(d.stato)); });
+            if (docTypeOptions) { docTypeOptions.innerHTML = ''; Array.from(types).slice(0,50).forEach(t => { const o=document.createElement('option'); o.value=t; docTypeOptions.appendChild(o); }); }
+            if (docStatusOptions) { docStatusOptions.innerHTML = ''; Array.from(states).slice(0,50).forEach(s => { const o=document.createElement('option'); o.value=s; docStatusOptions.appendChild(o); }); }
+          } catch (e) { /* ignore */ }
+          docsList.innerHTML = list.map(d => {
+            const tipo = (d.tipo_documento || d.tipo || 'DOC');
+            const num = (d.numero ? ` ${d.numero}` : '');
+            const serie = (d.serie ? `/${d.serie}` : '');
+            const when = (d.data_emissione || d.creato_il || d.created_at || '');
+            const stato = (d.stato || '');
+            const tot = (d.totale_documento || d.totale || null);
+            const amount = tot !== null && tot !== undefined ? ` • Totale: ${tot}` : '';
+            return `<div class="list-item"><strong>${tipo}${num}${serie}</strong><br><small>${stato} • ${when}${amount}</small></div>`;
+          }).join('');
+        } catch (e) {
+          const msg = (e && e.message) || '';
+          const human = /404/.test(msg) ? 'Endpoint documenti non disponibile.' : `Errore: ${msg || '—'}`;
+          docsList.innerHTML = `<p class="form-hint">${human}</p>`;
+          if (docsCount) docsCount.textContent = '—';
+        }
+      }
+
+      try {
+        const me = await q('auth/me', { json:false });
+        userBox.textContent = `${me.nome||''} ${me.cognome||''} (${me.email||''})`;
+        const tenantId = me.tenant_id ? parseInt(me.tenant_id,10) : 0;
+        if (!tenantId) {
+          info.textContent = 'Nessun tenant collegato all\'utente.';
+        } else {
+          try {
+            const tenant = await q(`hub_tenants/${tenantId}`, { json:false });
+            info.innerHTML = `<strong>${tenant.ragione_sociale||('Tenant #'+tenantId)}</strong> <span class="badge">${tenant.slug||''}</span>`;
+          } catch (e) {
+            info.textContent = `Tenant #${tenantId}`;
+          }
+        }
+      } catch (e) {
+        portal.innerHTML = `<div class="card"><p>Sessione non valida. Accedi da <a href="login.html">login</a>.</p></div>`;
+        return;
+      }
+
+      btnLogout?.addEventListener('click', async () => {
+        try { await q('auth/logout', { method:'POST', body:{}, json:true }); } catch (e) {}
+        try { window.lpwfAuth?.clearToken?.(); window.lpwfAuth?.clearCurrentUser?.(); } catch (e) {}
+        window.location.href = 'login.html';
+      });
+
+      pwdBtn?.addEventListener('click', async () => {
+        out.textContent = '';
+        const cur = (pwdCur.value||'').trim(); const nw = (pwdNew.value||'').trim();
+        if (!cur || !nw) { out.textContent = 'Inserisci entrambe le password.'; return; }
+        try {
+          await q('auth/password', { method:'POST', body:{ current_password: cur, new_password: nw }, json:true });
+          out.textContent = 'Password aggiornata.';
+          pwdCur.value = ''; pwdNew.value = '';
+        } catch (e) { out.textContent = e.message || 'Errore cambio password'; }
+      });
+
+      // Tickets utente (read-only)
+      if (btnTkRefresh) btnTkRefresh.addEventListener('click', () => loadMyTickets());
+      loadMyTickets();
+      if (btnInstRefresh) btnInstRefresh.addEventListener('click', () => loadMyInstances());
+      loadMyInstances();
+      if (btnDocsRefresh) btnDocsRefresh.addEventListener('click', () => loadMyDocs());
+      loadMyDocs();
+      // Filtri documenti: input/keyup per caricare in modo reattivo
+      const debounce = (fn, ms=350) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
+      if (docTypeInput) { const h = debounce(()=>loadMyDocs(), 350); docTypeInput.addEventListener('input', h); docTypeInput.addEventListener('keyup', h); }
+      if (docStatusInput) { const h2 = debounce(()=>loadMyDocs(), 350); docStatusInput.addEventListener('input', h2); docStatusInput.addEventListener('keyup', h2); }
+      if (btnDocsClear) { btnDocsClear.addEventListener('click', ()=>{ if (docTypeInput) docTypeInput.value=''; if (docStatusInput) docStatusInput.value=''; loadMyDocs(); }); }
+    });
+  </script>
+</head>
+<body>
+  <main class="portal-container" id="portal">
+    <header class="portal-header">
+      <div>
+        <h1>Area riservata Tenant</h1>
+        <p class="muted" id="tenant-info">—</p>
+      </div>
+      <div class="row">
+        <span id="user-info" class="muted"></span>
+        <button class="btn" id="btn-logout">Logout</button>
+      </div>
+    </header>
+    <section class="portal-cards">
+      <div class="card">
+        <h3>Impostazioni account</h3>
+        <label class="form-control"><span>Password corrente</span><input type="password" id="pwd-current" /></label>
+        <label class="form-control"><span>Nuova password</span><input type="password" id="pwd-new" /></label>
+        <div class="row">
+          <button class="btn btn-primary" id="btn-change-pwd">Cambia password</button>
+        </div>
+        <small id="portal-out" class="form-hint"></small>
+      </div>
+      <div class="card">
+        <h3>Risorse</h3>
+        <p class="muted">A breve qui troverai le funzionalità dedicate al tuo tenant.</p>
+        <ul>
+          <li><a href="hub_catalogo/index.php?path=articoli" target="_blank" rel="noopener">Catalogo (HUB)</a></li>
+          <li><a href="services_test.html" target="_blank" rel="noopener">Test servizi</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>I miei ticket <small class="badge" id="my-tickets-count">0</small></h3>
+        <div class="row" style="margin-bottom:8px;">
+          <button class="btn" id="btn-my-tickets-refresh">Aggiorna</button>
+        </div>
+        <div id="my-tickets-list" class="instance-list" style="max-height:300px; overflow:auto;"></div>
+        <small class="form-hint">Accesso in sola lettura.</small>
+      </div>
+      <div class="card">
+        <h3>Le mie istanze <small class="badge" id="my-instances-count">0</small></h3>
+        <div class="row" style="margin-bottom:8px;">
+          <button class="btn" id="btn-my-instances-refresh">Aggiorna</button>
+        </div>
+        <div id="my-instances-list" class="instance-list" style="max-height:300px; overflow:auto;"></div>
+        <small class="form-hint">Accesso in sola lettura.</small>
+      </div>
+      <div class="card">
+        <h3>I miei documenti <small class="badge" id="my-docs-count">0</small></h3>
+        <div class="row" style="margin-bottom:8px;">
+          <label class="form-control" style="min-width:160px;">
+            <span>Tipo</span>
+            <input list="doc-type-options" id="doc-type-filter" placeholder="Es. FATTURA, DDT…">
+            <datalist id="doc-type-options"></datalist>
+          </label>
+          <label class="form-control" style="min-width:160px;">
+            <span>Stato</span>
+            <input list="doc-status-options" id="doc-status-filter" placeholder="Es. EMESSO, BOZZA…">
+            <datalist id="doc-status-options"></datalist>
+          </label>
+          <button class="btn" id="btn-my-docs-refresh">Aggiorna</button>
+          <button class="btn" id="btn-my-docs-clear">Pulisci</button>
+        </div>
+        <div id="my-docs-list" class="instance-list" style="max-height:300px; overflow:auto;"></div>
+        <small class="form-hint">Accesso in sola lettura.</small>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

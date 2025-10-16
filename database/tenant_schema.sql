@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS utenti (
 -- Clienti
 CREATE TABLE IF NOT EXISTS clienti (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  hub_cliente_id BIGINT UNSIGNED NULL,
   ragione_sociale VARCHAR(255) NOT NULL,
   partita_iva VARCHAR(50) NULL,
   codice_fiscale VARCHAR(50) NULL,
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS clienti (
   creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   aggiornato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_il DATETIME NULL,
+  INDEX idx_clienti_hub_id (hub_cliente_id),
   UNIQUE KEY uq_clienti_piva (partita_iva)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
