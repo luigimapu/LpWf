@@ -40,7 +40,9 @@ require_once __DIR__ . '/CatalogPricesController.php';
 require_once __DIR__ . '/CatalogArticleCategoriesController.php';
 require_once __DIR__ . '/CatalogRelationsController.php';
 require_once __DIR__ . '/CatalogListsController.php';
+require_once __DIR__ . '/ServiceController.php';
 require_once __DIR__ . '/CatalogCategoriesController.php';
+require_once __DIR__ . '/HubTenantsController.php';
 require_once __DIR__ . '/../services/AuthService.php';
 
 function sendJson(int $status, array $payload): void
@@ -173,12 +175,22 @@ if ($resource_name === 'health') {
             }
         }
     } catch (Throwable $e) { $db_ok = false; }
+    // Verifica cartella uploads (allegati)
+    $uploadsPath = realpath(__DIR__ . '/../uploads') ?: (__DIR__ . '/../uploads');
+    $uploadsExists = is_dir($uploadsPath);
+    $uploadsWritable = $uploadsExists ? is_writable($uploadsPath) : is_writable(dirname($uploadsPath));
+
     sendJson(200, [
         'db_ok' => $db_ok,
         'tables' => $tables,
         'counts' => $counts,
         'auth_ok' => $auth_ok,
         'auth_user' => $auth_user,
+        'uploads' => [
+            'path' => $uploadsPath,
+            'exists' => $uploadsExists,
+            'writable' => $uploadsWritable,
+        ],
     ]);
     exit();
 }
@@ -195,6 +207,10 @@ if ($resource_name === 'tenant_health') {
         'workflow_istanze' => false,
         'workflow_task' => false,
         'documenti' => false,
+        // Ticketing
+        'tickets' => false,
+        'ticket_commenti' => false,
+        'ticket_allegati' => false,
     ];
     $counts = [];
     $clientiColumns = ['latitudine' => false, 'longitudine' => false];
@@ -219,11 +235,21 @@ if ($resource_name === 'tenant_health') {
             $clientiColumns['longitudine'] = in_array('longitudine', $set, true);
         }
     } catch (Throwable $e) { $db_ok = false; }
+    // Verifica cartella uploads (allegati) lato tenant
+    $uploadsPath = realpath(__DIR__ . '/../uploads') ?: (__DIR__ . '/../uploads');
+    $uploadsExists = is_dir($uploadsPath);
+    $uploadsWritable = $uploadsExists ? is_writable($uploadsPath) : is_writable(dirname($uploadsPath));
+
     sendJson(200, [
         'db_ok' => $db_ok,
         'tables' => $tables,
         'counts' => $counts,
         'clienti_columns' => $clientiColumns,
+        'uploads' => [
+            'path' => $uploadsPath,
+            'exists' => $uploadsExists,
+            'writable' => $uploadsWritable,
+        ],
     ]);
     exit();
 }
@@ -239,6 +265,13 @@ try {
     exit();
 } catch (Throwable $ex) {
     sendJson(500, ['message' => 'Errore nella verifica dell\'autenticazione.']);
+    exit();
+}
+
+// Servizi integrazione (autenticati): /api/services/{azione}
+if ($resource_name === 'services') {
+    $svc = new ServiceController($database, $_SERVER['AUTH_USER'] ?? null);
+    $svc->handle($request_method, $action);
     exit();
 }
 
@@ -269,6 +302,20 @@ if ($resource_name === 'catalog_media') {
     }
     $controller = new CatalogMediaController();
     $controller->handle($request_method, $id, $action);
+    exit();
+}
+
+// Hub Tenants (autenticato): gestione tenants su Hub (solo Admin)
+if ($resource_name === 'hub_tenants') {
+    try {
+        $currentUser = $authService->authenticateRequest($authorizationHeader);
+        $_SERVER['AUTH_USER'] = $currentUser;
+    } catch (Throwable $ex) {
+        sendJson(401, ['message' => 'Non autenticato']);
+        exit();
+    }
+    try { $ctrl = new HubTenantsController(); $ctrl->handle($request_method, $id); }
+    catch (Throwable $e) { sendJson(500, ['message'=>'Errore inizializzazione HubTenantsController']); }
     exit();
 }
 

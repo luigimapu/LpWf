@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>API Docs – LpWF</title>
+    <style>
+      body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+      header { padding: 10px 16px; border-bottom: 1px solid #eee; display:flex; align-items:center; gap:12px; }
+      header a { color:#0a66c2; text-decoration:none; }
+      .hint { color:#666; font-size: 0.9em; }
+      redoc { height: calc(100vh - 50px); display:block; }
+    </style>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  </head>
+  <body>
+    <header>
+      <strong>API Docs – LpWF</strong>
+      <span class="hint">OpenAPI generata da reference</span>
+      <span style="flex:1 1 auto"></span>
+      <a href="index.html">Docs Index</a>
+      <a href="swagger.html">Swagger UI</a>
+      <a href="postman_collection.json" download>Postman Collection</a>
+      <a id="openPostmanCollection" href="#">Apri in Postman</a>
+      <a id="openPostmanCollectionWeb" href="#">Import Web</a>
+      <a href="postman_environment.json" download>Env Local</a>
+      <a id="openPostmanEnvLocal" href="#">Apri Env Local</a>
+      <a id="openPostmanEnvLocalWeb" href="#">Import Env Local</a>
+      <a href="postman_environment.staging.json" download>Env Staging</a>
+      <a id="openPostmanEnvStaging" href="#">Apri Env Staging</a>
+      <a id="openPostmanEnvStagingWeb" href="#">Import Env Staging</a>
+      <a href="postman_environment.prod.json" download>Env Production</a>
+      <a id="openPostmanEnvProd" href="#">Apri Env Production</a>
+      <a id="openPostmanEnvProdWeb" href="#">Import Env Production</a>
+      <a href="../api_test.html">API Test Console</a>
+      <a href="../services_test.html">Services Test</a>
+      <a href="../docs/API_REFERENCE.md">Reference (MD)</a>
+    </header>
+    <redoc spec-url="openapi.yaml"></redoc>
+    <script>
+      (function(){
+        function absUrl(file) {
+          var base = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+          return base + file;
+        }
+        var colUrl = encodeURIComponent(absUrl('postman_collection.json'));
+        var deep = 'postman://app/import?url=' + colUrl;
+        var web = 'https://www.postman.com/import?url=' + colUrl;
+        var a1 = document.getElementById('openPostmanCollection');
+        var a2 = document.getElementById('openPostmanCollectionWeb');
+        if (a1) a1.href = deep;
+        if (a2) a2.href = web;
+
+        // Env deep links
+        function setEnvLink(id, file) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var url = encodeURIComponent(absUrl(file));
+          el.href = 'postman://app/import?url=' + url;
+        }
+        function setEnvWebLink(id, file) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var url = encodeURIComponent(absUrl(file));
+          el.href = 'https://www.postman.com/import?url=' + url;
+        }
+        setEnvLink('openPostmanEnvLocal', 'postman_environment.json');
+        setEnvLink('openPostmanEnvStaging', 'postman_environment.staging.json');
+        setEnvLink('openPostmanEnvProd', 'postman_environment.prod.json');
+        setEnvWebLink('openPostmanEnvLocalWeb', 'postman_environment.json');
+        setEnvWebLink('openPostmanEnvStagingWeb', 'postman_environment.staging.json');
+        setEnvWebLink('openPostmanEnvProdWeb', 'postman_environment.prod.json');
+      })();
+    </script>
+  </body>
+  </html>

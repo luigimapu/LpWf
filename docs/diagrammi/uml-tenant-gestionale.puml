@@ -52,6 +52,7 @@ class AzioniStandard {
 
 class Clienti {
   +id : int
+  +hub_cliente_id : int
   +ragione_sociale : string
   +partita_iva : string
 }

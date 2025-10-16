@@ -19,6 +19,8 @@ erDiagram
     CATEGORIE ||--o{ ARTICOLI_CATEGORIE : "mappa"
     LISTINI ||--o{ PREZZI_ARTICOLI : "tariffe"
     TENANTS ||--o{ EVENTI_SYNC : "genera"
+    CLIENTI ||--o{ CLIENTI_TENANT_MAP : "mappato"
+    TENANTS ||--o{ CLIENTI_TENANT_MAP : "collega"
 
     TENANTS {
         int id PK
@@ -138,5 +140,28 @@ erDiagram
         string entita
         string tipo_evento
         string stato_elaborazione
+    }
+
+    CLIENTI {
+        int id PK
+        string ragione_sociale
+        string partita_iva UK
+        string codice_fiscale UK
+        string email
+        string telefono
+        string indirizzo
+        string citta
+        string provincia
+        string nazione
+        string tipo_cliente
+        int tenant_assoc_id FK
+    }
+
+    CLIENTI_TENANT_MAP {
+        int id PK
+        int cliente_id FK
+        int tenant_id FK
+        string cliente_id_tenant
+        string cliente_codice_tenant
     }
 ```

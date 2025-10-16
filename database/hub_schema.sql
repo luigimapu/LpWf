@@ -272,3 +272,40 @@ CREATE TABLE IF NOT EXISTS sku_protocolli (
   KEY idx_sku_articolo (articolo_id),
   KEY idx_sku_tenant (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Clienti (anagrafica centralizzata)
+CREATE TABLE IF NOT EXISTS clienti (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ragione_sociale VARCHAR(255) NOT NULL,
+  partita_iva VARCHAR(50) NULL,
+  codice_fiscale VARCHAR(50) NULL,
+  email VARCHAR(190) NULL,
+  telefono VARCHAR(50) NULL,
+  indirizzo VARCHAR(255) NULL,
+  cap VARCHAR(20) NULL,
+  citta VARCHAR(120) NULL,
+  provincia VARCHAR(50) NULL,
+  nazione VARCHAR(60) NULL,
+  tipo_cliente ENUM('AZIENDA','PRIVATO','PA','TENANT') NOT NULL DEFAULT 'AZIENDA',
+  tenant_assoc_id BIGINT UNSIGNED NULL,
+  creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  aggiornato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_clienti_piva (partita_iva),
+  UNIQUE KEY uq_clienti_cf (codice_fiscale),
+  CONSTRAINT fk_clienti_tenant_assoc FOREIGN KEY (tenant_assoc_id) REFERENCES tenants(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Mappatura clienti hub <-> identità tenant
+CREATE TABLE IF NOT EXISTS clienti_tenant_map (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cliente_id BIGINT UNSIGNED NOT NULL,
+  tenant_id BIGINT UNSIGNED NOT NULL,
+  cliente_id_tenant VARCHAR(190) NULL,
+  cliente_codice_tenant VARCHAR(190) NULL,
+  creato_il DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_climap_cliente FOREIGN KEY (cliente_id) REFERENCES clienti(id) ON DELETE CASCADE,
+  CONSTRAINT fk_climap_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_climap_id_tenant (tenant_id, cliente_id_tenant),
+  UNIQUE KEY uq_climap_codice_tenant (tenant_id, cliente_codice_tenant),
+  KEY idx_climap_cliente (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -126,6 +126,29 @@ class EventiSync {
   +stato_elaborazione : string
 }
 
+class Clienti {
+  +id : int
+  +ragione_sociale : string
+  +partita_iva : string
+  +codice_fiscale : string
+  +email : string
+  +telefono : string
+  +indirizzo : string
+  +citta : string
+  +provincia : string
+  +nazione : string
+  +tipo_cliente : string
+  +tenant_assoc_id : int
+}
+
+class ClientiTenantMap {
+  +id : int
+  +cliente_id : int
+  +tenant_id : int
+  +cliente_id_tenant : string
+  +cliente_codice_tenant : string
+}
+
 Tenants "1" -- "*" Articoli : pubblica
 Articoli "1" -- "*" ArticoliVarianti : ha
 Articoli "1" -- "*" ValoriAttributi : definisce
@@ -143,5 +166,7 @@ Listini "1" -- "*" PrezziArticoli : definisce
 ArticoliVarianti "1" -- "*" DisponibilitaSlot : agenda
 Articoli "1" -- "*" RisorseMultimediali : media
 Tenants "1" -- "*" EventiSync : eventi
+Clienti "1" -- "*" ClientiTenantMap : mappato
+Tenants "1" -- "*" ClientiTenantMap : collega
 
 @enduml

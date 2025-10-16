@@ -5,7 +5,7 @@ class Utente extends CrudBaseAbstract
 {
     protected $table_name = 'utenti';
 
-    protected $fillable_fields = ['nome', 'cognome', 'email', 'password_hash', 'ruolo', 'stato'];
+    protected $fillable_fields = ['nome', 'cognome', 'email', 'password_hash', 'ruolo', 'stato', 'tenant_id'];
 
     public $nome;
     public $cognome;
@@ -66,6 +66,17 @@ class Utente extends CrudBaseAbstract
 
         $orderBy = $orderBy ?: 'nome_completo ASC';
         $query .= ' ORDER BY ' . preg_replace('/[^a-zA-Z0-9_, ASCascDESCdesc ]/', '', $orderBy);
+
+        // Limite risultati: se presente 'limit' usa quello, altrimenti se è una ricerca applica limite di default
+        $limit = 0;
+        if (isset($filters['limit'])) {
+            $limit = (int)$filters['limit'];
+        } elseif (!empty($filters['search'])) {
+            $limit = 50; // default per ricerche
+        }
+        if ($limit > 0) {
+            $query .= ' LIMIT ' . (int)min(200, max(1, $limit));
+        }
 
         return $this->db->select($query, $params) ?: [];
     }

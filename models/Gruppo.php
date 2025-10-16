@@ -21,6 +21,35 @@ class Gruppo extends CrudBaseAbstract
         parent::__construct($db);
     }
 
+    public function findAll($filters = [], string $orderBy = ''): array
+    {
+        $sql = 'SELECT id, nome, descrizione' . (isset($this->attivo) ? ', attivo' : '') . ' FROM ' . $this->table_name;
+        $where = [];
+        $params = [];
+        // Ricerca per nome/descrizione
+        if (!empty($filters['search'])) {
+            $where[] = '(nome LIKE ? OR descrizione LIKE ?)';
+            $term = '%' . $filters['search'] . '%';
+            $params[] = $term; $params[] = $term;
+        }
+        // Facoltativo: includi inattivi, se esiste la colonna attivo
+        if (array_key_exists('include_inactive', $filters)) {
+            // no-op: mostra tutto
+        } else {
+            // Se la colonna esiste e non è stato richiesto include_inactive, filtra attivi
+            try {
+                $cols = $this->db->select('SHOW COLUMNS FROM `' . $this->table_name . '` LIKE "attivo"') ?: [];
+                if (!empty($cols)) { $where[] = '(attivo IS NULL OR attivo = 1)'; }
+            } catch (Throwable $e) { /* ignore */ }
+        }
+        if ($where) { $sql .= ' WHERE ' . implode(' AND ', $where); }
+        $orderBy = $orderBy ?: 'nome ASC';
+        $sql .= ' ORDER BY ' . preg_replace('/[^a-zA-Z0-9_, .]/', '', $orderBy);
+        $limit = isset($filters['limit']) ? (int)$filters['limit'] : 0;
+        if ($limit > 0) { $sql .= ' LIMIT ' . (int)min(200, max(1, $limit)); }
+        return $this->db->select($sql, $params) ?: [];
+    }
+
     /**
      * Trova un gruppo tramite ID e carica anche tutti i suoi utenti associati.
      * @param int $group_id L'ID del gruppo da trovare.

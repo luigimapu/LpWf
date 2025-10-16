@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test Servizi – LpWF</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 16px; }
+    .card { border: 1px solid #e6e6e6; border-radius: 8px; padding: 12px; background: #fff; }
+    .card h3 { margin: 0 0 8px 0; }
+    pre { background:#f8f8f8; border:1px solid #eee; padding:8px; overflow:auto; max-height:200px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="section__header">
+      <h1>Test Servizi (WhatsApp, Email, Ordine, Documento, Pagamento, Ticket, Chat)</h1>
+      <p>Assicurati di aver eseguito il login da <a href="login.html">login.html</a>. L'URL API è letto da localStorage (impostalo nella pagina di login).</p>
+    </header>
+
+    <section class="section">
+      <div class="grid">
+        <div class="card">
+          <h3>Invio WhatsApp</h3>
+          <label class="form-control"><span>Destinatario</span><input type="text" id="wa-to" placeholder="es. +39333..." /></label>
+          <label class="form-control"><span>Messaggio</span><input type="text" id="wa-msg" placeholder="Test" /></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-primary" id="btn-wa">Invia</button>
+            <button class="btn" id="btn-wa-web" title="Apri WhatsApp Web/App">Apri WhatsApp</button>
+          </div>
+          <pre id="out-wa"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Invio Email</h3>
+          <label class="form-control"><span>Destinatario</span><input type="email" id="em-to" placeholder="utente@example.com" /></label>
+          <label class="form-control"><span>Oggetto</span><input type="text" id="em-subj" placeholder="Ciao" /></label>
+          <label class="form-control"><span>Contenuto</span><input type="text" id="em-body" placeholder="Contenuto..." /></label>
+          <button class="btn btn-primary" id="btn-em">Invia</button>
+          <pre id="out-em"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Crea Ordine</h3>
+          <label class="form-control"><span>Cliente ID</span><input type="text" id="ord-customer" placeholder="1" /></label>
+          <label class="form-control"><span>Item SKU</span><input type="text" id="ord-sku" placeholder="TENANT-0001" /></label>
+          <label class="form-control"><span>Qta</span><input type="number" id="ord-qty" value="1" min="1" /></label>
+          <button class="btn btn-primary" id="btn-ord">Crea</button>
+          <pre id="out-ord"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Genera Documento</h3>
+          <label class="form-control"><span>Tipo</span>
+            <select id="doc-type">
+              <option value="FATTURA">FATTURA</option>
+              <option value="DDT">DDT</option>
+              <option value="CONTRATTO">CONTRATTO</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="btn-doc">Genera</button>
+          <pre id="out-doc"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Pagamento</h3>
+          <label class="form-control"><span>Gateway</span>
+            <select id="pay-gw">
+              <option value="STRIPE">STRIPE</option>
+              <option value="PAYPAL">PAYPAL</option>
+            </select>
+          </label>
+          <label class="form-control"><span>Importo</span><input type="number" id="pay-amount" value="10" step="0.01" min="0" /></label>
+          <button class="btn btn-primary" id="btn-pay">Richiedi</button>
+          <pre id="out-pay"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Ticket Assistenza</h3>
+          <label class="form-control"><span>Titolo</span><input type="text" id="tk-title" placeholder="Problema..." /></label>
+          <label class="form-control"><span>Priorità</span>
+            <select id="tk-prio">
+              <option value="BASSA">BASSA</option>
+              <option value="MEDIA">MEDIA</option>
+              <option value="ALTA">ALTA</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="btn-tk">Crea</button>
+          <pre id="out-tk"></pre>
+        </div>
+
+        <div class="card">
+          <h3>Chat</h3>
+          <label class="form-control"><span>Canale</span><input type="text" id="ch-channel" value="general" /></label>
+          <label class="form-control"><span>Messaggio</span><input type="text" id="ch-msg" placeholder="Ciao!" /></label>
+          <button class="btn btn-primary" id="btn-ch">Invia</button>
+          <pre id="out-ch"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    const getApi = () => window.lpwfAuth?.getApiBase?.() || '';
+    const getToken = () => window.lpwfAuth?.getToken?.() || '';
+    async function call(path, body, outEl){
+      const api = getApi();
+      const token = getToken();
+      outEl.textContent = '...';
+      try{
+        const res = await fetch(`${api}/services/${path}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' },
+          body: JSON.stringify(body || {})
+        });
+        const text = await res.text();
+        try{ outEl.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+        catch(e){ outEl.textContent = text; }
+      }catch(err){ outEl.textContent = err?.message || 'Errore'; }
+    }
+
+    document.getElementById('btn-wa').addEventListener('click', () => {
+      call('whatsapp', { to: document.getElementById('wa-to').value.trim(), message: document.getElementById('wa-msg').value }, document.getElementById('out-wa'));
+    });
+    document.getElementById('btn-wa-web').addEventListener('click', async () => {
+      const to = document.getElementById('wa-to').value.trim();
+      const msg = document.getElementById('wa-msg').value || '';
+      const digits = String(to).replace(/[^\d]/g, '');
+      if (!digits) { alert('Numero non valido'); return; }
+      const url = msg ? `https://wa.me/${digits}?text=${encodeURIComponent(msg)}` : `https://wa.me/${digits}`;
+      try { window.open(url, '_blank', 'noopener'); } catch (e) { window.location.href = url; }
+      // Log manuale (non bloccante)
+      try { await fetch(`${getApi()}/services/whatsapp_log`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': getToken() ? `Bearer ${getToken()}` : '' }, body: JSON.stringify({ to, message: msg, link: url }) }); } catch (e) {}
+    });
+    document.getElementById('btn-em').addEventListener('click', () => {
+      call('email', { to: document.getElementById('em-to').value.trim(), subject: document.getElementById('em-subj').value, body: document.getElementById('em-body').value }, document.getElementById('out-em'));
+    });
+    document.getElementById('btn-ord').addEventListener('click', () => {
+      const sku = document.getElementById('ord-sku').value.trim();
+      const qty = Number(document.getElementById('ord-qty').value || 1);
+      call('order', { customer_id: document.getElementById('ord-customer').value.trim(), items: [{ sku, qty }] }, document.getElementById('out-ord'));
+    });
+    document.getElementById('btn-doc').addEventListener('click', () => {
+      call('document', { type: document.getElementById('doc-type').value }, document.getElementById('out-doc'));
+    });
+    document.getElementById('btn-pay').addEventListener('click', () => {
+      call('payment', { gateway: document.getElementById('pay-gw').value, amount: Number(document.getElementById('pay-amount').value || 0) }, document.getElementById('out-pay'));
+    });
+    document.getElementById('btn-tk').addEventListener('click', () => {
+      call('ticket', { title: document.getElementById('tk-title').value, priority: document.getElementById('tk-prio').value }, document.getElementById('out-tk'));
+    });
+    document.getElementById('btn-ch').addEventListener('click', () => {
+      call('chat', { channel: document.getElementById('ch-channel').value, message: document.getElementById('ch-msg').value }, document.getElementById('out-ch'));
+    });
+  </script>
+</body>
+</html>

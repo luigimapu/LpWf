@@ -1,0 +1,54 @@
+_type: export
+__export_format: 4
+__export_date: 2025-01-01T00:00:00.000Z
+__export_source: insomnia.desktop.app:v2024.0.0
+resources:
+  - _id: wrk_lpwf
+    parentId: null
+    modified: 0
+    created: 0
+    name: LpWF Gestionale
+    _type: workspace
+  - _id: env_lpwf
+    parentId: wrk_lpwf
+    modified: 0
+    created: 0
+    name: Base Environment
+    data:
+      baseUrl: http://localhost/api
+      token: ""
+    _type: environment
+  - _id: req_auth_login
+    parentId: wrk_lpwf
+    modified: 0
+    created: 0
+    url: "{{ baseUrl }}/auth/login"
+    name: Auth / Login
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {"email":"utente@example.com","password":"pwd"}
+    _type: request
+  - _id: req_auth_me
+    parentId: wrk_lpwf
+    modified: 0
+    created: 0
+    url: "{{ baseUrl }}/auth/me"
+    name: Auth / Me
+    method: GET
+    headers:
+      - name: Authorization
+        value: "Bearer {{ token }}"
+    _type: request
+  - _id: req_tickets_list
+    parentId: wrk_lpwf
+    modified: 0
+    created: 0
+    url: "{{ baseUrl }}/tickets?mine=1"
+    name: Tickets / List (mine)
+    method: GET
+    headers:
+      - name: Authorization
+        value: "Bearer {{ token }}"
+    _type: request
